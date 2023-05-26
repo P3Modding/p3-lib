@@ -1,0 +1,6 @@
+[workspace]
+
+members = [
+    "p3-aim-sys",
+    "p3-aim",
+]
