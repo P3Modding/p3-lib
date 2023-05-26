@@ -26,9 +26,10 @@ pub enum PixelWidth {
     Four,
 }
 
-/// Read an AIM file
+/// Reads an AIM file into memory.
 ///
 /// # Arguments
+/// * `path` - Path to the input file
 pub fn read_aim_file(path: &str) -> Result<ParsedAimFile, P3AimError> {
     unsafe {
         // AIM.dll is not thread-safe in the slightest
@@ -37,7 +38,6 @@ pub fn read_aim_file(path: &str) -> Result<ParsedAimFile, P3AimError> {
         let mut raw_aim_file = RawAimFile::default();
         ffi::aim_init(&mut raw_aim_file);
         let path_ptr = CString::new(path).unwrap();
-        debug!("coverting");
         ffi::aim_convert_file(&mut raw_aim_file, path_ptr.as_ptr());
         debug!("Converted aim file: {:#x?}", raw_aim_file);
 
