@@ -1,3 +1,5 @@
+use crate::ffi;
+
 #[repr(C)]
 #[derive(Debug)]
 pub struct RawAimFile {
@@ -52,6 +54,16 @@ impl Default for RawAimFile {
             field_50: Default::default(),
             field_54: Default::default(),
             inner_ptr: Default::default(),
+        }
+    }
+}
+
+impl Drop for RawAimFile {
+    fn drop(&mut self) {
+        unsafe {
+            if self.inner_ptr != 0 {
+                ffi::aim_free(self);
+            }
         }
     }
 }

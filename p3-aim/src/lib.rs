@@ -81,7 +81,6 @@ pub fn read_aim_file(path: &str) -> Result<ParsedAimFile, P3AimError> {
             height,
         };
 
-        ffi::aim_free(&mut raw_aim_file); // TODO this also needs to happen when we panic above
         Ok(parsed_file)
     }
 }
