@@ -1,7 +1,7 @@
 use std::ffi::CString;
 use std::sync::Mutex;
 
-use log::debug;
+use log::trace;
 use p3_aim_sys::ffi;
 use p3_aim_sys::raw_aim_file::RawAimFile;
 
@@ -39,7 +39,7 @@ pub fn read_aim_file(path: &str) -> Result<ParsedAimFile, P3AimError> {
         ffi::aim_init(&mut raw_aim_file);
         let path_ptr = CString::new(path).unwrap();
         ffi::aim_convert_file(&mut raw_aim_file, path_ptr.as_ptr());
-        debug!("Converted aim file: {:#x?}", raw_aim_file);
+        trace!("Converted aim file: {:#x?}", raw_aim_file);
 
         if raw_aim_file.buf_ptr.is_null() {
             return Err(P3AimError::ParsingFailed);
@@ -77,8 +77,8 @@ pub fn read_aim_file(path: &str) -> Result<ParsedAimFile, P3AimError> {
 
         let parsed_file = ParsedAimFile {
             data,
-            width: raw_aim_file.width2,
-            height: raw_aim_file.height,
+            width,
+            height,
         };
 
         ffi::aim_free(&mut raw_aim_file); // TODO this also needs to happen when we panic above
@@ -89,11 +89,9 @@ pub fn read_aim_file(path: &str) -> Result<ParsedAimFile, P3AimError> {
 fn get_pixel_width(raw_aim_file: &RawAimFile) -> Result<PixelWidth, P3AimError> {
     if raw_aim_file.bytes_per_pixel1 == 1 && raw_aim_file.bytes_per_pixel2 == 1 {
         Ok(PixelWidth::One)
-    }
-    else if raw_aim_file.bytes_per_pixel1 == 4 && raw_aim_file.bytes_per_pixel2 == 4 {
+    } else if raw_aim_file.bytes_per_pixel1 == 4 && raw_aim_file.bytes_per_pixel2 == 4 {
         Ok(PixelWidth::Four)
-    }
-    else {
+    } else {
         Err(P3AimError::UnknownPixelWidth(
             raw_aim_file.bytes_per_pixel1,
             raw_aim_file.bytes_per_pixel2,

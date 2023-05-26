@@ -1,6 +1,7 @@
 [workspace]
 
 members = [
-    "p3-aim-sys",
+    "aimcli",
     "p3-aim",
+    "p3-aim-sys",
 ]

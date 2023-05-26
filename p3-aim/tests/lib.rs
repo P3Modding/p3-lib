@@ -35,7 +35,8 @@ fn test_4bpp() {
 }
 
 #[test]
-fn test_wat() { // 1bpp
+fn test_wat() {
+    // 1bpp
     let _ = simple_logger::SimpleLogger::new()
         .with_level(LevelFilter::Debug)
         .env()
