@@ -2,6 +2,7 @@
 
 members = [
     "aimcli",
+    "cprcli",
     "p3-aim",
     "p3-aim-sys",
 ]

@@ -2,3 +2,5 @@
 /Cargo.lock
 *.raw
 *.bmp
+*.cpr
+p2arch0_eng
