@@ -2,6 +2,7 @@
 name = "aimcli"
 version = "0.1.0"
 edition = "2021"
+# forced-target = "i686-pc-windows-msvc" this requires the unstable `per-package-target` feature, so we set the target for the entire workspace for now
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
