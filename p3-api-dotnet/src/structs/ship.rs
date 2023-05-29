@@ -14,11 +14,11 @@ impl From<Ship> for DotnetShip {
     fn from(value: Ship) -> Self {
         Self {
             merchant_id: value.merchant_id,
-            max_health:  value.max_health,
-            current_health:  value.current_health,
-            x:  value.x,
-            y:  value.y,
-            current_town_id:  value.current_town_id,
+            max_health: value.max_health,
+            current_health: value.current_health,
+            x: value.x,
+            y: value.y,
+            current_town_id: value.current_town_id,
         }
     }
 }
