@@ -1,6 +1,6 @@
 use crate::P3ApiError;
 
-pub mod local_p3_access_api;
+pub mod open_process_p3_access_api;
 
 pub trait P3AccessApi {
     fn read_memory(&mut self, address: u32, dst: &mut [u8]) -> Result<(), P3ApiError>;

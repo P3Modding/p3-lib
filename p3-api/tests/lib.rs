@@ -1,6 +1,6 @@
 use log::{info, LevelFilter};
 use p3_api::read_ship;
-use p3_api::{p3_access_api::local_p3_access_api::OpenProcessP3AccessApi, structs::ship::RawShip};
+use p3_api::{p3_access_api::open_process_p3_access_api::OpenProcessP3AccessApi, structs::ship::RawShip};
 use sysinfo::{System, SystemExt, ProcessExt, PidExt};
 
 #[test]

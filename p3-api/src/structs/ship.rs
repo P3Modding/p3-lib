@@ -109,6 +109,7 @@ pub struct RawShip {
 }
 
 #[derive(Clone, Debug)]
+#[repr(C)]
 pub struct Ship {
     pub merchant_id: u8,
     pub max_health: i32,
