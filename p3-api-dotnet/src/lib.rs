@@ -7,6 +7,8 @@ use structs::ship::DotnetShip;
 
 pub mod structs;
 
+/// Open Patrician3.exe for Reading.
+#[no_mangle]
 pub extern "C" fn new_api(pid: u32) -> *mut OpenProcessP3AccessApi {
     match OpenProcessP3AccessApi::new(pid) {
         Ok(api) => Box::into_raw(Box::new(api)),

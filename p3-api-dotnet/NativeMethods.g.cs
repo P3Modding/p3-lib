@@ -13,6 +13,7 @@ namespace CsBindgen
     {
         const string __DllName = "p3-api-dotnet";
 
+        /// <summary>Open Patrician3.exe for Reading.</summary>
         [DllImport(__DllName, EntryPoint = "new_api", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern OpenProcessP3AccessApi* new_api(uint pid);
 
