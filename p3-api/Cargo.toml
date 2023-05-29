@@ -10,6 +10,7 @@ log = "0.4"
 
 [dev-dependencies]
 simple_logger = "4.1"
+sysinfo = "0.29"
 
 [dependencies.windows]
 version = "0.48"
