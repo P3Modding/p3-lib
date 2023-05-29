@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use clap::Parser;
 use glob::glob;
-use image::{ImageBuffer, RgbaImage, ImageError};
+use image::{ImageBuffer, ImageError, RgbaImage};
 use log::{debug, error, warn, LevelFilter};
 use p3_aim::P3AimError;
 

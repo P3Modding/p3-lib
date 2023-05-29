@@ -1,0 +1,38 @@
+version: '2'
+services:
+  influxdb:
+    read_only: true
+    image: influxdb:latest
+    ports:
+    - '127.0.0.1:8086:8086'
+    volumes:
+    - ./influxdb-storage:/var/lib/influxdb2
+    environment:
+    - INFLUXDB_DB=db0
+    - INFLUXDB_ADMIN_USER=if_user
+    - INFLUXDB_ADMIN_PASSWORD=if_passwort_12345
+  chronograf:
+    image: chronograf:latest
+    ports:
+    - '127.0.0.1:8888:8888'
+    volumes:
+    - ./chronograf-storage:/var/lib/chronograf
+    depends_on:
+    - influxdb
+    environment:
+    - INFLUXDB_URL=http://influxdb:8086
+    - INFLUXDB_USERNAME=if_user
+    - INFLUXDB_PASSWORD=if_passwort_12345
+  grafana:
+    image: grafana/grafana:latest
+    user: "$UID:$GID"
+    ports:
+    - '127.0.0.1:3000:3000'
+    volumes:
+    - ./grafana-storage:/var/lib/grafana
+    - ./grafana-provisioning/:/etc/grafana/provisioning
+    depends_on:
+    - influxdb
+    environment:
+    - GF_SECURITY_ADMIN_USER=grafana
+    - GF_SECURITY_ADMIN_PASSWORD=grafana

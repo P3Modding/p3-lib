@@ -67,4 +67,3 @@ fn test_wat2() {
         .write_all(&file.data)
         .unwrap();
 }
-

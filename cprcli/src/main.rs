@@ -1,9 +1,10 @@
 /// Inspired by https://gist.github.com/javiercantero/e1042ca2cbb072599c98028c207689fe
 use std::{
     backtrace::Backtrace,
+    ffi::OsStr,
     fs::{self, File},
     io::{self, BufRead, BufReader, Read, Seek, Write},
-    path::{Path, PathBuf}, ffi::OsStr,
+    path::{Path, PathBuf},
 };
 
 use byteorder::{LittleEndian, ReadBytesExt};
@@ -70,7 +71,7 @@ fn main() {
         return;
     }
 
-    let output_path = args.output_path.unwrap_or_else(||{
+    let output_path = args.output_path.unwrap_or_else(|| {
         let mut path = args.input_file.clone();
         if path.extension().is_some() {
             path.set_extension(OsStr::new(""));

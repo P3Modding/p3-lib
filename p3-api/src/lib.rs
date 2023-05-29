@@ -1,11 +1,13 @@
-use std::mem;
-
+use data::ship::{RawShip, Ship};
 use log::debug;
 use p3_access_api::P3AccessApi;
-use structs::ship::{RawShip, Ship};
+use std::mem;
 
+extern crate num_derive;
+
+pub mod data;
 pub mod p3_access_api;
-pub mod structs;
+pub use strum;
 
 const SHIPS_PTR: u32 = 0x006DD7A4;
 

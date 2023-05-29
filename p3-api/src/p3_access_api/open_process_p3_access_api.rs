@@ -1,4 +1,3 @@
-
 use windows::{
     core::Error,
     Win32::{

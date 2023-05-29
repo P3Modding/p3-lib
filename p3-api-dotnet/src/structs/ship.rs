@@ -1,4 +1,4 @@
-use p3_api::structs::ship::Ship;
+use p3_api::data::ship::Ship;
 
 #[repr(C)]
 pub struct DotnetShip {
