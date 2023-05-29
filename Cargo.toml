@@ -5,4 +5,7 @@ members = [
     "cprcli",
     "p3-aim",
     "p3-aim-sys",
+    "p3-api",
+]
+exclude = [
 ]
