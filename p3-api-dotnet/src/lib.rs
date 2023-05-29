@@ -19,8 +19,8 @@ pub extern "C" fn new_api(pid: u32) -> *mut DotnetOpenProcessP3AccessApi {
 ///
 /// # Safety
 ///
-/// `api` must point toward a valid OpenProcessP3AccessApi.
-pub unsafe extern "C" fn read_ship(
+/// `api` must point toward a valid DotnetOpenProcessP3AccessApi.
+pub extern "C" fn read_ship(
     api: *mut DotnetOpenProcessP3AccessApi,
     ship_id: u16,
 ) -> *const DotnetShip {

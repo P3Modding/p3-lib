@@ -17,7 +17,7 @@ namespace CsBindgen
         [DllImport(__DllName, EntryPoint = "new_api", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern DotnetOpenProcessP3AccessApi* new_api(uint pid);
 
-        /// <summary>Reads a ship from memory.  # Safety  `api` must point toward a valid OpenProcessP3AccessApi.</summary>
+        /// <summary>Reads a ship from memory.  # Safety  `api` must point toward a valid DotnetOpenProcessP3AccessApi.</summary>
         [DllImport(__DllName, EntryPoint = "read_ship", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern DotnetShip* read_ship(DotnetOpenProcessP3AccessApi* api, ushort ship_id);
 
