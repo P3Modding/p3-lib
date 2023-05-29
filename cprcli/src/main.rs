@@ -72,7 +72,7 @@ fn main() {
 
     let output_path = args.output_path.unwrap_or_else(||{
         let mut path = args.input_file.clone();
-        if let Some(_) = path.extension() {
+        if path.extension().is_some() {
             path.set_extension(OsStr::new(""));
         } else {
             let input_file_name = path.file_stem().unwrap().to_str().unwrap().to_string();

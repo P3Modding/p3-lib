@@ -8,7 +8,7 @@ fn test_1bpp() {
         .with_level(LevelFilter::Trace)
         .env()
         .init();
-    let file = p3_aim::read_aim_file(&"./tests/X_holk_a.aim").unwrap();
+    let file = p3_aim::read_aim_file("./tests/X_holk_a.aim").unwrap();
     fs::OpenOptions::new()
         .write(true)
         .create(true)
@@ -24,7 +24,7 @@ fn test_4bpp() {
         .with_level(LevelFilter::Trace)
         .env()
         .init();
-    let file = p3_aim::read_aim_file(&"./tests/page_schiffe.aim").unwrap();
+    let file = p3_aim::read_aim_file("./tests/page_schiffe.aim").unwrap();
     fs::OpenOptions::new()
         .write(true)
         .create(true)
@@ -41,7 +41,7 @@ fn test_wat() {
         .with_level(LevelFilter::Trace)
         .env()
         .init();
-    let file = p3_aim::read_aim_file(&"./tests/Stadttor.aim").unwrap();
+    let file = p3_aim::read_aim_file("./tests/Stadttor.aim").unwrap();
     fs::OpenOptions::new()
         .write(true)
         .create(true)
@@ -58,7 +58,7 @@ fn test_wat2() {
         .with_level(LevelFilter::Trace)
         .env()
         .init();
-    let file = p3_aim::read_aim_file(&"./tests/X_schniggeuntenno.aim").unwrap();
+    let file = p3_aim::read_aim_file("./tests/X_schniggeuntenno.aim").unwrap();
     fs::OpenOptions::new()
         .write(true)
         .create(true)
