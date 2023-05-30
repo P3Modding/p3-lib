@@ -1,7 +1,8 @@
+use std::ops::Add;
 use std::time::Duration;
 
 use async_std::task;
-use chrono::Utc;
+use chrono::{DateTime, Days, NaiveDate, NaiveDateTime, NaiveTime, Utc};
 use futures::prelude::*;
 use influxdb2::Client;
 use influxdb2_derive::WriteDataPoint;
@@ -45,11 +46,27 @@ async fn poll_town_wares() -> Result<(), Box<dyn std::error::Error>> {
     let client = get_client();
     let mut api = OpenProcessP3AccessApi::new(248).unwrap();
     let game_world = GameWorldPtr::default();
+    let d = NaiveDate::from_ymd_opt(0, 1, 1).unwrap();
+    let t = NaiveTime::from_hms_milli_opt(0, 0, 0, 0).unwrap();
+    let dt = NaiveDateTime::new(d, t);
+    let mut last_utc: DateTime<Utc> = DateTime::from_utc(dt, Utc);
     loop {
+        let p3_time = game_world.get_game_time(&mut api).unwrap();
+        let d = NaiveDate::from_ymd_opt(p3_time.year.try_into().unwrap(), 1, 1).unwrap();
+        let t = NaiveTime::from_hms_milli_opt(p3_time.hour_of_day, p3_time.minute_of_hour, 0, 0)
+            .unwrap();
+        let dt = NaiveDateTime::new(d, t);
+        let dt = dt.add(Days::new(p3_time.day_of_year.into()));
+        let utc: DateTime<Utc> = DateTime::from_utc(dt, Utc);
+        if (utc - last_utc).num_days() == 0 {
+            task::sleep(Duration::from_millis(200)).await;
+            continue;
+        }
+        last_utc = utc;
+
         let mut raw_data = vec![];
         let mut data = vec![];
         for town_id in TownId::iter() {
-            debug!("Polling Town {:?}", &town_id);
             let town_ptr = game_world.get_town(town_id, &mut api).unwrap();
             let town_data = town_ptr.get_town_data();
             let wares = town_data.get_town_wares(&mut api).unwrap();
@@ -59,22 +76,20 @@ async fn poll_town_wares() -> Result<(), Box<dyn std::error::Error>> {
                     town: format!("{:?}", town_id),
                     ware: format!("{:?}", ware_id),
                     value: *amount as u64,
-                    time: Utc::now().timestamp_nanos(),
+                    time: utc.timestamp(),
                 });
                 data.push(TownWaresMeasurement {
                     town: format!("{:?}", town_id),
                     ware: format!("{:?}", ware_id),
                     value: (*amount / ware_id.get_scaling()) as u64,
-                    time: Utc::now().timestamp_nanos(),
+                    time: utc.timestamp(),
                 });
             }
         }
 
-        let visby_beer = game_world.get_town(TownId::Visby, &mut api).unwrap().get_town_data().get_town_ware(WareId::Spices, &mut api).unwrap();
-        debug!("Visby Beer = {} {}", visby_beer, visby_beer * WareId::Beer.get_scaling());
+        debug!("Pushing {} ({})", utc.date_naive(), utc.timestamp());
         client.write(bucket, stream::iter(raw_data)).await?;
         client.write(bucket, stream::iter(data)).await?;
-        task::sleep(Duration::from_secs(5)).await;
     }
 }
 
