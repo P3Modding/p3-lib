@@ -31,11 +31,7 @@ pub enum AimCliError {
 
 pub fn main() {
     let args = Args::parse();
-    simple_logger::SimpleLogger::new()
-        .with_level(LevelFilter::Debug)
-        .env()
-        .init()
-        .unwrap();
+    simple_logger::SimpleLogger::new().with_level(LevelFilter::Debug).env().init().unwrap();
 
     for entry in glob(&args.input_pattern).expect("Failed to read glob pattern") {
         match entry {

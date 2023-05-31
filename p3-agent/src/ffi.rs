@@ -41,6 +41,7 @@ global_asm!(r#"
 
 pub unsafe fn schedule_operation(op: &[u8]) {
     debug!("Scheduling {:x?}", op);
-    let code: extern "fastcall" fn(class8_ptr: u32, operation_switch_input: *const [u8]) = unsafe { std::mem::transmute(INSERT_INTO_PENDING_OPERATIONS_WRAPPER) };
+    let code: extern "fastcall" fn(class8_ptr: u32, operation_switch_input: *const [u8]) =
+        unsafe { std::mem::transmute(INSERT_INTO_PENDING_OPERATIONS_WRAPPER) };
     (code)(0x006DF2F0, op);
 }

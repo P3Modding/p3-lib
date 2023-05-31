@@ -55,9 +55,7 @@ impl<P3: P3AccessApi> GameWorldPtr<P3> {
     }
 
     pub fn get_town(&self, town: TownId, api: &mut P3) -> Result<TownPtr<P3>, P3ApiError> {
-        Ok(TownPtr::new(
-            api.read_u32(self.address + 0x68)? + town as u32 * TOWN_SIZE,
-        ))
+        Ok(TownPtr::new(api.read_u32(self.address + 0x68)? + town as u32 * TOWN_SIZE))
     }
 }
 

@@ -49,7 +49,7 @@ impl<P3: P3AccessApi> TownDataPtr<P3> {
         api.read_memory(self.address + 0x3CC, &mut input_data)?;
         let mut data: Vec<u32> = Vec::with_capacity(wares_count);
         for i in 0..wares_count {
-            data.push(u32::from_le_bytes(input_data[i*4..(i*4) + 4].try_into().unwrap()))
+            data.push(u32::from_le_bytes(input_data[i * 4..(i * 4) + 4].try_into().unwrap()))
         }
         Ok(data)
     }

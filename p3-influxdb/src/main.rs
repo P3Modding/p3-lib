@@ -53,8 +53,7 @@ async fn poll_town_wares() -> Result<(), Box<dyn std::error::Error>> {
     loop {
         let p3_time = game_world.get_game_time(&mut api).unwrap();
         let d = NaiveDate::from_ymd_opt(p3_time.year.try_into().unwrap(), 1, 1).unwrap();
-        let t = NaiveTime::from_hms_milli_opt(p3_time.hour_of_day, p3_time.minute_of_hour, 0, 0)
-            .unwrap();
+        let t = NaiveTime::from_hms_milli_opt(p3_time.hour_of_day, p3_time.minute_of_hour, 0, 0).unwrap();
         let dt = NaiveDateTime::new(d, t);
         let dt = dt.add(Days::new(p3_time.day_of_year.into()));
         let utc: DateTime<Utc> = DateTime::from_utc(dt, Utc);
@@ -102,11 +101,7 @@ fn get_client() -> Client {
 
 #[async_std::main]
 async fn main() {
-    simple_logger::SimpleLogger::new()
-        .with_level(LevelFilter::Debug)
-        .env()
-        .init()
-        .unwrap();
+    simple_logger::SimpleLogger::new().with_level(LevelFilter::Debug).env().init().unwrap();
 
     poll_town_wares().await.unwrap()
 }

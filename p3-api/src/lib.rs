@@ -41,7 +41,5 @@ pub fn read_raw_ship<Api: P3AccessApi>(api: &mut Api, ship_id: u16) -> Result<Ra
 
 // https://stackoverflow.com/a/28175593/1569755
 fn latin1_to_string(s: &[u8]) -> String {
-    s.iter()
-        .filter_map(|&c| if c != 0 { Some(c as char) } else { None })
-        .collect()
+    s.iter().filter_map(|&c| if c != 0 { Some(c as char) } else { None }).collect()
 }

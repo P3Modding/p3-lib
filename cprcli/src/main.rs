@@ -55,11 +55,7 @@ struct CprIndexEntry {
 
 fn main() {
     let args = Args::parse();
-    simple_logger::SimpleLogger::new()
-        .with_level(LevelFilter::Debug)
-        .env()
-        .init()
-        .unwrap();
+    simple_logger::SimpleLogger::new().with_level(LevelFilter::Debug).env().init().unwrap();
 
     if !args.input_file.exists() {
         error!("Input file does not exist");

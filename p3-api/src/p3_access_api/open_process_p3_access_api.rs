@@ -29,13 +29,7 @@ impl P3AccessApi for OpenProcessP3AccessApi {
     fn read_memory(&mut self, address: u32, dst: &mut [u8]) -> Result<(), P3ApiError> {
         unsafe {
             let mut bytes_read: usize = 0;
-            ReadProcessMemory(
-                self.handle.0,
-                address as _,
-                dst.as_mut_ptr() as _,
-                dst.len(),
-                &mut bytes_read as _,
-            );
+            ReadProcessMemory(self.handle.0, address as _, dst.as_mut_ptr() as _, dst.len(), &mut bytes_read as _);
             if bytes_read != dst.len() {
                 Err(P3ApiError::ReadError)
             } else {

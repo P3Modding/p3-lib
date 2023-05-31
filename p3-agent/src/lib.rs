@@ -1,4 +1,12 @@
-use std::{ffi::c_void, net::TcpListener, sync::{Mutex, mpsc::{Sender, Receiver, channel}}, thread};
+use std::{
+    ffi::c_void,
+    net::TcpListener,
+    sync::{
+        mpsc::{channel, Receiver, Sender},
+        Mutex,
+    },
+    thread,
+};
 
 use ffi::_00535760_hook;
 use log::{debug, trace, warn};
@@ -37,8 +45,8 @@ pub(crate) fn run() {
         Ok(e) => {
             // Pass the command to P3
             unsafe { ffi::schedule_operation(&e) }
-        },
-        Err(_) => {},
+        }
+        Err(_) => {}
     }
 }
 
@@ -52,11 +60,7 @@ impl Context {
 }
 
 #[no_mangle]
-pub unsafe extern "stdcall" fn DllMain(
-    module: u32,
-    reason_for_call: u32,
-    resesrved: *mut c_void,
-) {
+pub unsafe extern "stdcall" fn DllMain(module: u32, reason_for_call: u32, resesrved: *mut c_void) {
     let _ = log::set_logger(&win_dbg_logger::DEBUGGER_LOGGER);
     log::set_max_level(log::LevelFilter::Debug);
     debug!("DllMain({:#x}, {}, {})", module, reason_for_call, resesrved as u32);

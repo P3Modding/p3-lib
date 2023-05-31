@@ -59,9 +59,7 @@ pub fn read_aim_file(path: &str) -> Result<ParsedAimFile, P3AimError> {
         if pixel_width == PixelWidth::OneWithPalette {
             for i in 0..pixels {
                 let pixel_id = *raw_aim_file.buf_ptr.offset(i.try_into().unwrap());
-                let pixel = *raw_aim_file
-                    .palette_ptr
-                    .offset(pixel_id.try_into().unwrap());
+                let pixel = *raw_aim_file.palette_ptr.offset(pixel_id.try_into().unwrap());
                 data.extend_from_slice(&pixel.to_le_bytes());
             }
         } else if pixel_width == PixelWidth::Four {
@@ -83,17 +81,10 @@ pub fn read_aim_file(path: &str) -> Result<ParsedAimFile, P3AimError> {
                 data.push(a);
             }
         } else {
-            return Err(P3AimError::UnknownPixelWidth(
-                raw_aim_file.bytes_per_pixel1,
-                raw_aim_file.bytes_per_pixel2,
-            ));
+            return Err(P3AimError::UnknownPixelWidth(raw_aim_file.bytes_per_pixel1, raw_aim_file.bytes_per_pixel2));
         }
 
-        let parsed_file = ParsedAimFile {
-            data,
-            width,
-            height,
-        };
+        let parsed_file = ParsedAimFile { data, width, height };
 
         Ok(parsed_file)
     }
@@ -107,9 +98,6 @@ fn get_pixel_width(raw_aim_file: &RawAimFile) -> Result<PixelWidth, P3AimError> 
     } else if raw_aim_file.bytes_per_pixel1 == 0 && raw_aim_file.bytes_per_pixel2 == 15 {
         Ok(PixelWidth::One)
     } else {
-        Err(P3AimError::UnknownPixelWidth(
-            raw_aim_file.bytes_per_pixel1,
-            raw_aim_file.bytes_per_pixel2,
-        ))
+        Err(P3AimError::UnknownPixelWidth(raw_aim_file.bytes_per_pixel1, raw_aim_file.bytes_per_pixel2))
     }
 }

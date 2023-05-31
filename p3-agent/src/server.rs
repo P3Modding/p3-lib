@@ -1,9 +1,13 @@
-use std::{net::{TcpListener, TcpStream}, io::{BufReader, BufRead}, num::ParseIntError, thread};
+use std::{
+    io::{BufRead, BufReader},
+    net::{TcpListener, TcpStream},
+    num::ParseIntError,
+    thread,
+};
 
-use log::{info, debug};
+use log::{debug, info};
 
-use crate::{CONTEXT, Context};
-
+use crate::{Context, CONTEXT};
 
 pub fn run_server() {
     info!("run_server()");
@@ -24,7 +28,7 @@ fn handle_client(stream: TcpStream) {
         debug!("Received {} ({} bytes read)", &buf, bytes_read);
         if bytes_read == 0 {
             info!("Client disconnected");
-            break
+            break;
         }
         let decoded = decode_hex(&buf[0..40]).unwrap();
         let mut mg = CONTEXT.try_lock().unwrap();
@@ -36,8 +40,5 @@ fn handle_client(stream: TcpStream) {
 
 // Credits to https://stackoverflow.com/a/52992629/1569755
 pub fn decode_hex(s: &str) -> Result<Vec<u8>, ParseIntError> {
-    (0..s.len())
-        .step_by(2)
-        .map(|i| u8::from_str_radix(&s[i..i + 2], 16))
-        .collect()
+    (0..s.len()).step_by(2).map(|i| u8::from_str_radix(&s[i..i + 2], 16)).collect()
 }
