@@ -1,0 +1,19 @@
+[package]
+name = "p3-agent"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+p3-api = { path = "../p3-api" }
+log = "0.4"
+win_dbg_logger = "0.1"
+
+[dependencies.windows]
+version = "0.48"
+features = [
+    "Win32_Foundation",
+    "Win32_System_Memory",
+]

@@ -3,6 +3,8 @@
 members = [
     "aimcli",
     "cprcli",
+    "p3-agent",
+    "p3-agent-loader",
     "p3-aim",
     "p3-aim-sys",
     "p3-api",

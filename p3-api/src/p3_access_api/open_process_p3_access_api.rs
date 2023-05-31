@@ -11,6 +11,7 @@ use crate::P3ApiError;
 
 use super::P3AccessApi;
 
+#[derive(Debug)]
 pub struct OpenProcessP3AccessApi {
     handle: HANDLE,
 }

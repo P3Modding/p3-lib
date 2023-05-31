@@ -4,11 +4,13 @@ use std::{marker::PhantomData, mem};
 
 pub const TOWN_SIZE: u32 = 0x9F8;
 
+#[derive(Debug)]
 pub struct TownPtr<P3> {
     pub address: u32,
     api_type: PhantomData<P3>,
 }
 
+#[derive(Debug)]
 pub struct TownDataPtr<P3> {
     pub address: u32,
     api_type: PhantomData<P3>,

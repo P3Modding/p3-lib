@@ -107,5 +107,6 @@ async fn main() {
         .env()
         .init()
         .unwrap();
+
     poll_town_wares().await.unwrap()
 }
