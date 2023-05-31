@@ -45,8 +45,8 @@ impl<P3: P3AccessApi> TownDataPtr<P3> {
         let wares_count = WareId::Bricks as usize + 1;
         let bytes_len = wares_count * mem::size_of::<u32>();
         let mut input_data: Vec<u8> = Vec::with_capacity(bytes_len);
-        unsafe { input_data.set_len(bytes_len) }
         api.read_memory(self.address + 0x3CC, &mut input_data)?;
+        unsafe { input_data.set_len(bytes_len) }
         let mut data: Vec<u32> = Vec::with_capacity(wares_count);
         for i in 0..wares_count {
             data.push(u32::from_le_bytes(input_data[i * 4..(i * 4) + 4].try_into().unwrap()))

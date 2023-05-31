@@ -57,7 +57,7 @@ fn load(pid: u32) {
     }
 }
 
-fn unload(pid: u32) {
+fn _unload(_pid: u32) {
     /*
 
     hThread = ::CreateRemoteThread( hProcess, NULL, 0,

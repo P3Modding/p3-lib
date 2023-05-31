@@ -7,7 +7,6 @@ use crate::run;
 const INSERT_INTO_PENDING_OPERATIONS_WRAPPER: u32 = 0x0054AA70;
 
 // This function will be called at 0x00546934 before the original operation_switch (0x00535760).
-#[no_mangle] // nomangle should not be required here
 extern "C" fn _00535760_hook_handler() {
     run()
 }
@@ -39,9 +38,10 @@ global_asm!(r#"
     ret
 "#, sym _00535760_hook, sym _00535760_hook, sym _00535760_hook_handler);
 
-pub unsafe fn schedule_operation(op: &[u8]) {
-    debug!("Scheduling {:x?}", op);
-    let code: extern "fastcall" fn(class8_ptr: u32, operation_switch_input: *const [u8]) =
-        unsafe { std::mem::transmute(INSERT_INTO_PENDING_OPERATIONS_WRAPPER) };
-    (code)(0x006DF2F0, op);
+pub fn schedule_operation(op: &[u8]) {
+    unsafe {
+        debug!("Scheduling {:x?}", op);
+        let code: extern "fastcall" fn(class8_ptr: u32, operation_switch_input: *const [u8]) = std::mem::transmute(INSERT_INTO_PENDING_OPERATIONS_WRAPPER);
+        (code)(0x006DF2F0, op);
+    }
 }

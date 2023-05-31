@@ -25,7 +25,7 @@ fn handle_client(stream: TcpStream) {
 
     debug!("Start handling client");
     while let Ok(bytes_read) = reader.read_line(&mut buf) {
-        debug!("Received {} ({} bytes read)", &buf, bytes_read);
+        debug!("Received {} ({} bytes read)", buf.strip_suffix('\n').unwrap(), bytes_read);
         if bytes_read == 0 {
             info!("Client disconnected");
             break;
