@@ -8,7 +8,7 @@ use windows::{
         System::{
             Diagnostics::Debug::WriteProcessMemory,
             LibraryLoader::GetModuleHandleA,
-            Memory::{VirtualAllocEx, VirtualFreeEx, VirtualProtectEx, MEM_COMMIT, MEM_RELEASE, PAGE_PROTECTION_FLAGS, PAGE_READWRITE},
+            Memory::{VirtualAllocEx, VirtualFreeEx, MEM_COMMIT, MEM_RELEASE, PAGE_READWRITE},
             Threading::{CreateRemoteThread, OpenProcess, WaitForSingleObject, INFINITE, PROCESS_ALL_ACCESS},
         },
     },
@@ -27,11 +27,6 @@ fn load(pid: u32) {
     unsafe {
         let handle = OpenProcess(PROCESS_ALL_ACCESS, false, pid).unwrap();
         debug!("P3 opened sucessfully");
-        let mut old: PAGE_PROTECTION_FLAGS = windows::Win32::System::Memory::PAGE_PROTECTION_FLAGS(0);
-        if !VirtualProtectEx(handle, 0x00546935 as _, 4, PAGE_READWRITE, &mut old).as_bool() {
-            error!("VirtualProtectEx failed: {}", GetLastError());
-            return;
-        }
         let path = s!(r"C:\Users\Benni\repositories\p3-lib\target\i686-pc-windows-msvc\release\p3_agent.dll");
         let buf_ptr = VirtualAllocEx(handle, None, path.as_bytes().len(), MEM_COMMIT, PAGE_READWRITE);
         debug!("Allocated buffer at {:#x}", buf_ptr as usize);
@@ -53,7 +48,6 @@ fn load(pid: u32) {
         debug!("Buffer freed sucessfully");
         assert!(CloseHandle(handle).0 != 0);
         debug!("P3 handle closed");
-        //CreateRemoteThread(todo!(), todo!(), todo!(), todo!(), todo!(), todo!(), todo!());
     }
 }
 
