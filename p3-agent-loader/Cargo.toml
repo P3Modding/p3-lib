@@ -9,6 +9,8 @@ edition = "2021"
 log = "0.4"
 simple_logger = "4.1"
 sysinfo = "0.29"
+clap = { version = "4.3.0", features = ["derive"] }
+#p3-agent = { path = "../p3-agent" }
 
 [dependencies.windows]
 version = "0.48"

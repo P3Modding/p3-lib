@@ -1,4 +1,4 @@
-use std::arch::global_asm;
+use std::arch::{asm, global_asm};
 
 use log::debug;
 
@@ -20,6 +20,7 @@ global_asm!(r#"
 .global {}
 {}:
     # save original regs
+    push eax
     push edi
     push dx
     push ecx
@@ -35,13 +36,23 @@ global_asm!(r#"
     # call original function and return
     mov eax, 0x00535760
     call eax
+    pop eax
     ret
 "#, sym _00535760_hook, sym _00535760_hook, sym _00535760_hook_handler);
 
 pub fn schedule_operation(op: &[u8]) {
     unsafe {
         debug!("Scheduling {:x?}", op);
-        let code: extern "fastcall" fn(class8_ptr: u32, operation_switch_input: *const [u8]) = std::mem::transmute(INSERT_INTO_PENDING_OPERATIONS_WRAPPER);
-        (code)(0x006DF2F0, op);
+        let functon_ptr: u32 = INSERT_INTO_PENDING_OPERATIONS_WRAPPER;
+        // rustc can't do thiscall because reasons
+        asm!(
+            "push eax",
+            "call ebx",
+            in("eax") op.as_ptr(),
+            in("ebx") functon_ptr,
+            in("ecx") 0x006DF2F0,
+        );
+
+        debug!("Scheduling done");
     }
 }

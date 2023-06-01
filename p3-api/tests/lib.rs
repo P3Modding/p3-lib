@@ -1,6 +1,6 @@
 use log::{info, LevelFilter};
 use p3_api::data::enums::{TownId, WareId};
-use p3_api::data::game_world::{GameWorldPtr, GAME_WORLD_ADDRESS};
+use p3_api::data::game_world::GameWorldPtr;
 use p3_api::read_ship;
 use p3_api::{data::ship::RawShip, p3_access_api::open_process_p3_access_api::OpenProcessP3AccessApi};
 use sysinfo::{PidExt, ProcessExt, System, SystemExt};
