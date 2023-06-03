@@ -5,7 +5,7 @@ use async_std::task;
 use chrono::{DateTime, Days, NaiveDate, NaiveDateTime, NaiveTime, Utc};
 use futures::prelude::*;
 use influxdb2::Client;
-use influxdb2_derive::WriteDataPoint;
+use influxdb2_derive::{FromDataPoint, WriteDataPoint};
 use log::{debug, LevelFilter};
 use num_traits::FromPrimitive;
 use p3_api::data::enums::WareId;
@@ -15,7 +15,7 @@ use p3_api::{
     p3_access_api::open_process_p3_access_api::OpenProcessP3AccessApi,
 };
 
-#[derive(Default, WriteDataPoint)]
+#[derive(Debug, Default, WriteDataPoint)]
 #[measurement = "town_wares_raw"]
 struct TownWaresMeasurementRaw {
     #[influxdb(tag)]
@@ -28,7 +28,7 @@ struct TownWaresMeasurementRaw {
     time: i64,
 }
 
-#[derive(Default, WriteDataPoint)]
+#[derive(Debug, Default, WriteDataPoint, FromDataPoint)]
 #[measurement = "town_wares"]
 struct TownWaresMeasurement {
     #[influxdb(tag)]
@@ -44,7 +44,7 @@ struct TownWaresMeasurement {
 async fn poll_town_wares() -> Result<(), Box<dyn std::error::Error>> {
     let bucket = "P3";
     let client = get_client();
-    let mut api = OpenProcessP3AccessApi::new(248).unwrap();
+    let mut api = OpenProcessP3AccessApi::new(13032).unwrap();
     let game_world = GameWorldPtr::default();
     let d = NaiveDate::from_ymd_opt(0, 1, 1).unwrap();
     let t = NaiveTime::from_hms_milli_opt(0, 0, 0, 0).unwrap();
@@ -52,7 +52,7 @@ async fn poll_town_wares() -> Result<(), Box<dyn std::error::Error>> {
     let mut last_utc: DateTime<Utc> = DateTime::from_utc(dt, Utc);
     loop {
         let p3_time = game_world.get_game_time(&mut api).unwrap();
-        let d = NaiveDate::from_ymd_opt(p3_time.year.try_into().unwrap(), 1, 1).unwrap();
+        let d = NaiveDate::from_ymd_opt((700 + p3_time.year).try_into().unwrap(), 1, 1).unwrap();
         let t = NaiveTime::from_hms_milli_opt(p3_time.hour_of_day, p3_time.minute_of_hour, 0, 0).unwrap();
         let dt = NaiveDateTime::new(d, t);
         let dt = dt.add(Days::new(p3_time.day_of_year.into()));
@@ -75,18 +75,18 @@ async fn poll_town_wares() -> Result<(), Box<dyn std::error::Error>> {
                     town: format!("{:?}", town_id),
                     ware: format!("{:?}", ware_id),
                     value: *amount as u64,
-                    time: utc.timestamp(),
+                    time: utc.timestamp_nanos(),
                 });
                 data.push(TownWaresMeasurement {
                     town: format!("{:?}", town_id),
                     ware: format!("{:?}", ware_id),
                     value: (*amount / ware_id.get_scaling()) as u64,
-                    time: utc.timestamp(),
+                    time: utc.timestamp_nanos(),
                 });
             }
         }
 
-        debug!("Pushing {} ({})", utc.date_naive(), utc.timestamp());
+        debug!("Pushing {} ({})", utc, utc.timestamp_nanos());
         client.write(bucket, stream::iter(raw_data)).await?;
         client.write(bucket, stream::iter(data)).await?;
     }

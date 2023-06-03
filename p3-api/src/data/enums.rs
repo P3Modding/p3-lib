@@ -1,7 +1,7 @@
 use num_derive::FromPrimitive;
 use strum::EnumIter;
 
-#[derive(Clone, Copy, Debug, EnumIter, FromPrimitive)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, EnumIter, FromPrimitive)]
 pub enum WareId {
     Grain = 0x00,
     Meat = 0x01,
@@ -25,7 +25,7 @@ pub enum WareId {
     Bricks = 0x13,
 }
 
-#[derive(Clone, Copy, Debug, EnumIter, FromPrimitive)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, EnumIter, FromPrimitive)]
 pub enum TownId {
     Edinburgh = 0x00,
     Scarborough = 0x01,

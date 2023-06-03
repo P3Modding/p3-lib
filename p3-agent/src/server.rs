@@ -2,8 +2,9 @@ use std::{
     io::{self, BufRead, BufReader, Write},
     net::{SocketAddr, TcpListener, TcpStream},
     num::ParseIntError,
+    sync::atomic::Ordering,
     thread::{self, sleep},
-    time::Duration, sync::atomic::Ordering,
+    time::Duration,
 };
 
 use log::{debug, error, info};

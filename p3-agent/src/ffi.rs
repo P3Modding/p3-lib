@@ -2,13 +2,13 @@ use std::arch::{asm, global_asm};
 
 use log::debug;
 
-use crate::run;
+use crate::tick;
 
 const INSERT_INTO_PENDING_OPERATIONS_WRAPPER: u32 = 0x0054AA70;
 
 // This function will be called at 0x00546934 before the original operation_switch (0x00535760).
 extern "C" fn _00535760_hook_handler() {
-    run()
+    tick()
 }
 
 extern "C" {

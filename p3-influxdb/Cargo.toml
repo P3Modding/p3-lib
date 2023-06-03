@@ -11,7 +11,7 @@ log = "0.4"
 simple_logger = "4.1"
 chrono = "0.4"
 async-std = { version = "1.6.5", features = ["attributes", "tokio1"] }
-influxdb2 = "0.3"
+influxdb2 = "0.4"
 influxdb2-structmap = "*"
 influxdb2-derive = "*"
 num-traits = "0.2"

@@ -1,20 +1,26 @@
+use std::{string::FromUtf8Error};
+
 use clap::Parser;
 use log::{debug, error, info, LevelFilter};
-use sysinfo::{PidExt, ProcessExt, System, SystemExt, Process};
+use sysinfo::{PidExt, Process, ProcessExt, System, SystemExt};
 use windows::{
-    core::Error,
-    imp::{GetLastError, GetProcAddress},
+    core::{Error},
     s,
     Win32::{
-        Foundation::CloseHandle,
+        Foundation::{GetLastError, WIN32_ERROR},
         System::{
-            Diagnostics::Debug::WriteProcessMemory,
-            LibraryLoader::GetModuleHandleA,
-            Memory::{VirtualAllocEx, VirtualFreeEx, MEM_COMMIT, MEM_RELEASE, PAGE_READWRITE},
-            Threading::{CreateRemoteThread, GetExitCodeThread, OpenProcess, WaitForSingleObject, INFINITE, PROCESS_ALL_ACCESS},
+            Diagnostics::Debug::{IMAGE_DIRECTORY_ENTRY_EXPORT, IMAGE_NT_HEADERS32},
+            LibraryLoader::{GetModuleHandleA, GetProcAddress},
+            SystemServices::{IMAGE_DOS_HEADER, IMAGE_EXPORT_DIRECTORY},
         },
     },
 };
+
+use crate::{remote_process::RemoteProcess, remote_thread::RemoteThread, remote_virtual_allocation::RemoteVirtualAllocation};
+
+pub mod remote_process;
+pub mod remote_thread;
+pub mod remote_virtual_allocation;
 
 #[derive(clap::ValueEnum, Clone, Debug)]
 enum Operation {
@@ -34,13 +40,17 @@ struct Args {
 pub enum P3AgentLoaderError {
     OpenProcessFailed(Error),
     GetModuleHandleAFailed(Error),
-    GetProcAddressFailed(u32),
-    VirtualAllocExFailed(u32),
-    WriteProcessMemoryFailed(u32),
+    GetProcAddressFailed(WIN32_ERROR),
+    VirtualAllocExFailed(WIN32_ERROR),
+    WriteProcessMemoryFailed(WIN32_ERROR),
+    ReadProcessMemoryFailed(WIN32_ERROR),
+    ReadStringFailed(FromUtf8Error),
     CreateRemoteThreadFailed(Error),
     GetExitCodeThreadFailed,
     LoadLibraryAFailed,
     FreeLibraryFailed(u32),
+    GetProcAddressRemoteFailed,
+    ExportedFunctionNotFound,
 }
 
 fn main() {
@@ -63,7 +73,7 @@ fn main() {
         }
         Operation::Unload => {
             for process in patricians {
-                if let Err(e) = unload(process.pid().as_u32(), 0x7462_0000) {
+                if let Err(e) = unload(process.pid().as_u32()) {
                     error!("Unload failed: {:?}", e);
                 }
             }
@@ -73,136 +83,79 @@ fn main() {
 
 fn load(pid: u32) -> Result<(), P3AgentLoaderError> {
     unsafe {
-        let handle = OpenProcess(PROCESS_ALL_ACCESS, false, pid).map_err(P3AgentLoaderError::OpenProcessFailed)?;
-        debug!("P3 opened sucessfully");
-
-        // Get handle of kernel32.dll
-        let kernel_32 = match GetModuleHandleA(s!("Kernel32")) {
-            Ok(m) => m,
-            Err(e) => {
-                CloseHandle(handle);
-                return Err(P3AgentLoaderError::GetModuleHandleAFailed(e));
-            }
-        };
-
-        // Get address of LoadLibrary
-        let load_library_a_address = GetProcAddress(kernel_32.0, s!("LoadLibraryA"));
-        if load_library_a_address.is_null() {
-            CloseHandle(handle);
-            return Err(P3AgentLoaderError::GetProcAddressFailed(GetLastError()));
-        }
-        debug!("LoadLibraryA is at {:#x}", load_library_a_address as usize);
-
-        // Allocate LoadLibrary argument buffer
+        let mut remote_process = RemoteProcess::new(pid)?;
+        let kernel_32 = GetModuleHandleA(s!("Kernel32")).map_err(P3AgentLoaderError::GetModuleHandleAFailed)?;
+        let load_library_a_address = GetProcAddress(kernel_32, s!("LoadLibraryA")).ok_or(P3AgentLoaderError::GetProcAddressFailed(GetLastError()))?;
         let path = s!(r"C:\Users\Benni\repositories\p3-lib\target\i686-pc-windows-msvc\release\p3_agent.dll");
-        let buf_ptr = VirtualAllocEx(handle, None, path.as_bytes().len(), MEM_COMMIT, PAGE_READWRITE);
-        if buf_ptr.is_null() {
-            CloseHandle(handle);
-            return Err(P3AgentLoaderError::VirtualAllocExFailed(GetLastError()));
-        }
-
-        // Write dll path to buffer
-        if !WriteProcessMemory(handle, buf_ptr, path.as_ptr() as _, path.as_bytes().len(), None).as_bool() {
-            CloseHandle(handle);
-            VirtualFreeEx(handle, buf_ptr, 4, MEM_RELEASE);
-            return Err(P3AgentLoaderError::WriteProcessMemoryFailed(GetLastError()));
-        }
-
-        // Execute LoadLibraryA
-        let thread = match CreateRemoteThread(handle, None, 0, Some(std::mem::transmute(load_library_a_address)), Some(buf_ptr), 0, None) {
-            Ok(h) => h,
-            Err(e) => {
-                CloseHandle(handle);
-                return Err(P3AgentLoaderError::CreateRemoteThreadFailed(e));
-            }
-        };
-
-        debug!("Waiting for thread to finish...");
-        WaitForSingleObject(thread, INFINITE);
-        debug!("done!");
-
-        // Check exit code
-        let mut exit_code = 0;
-        if !GetExitCodeThread(thread, &mut exit_code).as_bool() {
-            CloseHandle(thread);
-            VirtualFreeEx(handle, buf_ptr, 4, MEM_RELEASE);
-            CloseHandle(handle);
-            return Err(P3AgentLoaderError::GetExitCodeThreadFailed);
-        }
-        if exit_code == 0 {
-            CloseHandle(thread);
-            VirtualFreeEx(handle, buf_ptr, 4, MEM_RELEASE);
-            CloseHandle(handle);
+        let mut remote_path = RemoteVirtualAllocation::new(&mut remote_process, path.as_bytes().len())?;
+        remote_path.write(path.as_bytes())?;
+        let p3_agent_module = RemoteThread::new(&mut remote_process, load_library_a_address as usize as _, Some(remote_path.ptr as _))?.wait()?;
+        if p3_agent_module == 0 {
             return Err(P3AgentLoaderError::LoadLibraryAFailed);
         }
 
-        info!("Module loaded sucessfully ({:x})", exit_code);
-        CloseHandle(thread);
-        VirtualFreeEx(handle, buf_ptr, 4, MEM_RELEASE);
-        CloseHandle(handle);
+        run_exported_function(&mut remote_process, p3_agent_module, "start")?;
+
+        info!("Module loaded sucessfully ({:x})", p3_agent_module);
         Ok(())
     }
 }
 
-fn unload(pid: u32, module_address: u32) -> Result<(), P3AgentLoaderError> {
+fn unload(pid: u32) -> Result<(), P3AgentLoaderError> {
     unsafe {
-        let handle = OpenProcess(PROCESS_ALL_ACCESS, false, pid).map_err(P3AgentLoaderError::OpenProcessFailed)?;
-        debug!("P3 opened sucessfully");
-
-        // Get handle of kernel32.dll
-        let kernel_32 = match GetModuleHandleA(s!("Kernel32")) {
-            Ok(m) => m,
-            Err(e) => {
-                CloseHandle(handle);
-                return Err(P3AgentLoaderError::GetModuleHandleAFailed(e));
-            }
-        };
-
-        // Get address of FreeLibrary
-        let free_library_address = GetProcAddress(kernel_32.0, s!("FreeLibrary"));
-        if free_library_address.is_null() {
-            CloseHandle(handle);
-            return Err(P3AgentLoaderError::GetProcAddressFailed(GetLastError()));
+        let mut remote_process = RemoteProcess::new(pid)?;
+        let kernel_32 = GetModuleHandleA(s!("Kernel32")).map_err(P3AgentLoaderError::GetModuleHandleAFailed)?;
+        let get_module_handle_address = GetProcAddress(kernel_32, s!("GetModuleHandleA")).ok_or(P3AgentLoaderError::GetProcAddressFailed(GetLastError()))?;
+        let module_name = s!(r"p3_agent.dll");
+        let mut buf_ptr = RemoteVirtualAllocation::new(&mut remote_process, module_name.as_bytes().len())?;
+        buf_ptr.write(module_name.as_bytes())?;
+        let p3_agent_module = RemoteThread::new(&mut remote_process, get_module_handle_address as usize as u32, Some(buf_ptr.ptr as _))?.wait()?;
+        if p3_agent_module == 0 {
+            return Err(P3AgentLoaderError::GetProcAddressRemoteFailed);
         }
-        debug!("FreeLibrary is at {:#x}", free_library_address as usize);
 
-        // Execute FreeLibrary
-        let thread = match CreateRemoteThread(
-            handle,
-            None,
-            0,
-            Some(std::mem::transmute(free_library_address)),
-            Some(module_address as *const _),
-            0,
-            None,
-        ) {
-            Ok(h) => h,
-            Err(e) => {
-                CloseHandle(handle);
-                return Err(P3AgentLoaderError::CreateRemoteThreadFailed(e));
-            }
-        };
+        run_exported_function(&mut remote_process, p3_agent_module, "stop")?;
 
-        debug!("Waiting for thread to finish...");
-        WaitForSingleObject(thread, INFINITE);
-        debug!("done!");
-
-        // Check exit code
-        let mut exit_code = 0;
-        if !GetExitCodeThread(thread, &mut exit_code).as_bool() {
-            CloseHandle(thread);
-            CloseHandle(handle);
-            return Err(P3AgentLoaderError::GetExitCodeThreadFailed);
-        }
+        let free_library_a_address = GetProcAddress(kernel_32, s!("FreeLibrary")).ok_or(P3AgentLoaderError::GetProcAddressFailed(GetLastError()))?;
+        let exit_code = RemoteThread::new(&mut remote_process, free_library_a_address as usize as _, Some(p3_agent_module))?.wait()?;
         if exit_code == 0 {
-            CloseHandle(thread);
-            CloseHandle(handle);
             return Err(P3AgentLoaderError::FreeLibraryFailed(exit_code));
         }
 
-        info!("Module {:#x} freed sucessfully", module_address);
-        CloseHandle(thread);
-        CloseHandle(handle);
+        info!("Module {:#x} freed sucessfully", p3_agent_module);
+
         Ok(())
+    }
+}
+
+fn run_exported_function(remote_process: &mut RemoteProcess, base_address: u32, function_name: &str) -> Result<u32, P3AgentLoaderError> {
+    unsafe {
+        // We'd love to call GetProcAddress to obtain the function pointer, but it requires 2 arguments and thus cannot be run with a simple CreateRemoteThread.
+        // Instead, we'll go through the EAT, and acquire the function pointer there
+        let dos_header: IMAGE_DOS_HEADER = remote_process.read(base_address)?;
+        assert_eq!(dos_header.e_magic, 0x5a4d);
+        let new_exe_header: IMAGE_NT_HEADERS32 = remote_process.read(base_address + dos_header.e_lfanew as usize as u32)?;
+        assert_eq!(new_exe_header.Signature, 0x4550);
+        let image_export_directory: IMAGE_EXPORT_DIRECTORY =
+            remote_process.read(base_address + new_exe_header.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT.0 as usize].VirtualAddress)?;
+        debug!("{:x?}", image_export_directory);
+
+        let mut ordinal = None;
+        for i in 0..image_export_directory.NumberOfNames {
+            let name_offset: u32 = remote_process.read(base_address + image_export_directory.AddressOfNames + 4 * i)?;
+            let name = remote_process.read_string(base_address + name_offset)?;
+            if name == function_name {
+                ordinal = Some(i);
+                break;
+            }
+        }
+
+        if let Some(ordinal) = ordinal {
+            let function_offset: u32 = remote_process.read(base_address + image_export_directory.AddressOfFunctions + 4 * ordinal)?;
+            debug!("function_offset={:x}", function_offset);
+            RemoteThread::new(remote_process, base_address + function_offset, None)?.wait()
+        } else {
+            Err(P3AgentLoaderError::ExportedFunctionNotFound)
+        }
     }
 }

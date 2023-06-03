@@ -11,6 +11,7 @@ pub const TICKS_PER_DAY: u32 = 256;
 pub const TICKS_PER_HOUR: f32 = TICKS_PER_DAY as f32 / 24.0;
 pub const TICKS_PER_MINUTE: f32 = TICKS_PER_HOUR / 60.0;
 
+#[derive(Clone, Debug)]
 pub struct GameWorldPtr<P3> {
     pub address: u32,
     api_type: PhantomData<P3>,
