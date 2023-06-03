@@ -6,7 +6,7 @@ use chrono::{DateTime, Days, NaiveDate, NaiveDateTime, NaiveTime, Utc};
 use futures::prelude::*;
 use influxdb2::Client;
 use influxdb2_derive::{FromDataPoint, WriteDataPoint};
-use log::{debug, LevelFilter};
+use log::{debug, LevelFilter, error};
 use num_traits::FromPrimitive;
 use p3_api::data::enums::WareId;
 use p3_api::strum::IntoEnumIterator;
@@ -14,6 +14,7 @@ use p3_api::{
     data::{enums::TownId, game_world::GameWorldPtr},
     p3_access_api::open_process_p3_access_api::OpenProcessP3AccessApi,
 };
+use sysinfo::{System, SystemExt, Process, ProcessExt, PidExt};
 
 #[derive(Debug, Default, WriteDataPoint)]
 #[measurement = "town_wares_raw"]
@@ -41,10 +42,10 @@ struct TownWaresMeasurement {
     time: i64,
 }
 
-async fn poll_town_wares() -> Result<(), Box<dyn std::error::Error>> {
+async fn poll_town_wares(pid: u32) -> Result<(), Box<dyn std::error::Error>> {
     let bucket = "P3";
     let client = get_client();
-    let mut api = OpenProcessP3AccessApi::new(13032).unwrap();
+    let mut api = OpenProcessP3AccessApi::new(pid).unwrap();
     let game_world = GameWorldPtr::default();
     let d = NaiveDate::from_ymd_opt(0, 1, 1).unwrap();
     let t = NaiveTime::from_hms_milli_opt(0, 0, 0, 0).unwrap();
@@ -102,6 +103,12 @@ fn get_client() -> Client {
 #[async_std::main]
 async fn main() {
     simple_logger::SimpleLogger::new().with_level(LevelFilter::Debug).env().init().unwrap();
+    let s = System::new_all();
+    let patricians: Vec<&Process> = s.processes_by_exact_name("Patrician3.exe").collect();
+    if patricians.is_empty() {
+        error!("Could not find Patrician3.exe");
+        return;
+    }
 
-    poll_town_wares().await.unwrap()
+    poll_town_wares(patricians[0].pid().as_u32()).await.unwrap()
 }

@@ -72,14 +72,14 @@ impl<P3: P3AccessApi> TownDataPtr<P3> {
     }
 
     pub fn get_town_ware(&self, ware: WareId, api: &mut P3) -> Result<u32, P3ApiError> {
-        api.read_u32(self.address + 0x3CC + ware as u32 * 4)
+        api.read_u32(self.address + ware as u32 * 4)
     }
 
     pub fn get_town_wares(&self, api: &mut P3) -> Result<Vec<u32>, P3ApiError> {
         let wares_count = WareId::Bricks as usize + 1;
         let bytes_len = wares_count * mem::size_of::<u32>();
         let mut input_data: Vec<u8> = vec![0; bytes_len];
-        api.read_memory(self.address + 0x3CC, &mut input_data)?;
+        api.read_memory(self.address, &mut input_data)?;
         let mut data: Vec<u32> = Vec::with_capacity(wares_count);
         for i in 0..wares_count {
             data.push(u32::from_le_bytes(input_data[i * 4..(i * 4) + 4].try_into().unwrap()))
