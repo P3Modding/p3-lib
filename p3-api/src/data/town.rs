@@ -1,6 +1,6 @@
 use log::debug;
 
-use super::enums::WareId;
+use super::{enums::WareId, p3_ptr::P3Pointer};
 use crate::{p3_access_api::P3AccessApi, P3ApiError};
 use std::{marker::PhantomData, mem};
 
@@ -47,18 +47,6 @@ impl<P3: P3AccessApi> TownDataPtr<P3> {
         api.read_u32(self.address + 0x2e0)
     }
 
-    pub fn get_field_0(&self, api: &mut P3) -> Result<Vec<u32>, P3ApiError> {
-        let byte_width = 4 * 24;
-        let mut input_data: Vec<u8> = vec![0; byte_width];
-        debug!("Getting field0 from {:x}", self.address);
-        api.read_memory(self.address, &mut input_data)?;
-        let mut data: Vec<u32> = Vec::with_capacity(byte_width / 4);
-        for i in 0..byte_width / 4 {
-            data.push(u32::from_le_bytes(input_data[i * 4..(i * 4) + 4].try_into().unwrap()))
-        }
-        Ok(data)
-    }
-
     pub fn get_field_3cc(&self, api: &mut P3) -> Result<Vec<u32>, P3ApiError> {
         let byte_width = 4 * 24;
         let mut input_data: Vec<u8> = vec![0; byte_width];
@@ -85,5 +73,11 @@ impl<P3: P3AccessApi> TownDataPtr<P3> {
             data.push(u32::from_le_bytes(input_data[i * 4..(i * 4) + 4].try_into().unwrap()))
         }
         Ok(data)
+    }
+}
+
+impl<P3: P3AccessApi> P3Pointer for TownDataPtr<P3> {
+    fn get_address(&self) -> u32 {
+        self.address
     }
 }
