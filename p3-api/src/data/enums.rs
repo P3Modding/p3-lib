@@ -23,6 +23,10 @@ pub enum WareId {
     Hemp = 0x11,
     Pottery = 0x12,
     Bricks = 0x13,
+    //Swords = 0x14,
+    //Bows=0x15,
+    //Crossbows=0x16,
+    //Carbines=0x17,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, EnumIter, FromPrimitive)]
