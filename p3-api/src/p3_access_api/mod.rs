@@ -1,8 +1,9 @@
 use crate::P3ApiError;
+use std::fmt::Debug;
 
 pub mod open_process_p3_access_api;
 
-pub trait P3AccessApi {
+pub trait P3AccessApi: Debug {
     fn read_memory(&mut self, address: u32, dst: &mut [u8]) -> Result<(), P3ApiError>;
     fn read_u32(&mut self, address: u32) -> Result<u32, P3ApiError> {
         let mut buf = [0; 4];

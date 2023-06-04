@@ -29,6 +29,10 @@ impl<P3: P3AccessApi> TownPtr<P3> {
     pub fn get_town_data(&self) -> TownDataPtr<P3> {
         TownDataPtr::new(self.address + 0x04)
     }
+
+    pub fn get_first_office_id(&self, api: &mut P3) -> Result<u16, P3ApiError> {
+        self.get(0x784, api)
+    }
 }
 
 impl<P3: P3AccessApi> TownDataPtr<P3> {
@@ -77,6 +81,12 @@ impl<P3: P3AccessApi> TownDataPtr<P3> {
 }
 
 impl<P3: P3AccessApi> P3Pointer for TownDataPtr<P3> {
+    fn get_address(&self) -> u32 {
+        self.address
+    }
+}
+
+impl<P3: P3AccessApi> P3Pointer for TownPtr<P3> {
     fn get_address(&self) -> u32 {
         self.address
     }

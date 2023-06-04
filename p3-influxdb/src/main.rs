@@ -6,7 +6,7 @@ use chrono::{DateTime, Days, NaiveDate, NaiveDateTime, NaiveTime, Utc};
 use futures::prelude::*;
 use influxdb2::Client;
 use influxdb2_derive::{FromDataPoint, WriteDataPoint};
-use log::{debug, LevelFilter, error};
+use log::{debug, error, LevelFilter};
 use num_traits::FromPrimitive;
 use p3_api::data::enums::WareId;
 use p3_api::strum::IntoEnumIterator;
@@ -14,7 +14,7 @@ use p3_api::{
     data::{enums::TownId, game_world::GameWorldPtr},
     p3_access_api::open_process_p3_access_api::OpenProcessP3AccessApi,
 };
-use sysinfo::{System, SystemExt, Process, ProcessExt, PidExt};
+use sysinfo::{PidExt, Process, ProcessExt, System, SystemExt};
 
 #[derive(Debug, Default, WriteDataPoint)]
 #[measurement = "town_wares_raw"]

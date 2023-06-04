@@ -1,5 +1,9 @@
+use log::debug;
+
 use super::{
     enums::TownId,
+    office::{OfficePtr, OFFICE_SIZE},
+    p3_ptr::P3Pointer,
     town::{TownPtr, TOWN_SIZE},
 };
 use crate::{p3_access_api::P3AccessApi, P3ApiError};
@@ -34,6 +38,10 @@ impl<P3: P3AccessApi> GameWorldPtr<P3> {
         }
     }
 
+    pub fn get_offices_count(&self, api: &mut P3) -> Result<u16, P3ApiError> {
+        self.get(0x08, api)
+    }
+
     pub fn get_game_time_raw(&self, api: &mut P3) -> Result<u32, P3ApiError> {
         api.read_u32(self.address + 0x14)
     }
@@ -55,13 +63,43 @@ impl<P3: P3AccessApi> GameWorldPtr<P3> {
         })
     }
 
-    pub fn get_town(&self, town: TownId, api: &mut P3) -> Result<TownPtr<P3>, P3ApiError> {
-        Ok(TownPtr::new(api.read_u32(self.address + 0x68)? + town as u32 * TOWN_SIZE))
+    pub fn get_town(&self, town_id: TownId, api: &mut P3) -> Result<TownPtr<P3>, P3ApiError> {
+        Ok(TownPtr::new(api.read_u32(self.address + 0x68)? + town_id as u32 * TOWN_SIZE))
+    }
+
+    pub fn get_office(&self, office_id: u16, api: &mut P3) -> Result<OfficePtr<P3>, P3ApiError> {
+        let base_address: u32 = self.get(0x74, api)?;
+        Ok(OfficePtr::new(base_address + office_id as u32 * OFFICE_SIZE))
+    }
+
+    pub fn get_office_in_of(&self, town_id: TownId, merchant_id: u16, api: &mut P3) -> Result<Option<OfficePtr<P3>>, P3ApiError> {
+        let offices_count = self.get_offices_count(api)?;
+        let town = self.get_town(town_id, api)?;
+        let mut office_id = town.get_first_office_id(api)?;
+        loop {
+            if office_id >= offices_count {
+                return Ok(None);
+            }
+
+            let office = self.get_office(office_id, api)?;
+            if office.get_merchant_id(api)? == merchant_id {
+                return Ok(Some(office));
+            }
+
+            debug!("{:?} belongs to someone else {:#x}", &office, office.get_merchant_id(api)?);
+            office_id = office.next_office_id(api)?;
+        }
     }
 }
 
 impl<P3: P3AccessApi> Default for GameWorldPtr<P3> {
     fn default() -> Self {
         Self::new(GAME_WORLD_ADDRESS)
+    }
+}
+
+impl<P3: P3AccessApi> P3Pointer for GameWorldPtr<P3> {
+    fn get_address(&self) -> u32 {
+        self.address
     }
 }

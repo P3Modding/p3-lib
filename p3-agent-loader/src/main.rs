@@ -1,10 +1,10 @@
-use std::{string::FromUtf8Error};
+use std::string::FromUtf8Error;
 
 use clap::Parser;
 use log::{debug, error, info, LevelFilter};
 use sysinfo::{PidExt, Process, ProcessExt, System, SystemExt};
 use windows::{
-    core::{Error},
+    core::Error,
     s,
     Win32::{
         Foundation::{GetLastError, WIN32_ERROR},
