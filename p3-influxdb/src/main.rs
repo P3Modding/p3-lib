@@ -8,7 +8,7 @@ use influxdb2::Client;
 use influxdb2_derive::{FromDataPoint, WriteDataPoint};
 use log::{debug, error, LevelFilter};
 use num_traits::FromPrimitive;
-use p3_api::data::enums::WareId;
+use p3_api::data::enums::{ShipWeaponId, WareId};
 use p3_api::strum::IntoEnumIterator;
 use p3_api::{
     data::{enums::TownId, game_world::GameWorldPtr},
@@ -17,8 +17,10 @@ use p3_api::{
 use sysinfo::{PidExt, Process, ProcessExt, System, SystemExt};
 
 #[derive(Debug, Default, WriteDataPoint)]
-#[measurement = "town_wares_raw"]
-struct TownWaresMeasurementRaw {
+#[measurement = "storage_wares_raw"]
+struct StorageMeasurementRaw {
+    #[influxdb(tag)]
+    storage_type: String,
     #[influxdb(tag)]
     town: String,
     #[influxdb(tag)]
@@ -30,8 +32,10 @@ struct TownWaresMeasurementRaw {
 }
 
 #[derive(Debug, Default, WriteDataPoint, FromDataPoint)]
-#[measurement = "town_wares"]
-struct TownWaresMeasurement {
+#[measurement = "storage_wares"]
+struct StorageMeasurement {
+    #[influxdb(tag)]
+    storage_type: String,
     #[influxdb(tag)]
     town: String,
     #[influxdb(tag)]
@@ -68,26 +72,106 @@ async fn poll_town_wares(pid: u32) -> Result<(), Box<dyn std::error::Error>> {
         let mut data = vec![];
         for town_id in TownId::iter() {
             let town_ptr = game_world.get_town(town_id, &mut api).unwrap();
-            let town_data = town_ptr.get_town_data();
-            let wares = town_data.get_town_wares(&mut api).unwrap();
+            // Town data
+            let town_storage = town_ptr.get_storage();
+            let cutlasses = town_storage.get_cutlasses(&mut api).unwrap();
+            data.push(StorageMeasurement {
+                storage_type: "Town".to_string(),
+                town: format!("{:?}", town_id),
+                ware: "Cutlass".to_string(),
+                value: cutlasses as u64,
+                time: utc.timestamp_nanos(),
+            });
+            let wares = town_storage.get_wares(&mut api).unwrap();
             for (index, amount) in wares.iter().enumerate() {
                 let ware_id: WareId = FromPrimitive::from_u32(index as u32).unwrap();
-                raw_data.push(TownWaresMeasurementRaw {
+                raw_data.push(StorageMeasurementRaw {
+                    storage_type: "Town".to_string(),
                     town: format!("{:?}", town_id),
                     ware: format!("{:?}", ware_id),
                     value: *amount as u64,
                     time: utc.timestamp_nanos(),
                 });
-                data.push(TownWaresMeasurement {
+                data.push(StorageMeasurement {
+                    storage_type: "Town".to_string(),
                     town: format!("{:?}", town_id),
                     ware: format!("{:?}", ware_id),
                     value: (*amount / ware_id.get_scaling()) as u64,
                     time: utc.timestamp_nanos(),
                 });
             }
+            let weapons = town_storage.get_ship_weapons(&mut api).unwrap();
+            for (index, amount) in weapons.iter().enumerate() {
+                let ware_id: ShipWeaponId = FromPrimitive::from_u32(index as u32).unwrap();
+                raw_data.push(StorageMeasurementRaw {
+                    storage_type: "Town".to_string(),
+                    town: format!("{:?}", town_id),
+                    ware: format!("{:?}", ware_id),
+                    value: *amount as u64,
+                    time: utc.timestamp_nanos(),
+                });
+                data.push(StorageMeasurement {
+                    storage_type: "Town".to_string(),
+                    town: format!("{:?}", town_id),
+                    ware: format!("{:?}", ware_id),
+                    value: (*amount / ware_id.get_scaling()) as u64,
+                    time: utc.timestamp_nanos(),
+                });
+            }
+
+            // Office data
+            // This is unsafe, because the office might be moved during execution (?)
+            if let Some(office) = game_world.get_office_in_of(town_id, 0x24, &mut api).unwrap() {
+                let office_storage = office.get_storage();
+                let cutlasses = office_storage.get_cutlasses(&mut api).unwrap();
+                data.push(StorageMeasurement {
+                    storage_type: "Office".to_string(),
+                    town: format!("{:?}", town_id),
+                    ware: "Cutlass".to_string(),
+                    value: cutlasses as u64,
+                    time: utc.timestamp_nanos(),
+                });
+                let wares = office_storage.get_wares(&mut api).unwrap();
+                for (index, amount) in wares.iter().enumerate() {
+                    let ware_id: WareId = FromPrimitive::from_u32(index as u32).unwrap();
+                    raw_data.push(StorageMeasurementRaw {
+                        storage_type: "Office".to_string(),
+                        town: format!("{:?}", town_id),
+                        ware: format!("{:?}", ware_id),
+                        value: *amount as u64,
+                        time: utc.timestamp_nanos(),
+                    });
+                    data.push(StorageMeasurement {
+                        storage_type: "Office".to_string(),
+                        town: format!("{:?}", town_id),
+                        ware: format!("{:?}", ware_id),
+                        value: (*amount / ware_id.get_scaling()) as u64,
+                        time: utc.timestamp_nanos(),
+                    });
+                }
+                let weapons = office_storage.get_ship_weapons(&mut api).unwrap();
+                for (index, amount) in weapons.iter().enumerate() {
+                    let ware_id: ShipWeaponId = FromPrimitive::from_u32(index as u32).unwrap();
+                    raw_data.push(StorageMeasurementRaw {
+                        storage_type: "Office".to_string(),
+                        town: format!("{:?}", town_id),
+                        ware: format!("{:?}", ware_id),
+                        value: *amount as u64,
+                        time: utc.timestamp_nanos(),
+                    });
+                    data.push(StorageMeasurement {
+                        storage_type: "Office".to_string(),
+                        town: format!("{:?}", town_id),
+                        ware: format!("{:?}", ware_id),
+                        value: (*amount / ware_id.get_scaling()) as u64,
+                        time: utc.timestamp_nanos(),
+                    });
+                }
+            }
         }
 
         debug!("Pushing {} ({})", utc, utc.timestamp_nanos());
+        debug!("{:?}", data);
         client.write(bucket, stream::iter(raw_data)).await?;
         client.write(bucket, stream::iter(data)).await?;
     }

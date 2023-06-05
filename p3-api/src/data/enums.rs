@@ -23,10 +23,10 @@ pub enum WareId {
     Hemp = 0x11,
     Pottery = 0x12,
     Bricks = 0x13,
-    //Swords = 0x14,
-    //Bows=0x15,
-    //Crossbows=0x16,
-    //Carbines=0x17,
+    Sword = 0x14,
+    Bow = 0x15,
+    Crossbow = 0x16,
+    Carbine = 0x17,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, EnumIter, FromPrimitive)]
@@ -59,6 +59,16 @@ pub enum TownId {
     Newcastle = 0x19,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq, EnumIter, FromPrimitive)]
+pub enum ShipWeaponId {
+    SmallCatapult = 0x00,
+    SmallBallista = 0x01,
+    LargeCatapult = 0x02,
+    LargeBallista = 0x03,
+    Bombard = 0x04,
+    Cannon = 0x05,
+}
+
 impl WareId {
     pub fn get_scaling(&self) -> u32 {
         match self {
@@ -82,6 +92,23 @@ impl WareId {
             WareId::Hemp => 2000,
             WareId::Pottery => 200,
             WareId::Bricks => 2000,
+            WareId::Sword => 10,
+            WareId::Bow => 10,
+            WareId::Crossbow => 10,
+            WareId::Carbine => 10,
+        }
+    }
+}
+
+impl ShipWeaponId {
+    pub fn get_scaling(&self) -> u32 {
+        match self {
+            ShipWeaponId::SmallCatapult => 1000,
+            ShipWeaponId::SmallBallista => 1000,
+            ShipWeaponId::LargeCatapult => 2000,
+            ShipWeaponId::LargeBallista => 2000,
+            ShipWeaponId::Bombard => 2000,
+            ShipWeaponId::Cannon => 1000,
         }
     }
 }

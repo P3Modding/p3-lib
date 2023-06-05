@@ -35,7 +35,7 @@ fn test_vispy_beer() {
         let mut api = OpenProcessP3AccessApi::new(process.pid().as_u32()).unwrap();
         let game_world = GameWorldPtr::default();
         let vispy = game_world.get_town(TownId::Visby, &mut api).unwrap();
-        let beer = vispy.get_town_data().get_town_ware(WareId::Beer, &mut api).unwrap();
+        let beer = vispy.get_storage().get_ware(WareId::Beer, &mut api).unwrap();
         info!("visby beer={}", beer);
     }
 }

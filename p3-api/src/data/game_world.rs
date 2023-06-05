@@ -1,5 +1,3 @@
-use log::debug;
-
 use super::{
     enums::TownId,
     office::{OfficePtr, OFFICE_SIZE},
@@ -7,6 +5,7 @@ use super::{
     town::{TownPtr, TOWN_SIZE},
 };
 use crate::{p3_access_api::P3AccessApi, P3ApiError};
+use log::debug;
 use std::marker::PhantomData;
 
 pub const GAME_WORLD_ADDRESS: u32 = 0x006DE4A0;
@@ -83,6 +82,7 @@ impl<P3: P3AccessApi> GameWorldPtr<P3> {
 
             let office = self.get_office(office_id, api)?;
             if office.get_merchant_id(api)? == merchant_id {
+                debug!("returning office {:#x}", office_id);
                 return Ok(Some(office));
             }
 

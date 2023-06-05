@@ -47,7 +47,7 @@ pub fn schedule_operation(op: &[u8]) {
         // rustc can't do thiscall because reasons
         asm!(
             "push eax",
-            "call ebx",
+            "call ebx", //TODO properly define clobber by this thiscall call
             in("eax") op.as_ptr(),
             in("ebx") functon_ptr,
             in("ecx") 0x006DF2F0,
