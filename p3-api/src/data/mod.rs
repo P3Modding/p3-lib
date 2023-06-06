@@ -5,3 +5,4 @@ pub mod p3_ptr;
 pub mod ship;
 pub mod storage;
 pub mod town;
+pub mod statics;
