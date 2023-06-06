@@ -10,6 +10,15 @@ pub struct TownPtr<P3> {
     api_type: PhantomData<P3>,
 }
 
+#[derive(Debug)]
+#[repr(C)]
+pub struct ShipLevels {
+    snaikka_level: u8,
+    craier_level: u8,
+    cog_level: u8,
+    hulk_level: u8,
+}
+
 impl<P3: P3AccessApi> TownPtr<P3> {
     pub fn new(address: u32) -> Self {
         Self {
@@ -24,6 +33,18 @@ impl<P3: P3AccessApi> TownPtr<P3> {
 
     pub fn get_first_office_id(&self, api: &mut P3) -> Result<u16, P3ApiError> {
         self.get(0x784, api)
+    }
+
+    pub fn get_build_ship_818(&self, api: &mut P3) -> Result<f32, P3ApiError> {
+        self.get(0x818, api)
+    }
+
+    pub fn get_build_ship_levels(&self, api: &mut P3) -> Result<ShipLevels, P3ApiError> {
+        self.get(0x824, api)
+    }
+
+    pub fn get_build_ship_828(&self, api: &mut P3) -> Result<ShipLevels, P3ApiError> {
+        self.get(0x824, api)
     }
 }
 
