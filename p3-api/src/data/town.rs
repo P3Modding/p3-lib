@@ -13,10 +13,10 @@ pub struct TownPtr<P3> {
 #[derive(Debug)]
 #[repr(C)]
 pub struct ShipLevels {
-    snaikka_level: u8,
-    craier_level: u8,
-    cog_level: u8,
-    hulk_level: u8,
+    pub snaikka_level: u8,
+    pub craier_level: u8,
+    pub cog_level: u8,
+    pub hulk_level: u8,
 }
 
 impl<P3: P3AccessApi> TownPtr<P3> {
@@ -35,7 +35,7 @@ impl<P3: P3AccessApi> TownPtr<P3> {
         self.get(0x784, api)
     }
 
-    pub fn get_build_ship_818(&self, api: &mut P3) -> Result<f32, P3ApiError> {
+    pub fn get_build_ship_capacity_markup(&self, api: &mut P3) -> Result<f32, P3ApiError> {
         self.get(0x818, api)
     }
 
@@ -43,8 +43,8 @@ impl<P3: P3AccessApi> TownPtr<P3> {
         self.get(0x824, api)
     }
 
-    pub fn get_build_ship_828(&self, api: &mut P3) -> Result<ShipLevels, P3ApiError> {
-        self.get(0x824, api)
+    pub fn get_build_ship_828_always_0(&self, api: &mut P3) -> Result<[u8; 4], P3ApiError> {
+        self.get(0x828, api)
     }
 }
 

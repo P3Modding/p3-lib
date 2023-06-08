@@ -69,6 +69,25 @@ pub enum ShipWeaponId {
     Cannon = 0x05,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq, EnumIter, FromPrimitive)]
+pub enum ShipTypeId {
+    Snaikkka = 0x00,
+    Craier = 0x01,
+    Cog = 0x02,
+    Hulk = 0x03,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq, EnumIter, FromPrimitive)]
+pub enum BuildingId {
+    // Road = 0x24, uses opcode 0x25
+    Well = 0x28,
+    HousePoor = 0x2a,
+    Fisher = 0x57,
+    Apiary = 0x59,
+    Warehouse = 0x66, // has a 0x20 next to it
+    Mint = 0x67,
+}
+
 impl WareId {
     pub fn get_scaling(&self) -> u32 {
         match self {

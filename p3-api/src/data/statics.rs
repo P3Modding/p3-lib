@@ -5,14 +5,14 @@ use super::p3_ptr::{self};
 #[derive(Clone, Debug)]
 #[repr(C)]
 pub struct ShipCost {
-    timber: u32,
-    cloth: u32,
-    iron_goods: u32,
-    hemp: u32,
-    pitch: u32,
-    field_14: u32, // base_time?
-    base_price: u32,
-    field_1c: u32,
+    pub timber: u32,
+    pub cloth: u32,
+    pub iron_goods: u32,
+    pub hemp: u32,
+    pub pitch: u32,
+    pub field_14: u32, // base_time?
+    pub base_price: u32,
+    pub field_1c: u32,
 }
 
 #[derive(Clone, Debug)]
@@ -24,6 +24,20 @@ pub struct ShipCosts {
     pub hulk: [ShipCost; 3],
 }
 
+#[derive(Clone, Debug)]
+#[repr(C)]
+pub struct ShipCapacityRaw {
+    pub snaikka: [u8; 4],
+    pub craier: [u8; 4],
+    pub cog: [u8; 4],
+    pub hulk: [u8; 4],
+}
+
+
 pub fn get_ship_costs<P3: P3AccessApi>(api: &mut P3) -> Result<ShipCosts, P3ApiError> {
     p3_ptr::get_from(0x0066DEB0, api)
+}
+
+pub fn get_ship_capacities_raw<P3: P3AccessApi>(api: &mut P3) -> Result<ShipCapacityRaw, P3ApiError> {
+    p3_ptr::get_from(0x00673838, api)
 }
