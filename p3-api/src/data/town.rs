@@ -11,6 +11,12 @@ pub struct TownPtr<P3> {
 }
 
 #[derive(Debug)]
+pub struct TownMapPtr<P3> {
+    pub address: u32,
+    api_type: PhantomData<P3>,
+}
+
+#[derive(Debug)]
 #[repr(C)]
 pub struct ShipLevels {
     pub snaikka_level: u8,
@@ -35,6 +41,13 @@ impl<P3: P3AccessApi> TownPtr<P3> {
         self.get(0x784, api)
     }
 
+    pub fn get_town_map(&self) -> TownMapPtr<P3> {
+        TownMapPtr {
+            address: self.address + 0x7a4,
+            api_type: PhantomData,
+        }
+    }
+
     pub fn get_build_ship_capacity_markup(&self, api: &mut P3) -> Result<f32, P3ApiError> {
         self.get(0x818, api)
     }
@@ -48,7 +61,32 @@ impl<P3: P3AccessApi> TownPtr<P3> {
     }
 }
 
+impl<P3: P3AccessApi> TownMapPtr<P3> {
+    pub fn get_rows(&self, api: &mut P3) -> Result<u32, P3ApiError> {
+        self.get(0x08, api)
+    }
+
+    pub fn get_cols(&self, api: &mut P3) -> Result<u32, P3ApiError> {
+        self.get(0x04, api)
+    }
+
+    pub fn get_map_data(&self, api: &mut P3) -> Result<Vec<u8>, P3ApiError> {
+        let address: u32 = self.get(0x68, api)?;
+        let cols = self.get_cols(api)? as usize;
+        let rows = self.get_rows(api)? as usize;
+        let mut buf: Vec<u8> = vec![0; cols * rows];
+        api.read_memory(address, &mut buf)?;
+        Ok(buf)
+    }
+}
+
 impl<P3: P3AccessApi> P3Pointer for TownPtr<P3> {
+    fn get_address(&self) -> u32 {
+        self.address
+    }
+}
+
+impl<P3: P3AccessApi> P3Pointer for TownMapPtr<P3> {
     fn get_address(&self) -> u32 {
         self.address
     }

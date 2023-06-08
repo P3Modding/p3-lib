@@ -88,6 +88,17 @@ pub enum BuildingId {
     Mint = 0x67,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq, EnumIter, FromPrimitive)]
+pub enum TownGroundTypeId {
+    // Road = 0x24, uses opcode 0x25
+    Border = 0x06,
+    Wall = 0x0A,
+    Shipyard = 0x0b,
+    Water = 0x0c,
+    Coast = 0x0d,
+    Fisher = 0x0e,
+}
+
 impl WareId {
     pub fn get_scaling(&self) -> u32 {
         match self {
