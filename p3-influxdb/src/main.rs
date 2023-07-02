@@ -49,14 +49,14 @@ struct StorageMeasurement {
 async fn poll_town_wares(pid: u32) -> Result<(), Box<dyn std::error::Error>> {
     let bucket = "P3";
     let client = get_client();
-    let mut api = OpenProcessP3AccessApi::new(pid).unwrap();
+    let api = OpenProcessP3AccessApi::new(pid).unwrap();
     let game_world = GameWorldPtr::default();
     let d = NaiveDate::from_ymd_opt(0, 1, 1).unwrap();
     let t = NaiveTime::from_hms_milli_opt(0, 0, 0, 0).unwrap();
     let dt = NaiveDateTime::new(d, t);
     let mut last_utc: DateTime<Utc> = DateTime::from_utc(dt, Utc);
     loop {
-        let p3_time = game_world.get_game_time(&mut api).unwrap();
+        let p3_time = game_world.get_game_time(&api).unwrap();
         let d = NaiveDate::from_ymd_opt((700 + p3_time.year).try_into().unwrap(), 1, 1).unwrap();
         let t = NaiveTime::from_hms_milli_opt(p3_time.hour_of_day, p3_time.minute_of_hour, 0, 0).unwrap();
         let dt = NaiveDateTime::new(d, t);
@@ -71,10 +71,10 @@ async fn poll_town_wares(pid: u32) -> Result<(), Box<dyn std::error::Error>> {
         let mut raw_data = vec![];
         let mut data = vec![];
         for town_id in TownId::iter() {
-            let town_ptr = game_world.get_town(town_id, &mut api).unwrap();
+            let town_ptr = game_world.get_town(town_id, &api).unwrap();
             // Town data
             let town_storage = town_ptr.get_storage();
-            let cutlasses = town_storage.get_cutlasses(&mut api).unwrap();
+            let cutlasses = town_storage.get_cutlasses(&api).unwrap();
             data.push(StorageMeasurement {
                 storage_type: "Town".to_string(),
                 town: format!("{:?}", town_id),
@@ -82,7 +82,7 @@ async fn poll_town_wares(pid: u32) -> Result<(), Box<dyn std::error::Error>> {
                 value: cutlasses as u64,
                 time: utc.timestamp_nanos(),
             });
-            let wares = town_storage.get_wares(&mut api).unwrap();
+            let wares = town_storage.get_wares(&api).unwrap();
             for (index, amount) in wares.iter().enumerate() {
                 let ware_id: WareId = FromPrimitive::from_u32(index as u32).unwrap();
                 raw_data.push(StorageMeasurementRaw {
@@ -100,7 +100,7 @@ async fn poll_town_wares(pid: u32) -> Result<(), Box<dyn std::error::Error>> {
                     time: utc.timestamp_nanos(),
                 });
             }
-            let weapons = town_storage.get_ship_weapons(&mut api).unwrap();
+            let weapons = town_storage.get_ship_weapons(&api).unwrap();
             for (index, amount) in weapons.iter().enumerate() {
                 let ware_id: ShipWeaponId = FromPrimitive::from_u32(index as u32).unwrap();
                 raw_data.push(StorageMeasurementRaw {
@@ -121,9 +121,9 @@ async fn poll_town_wares(pid: u32) -> Result<(), Box<dyn std::error::Error>> {
 
             // Office data
             // This is unsafe, because the office might be moved during execution (?)
-            if let Some(office) = game_world.get_office_in_of(town_id, 0x24, &mut api).unwrap() {
+            if let Some(office) = game_world.get_office_in_of(town_id, 0x24, &api).unwrap() {
                 let office_storage = office.get_storage();
-                let cutlasses = office_storage.get_cutlasses(&mut api).unwrap();
+                let cutlasses = office_storage.get_cutlasses(&api).unwrap();
                 data.push(StorageMeasurement {
                     storage_type: "Office".to_string(),
                     town: format!("{:?}", town_id),
@@ -131,7 +131,7 @@ async fn poll_town_wares(pid: u32) -> Result<(), Box<dyn std::error::Error>> {
                     value: cutlasses as u64,
                     time: utc.timestamp_nanos(),
                 });
-                let wares = office_storage.get_wares(&mut api).unwrap();
+                let wares = office_storage.get_wares(&api).unwrap();
                 for (index, amount) in wares.iter().enumerate() {
                     let ware_id: WareId = FromPrimitive::from_u32(index as u32).unwrap();
                     raw_data.push(StorageMeasurementRaw {
@@ -149,7 +149,7 @@ async fn poll_town_wares(pid: u32) -> Result<(), Box<dyn std::error::Error>> {
                         time: utc.timestamp_nanos(),
                     });
                 }
-                let weapons = office_storage.get_ship_weapons(&mut api).unwrap();
+                let weapons = office_storage.get_ship_weapons(&api).unwrap();
                 for (index, amount) in weapons.iter().enumerate() {
                     let ware_id: ShipWeaponId = FromPrimitive::from_u32(index as u32).unwrap();
                     raw_data.push(StorageMeasurementRaw {

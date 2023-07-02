@@ -1,3 +1,76 @@
+use super::{enums::TownId, p3_ptr::P3Pointer};
+use crate::{latin1_to_string, p3_access_api::P3AccessApi, P3ApiError};
+use num_traits::FromPrimitive;
+use std::marker::PhantomData;
+
+pub const SHIP_SIZE: u32 = 0x180;
+
+#[derive(Debug)]
+pub struct ShipPtr<P3> {
+    pub address: u32,
+    api_type: PhantomData<P3>,
+}
+
+impl<P3: P3AccessApi> ShipPtr<P3> {
+    pub fn new(address: u32) -> Self {
+        Self {
+            address,
+            api_type: PhantomData,
+        }
+    }
+
+    pub fn get_raw(&self) -> *mut RawShip {
+        self.address as _
+    }
+
+    pub fn get_next_ship_in_convoy(&self, api: &P3) -> Result<u16, P3ApiError> {
+        let ship_id = self.get(0x06, api)?;
+        Ok(ship_id)
+    }
+
+    pub fn get_convoy_id(&self, api: &P3) -> Result<u16, P3ApiError> {
+        let convoy_id = self.get(0x08, api)?;
+        Ok(convoy_id)
+    }
+
+    pub fn get_capacity(&self, api: &P3) -> Result<u32, P3ApiError> {
+        let capacity = self.get(0x10, api)?;
+        Ok(capacity)
+    }
+
+    pub fn get_max_health(&self, api: &P3) -> Result<u32, P3ApiError> {
+        let max_heatlh = self.get(0x14, api)?;
+        Ok(max_heatlh)
+    }
+
+    pub fn get_current_health(&self, api: &P3) -> Result<u32, P3ApiError> {
+        let current_health = self.get(0x18, api)?;
+        Ok(current_health)
+    }
+
+    pub fn get_current_town_id(&self, api: &P3) -> Result<Option<TownId>, P3ApiError> {
+        let raw_town_id: u8 = self.get(0x39, api)?;
+        Ok(FromPrimitive::from_u8(raw_town_id))
+    }
+
+    pub fn get_status(&self, api: &P3) -> Result<u16, P3ApiError> {
+        let raw_status = self.get(0x134, api)?;
+        Ok(raw_status)
+    }
+
+    pub fn get_name(&self, api: &P3) -> Result<String, P3ApiError> {
+        let buf: [u8; 16] = self.get(0x160, api)?;
+        Ok(latin1_to_string(&buf))
+    }
+}
+
+impl<P3: P3AccessApi> P3Pointer for ShipPtr<P3> {
+    fn get_address(&self) -> u32 {
+        self.address
+    }
+}
+
+#[derive(Debug)]
 #[repr(C)]
 pub struct RawShip {
     pub field_0_merchant_id: u8,
@@ -84,7 +157,7 @@ pub struct RawShip {
     pub field_128: i32,
     pub field_12c: i32,
     pub field_130: i32,
-    pub field_134: u16,
+    pub field_134_flags: u16,
     pub field_136: u8,
     pub field_137: u8,
     pub field_138: u8,

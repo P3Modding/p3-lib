@@ -19,23 +19,23 @@ impl<P3: P3AccessApi> StoragePtr<P3> {
         }
     }
 
-    pub fn get_ware(&self, ware: WareId, api: &mut P3) -> Result<u32, P3ApiError> {
-        api.read_u32(self.address + 0x04 + ware as u32 * 4)
+    pub fn get_ware(&self, ware: WareId, api: &P3) -> Result<i32, P3ApiError> {
+        self.get(0x04 + ware as u32 * 4, api)
     }
 
-    pub fn get_wares(&self, api: &mut P3) -> Result<Vec<u32>, P3ApiError> {
+    pub fn get_wares(&self, api: &P3) -> Result<Vec<i32>, P3ApiError> {
         let wares_count = WareId::Carbine as usize + 1;
         let bytes_len = wares_count * mem::size_of::<u32>();
         let mut input_data: Vec<u8> = vec![0; bytes_len];
         api.read_memory(self.address + 0x04, &mut input_data)?;
-        let mut data: Vec<u32> = Vec::with_capacity(wares_count);
+        let mut data: Vec<i32> = Vec::with_capacity(wares_count);
         for i in 0..wares_count {
-            data.push(u32::from_le_bytes(input_data[i * 4..(i * 4) + 4].try_into().unwrap()))
+            data.push(i32::from_le_bytes(input_data[i * 4..(i * 4) + 4].try_into().unwrap()))
         }
         Ok(data)
     }
 
-    pub fn get_ship_weapons(&self, api: &mut P3) -> Result<Vec<u32>, P3ApiError> {
+    pub fn get_ship_weapons(&self, api: &P3) -> Result<Vec<u32>, P3ApiError> {
         let wares_count = ShipWeaponId::Cannon as usize + 1;
         let bytes_len = wares_count * mem::size_of::<u32>();
         let mut input_data: Vec<u8> = vec![0; bytes_len];
@@ -47,7 +47,7 @@ impl<P3: P3AccessApi> StoragePtr<P3> {
         Ok(data)
     }
 
-    pub fn get_cutlasses(&self, api: &mut P3) -> Result<u32, P3ApiError> {
+    pub fn get_cutlasses(&self, api: &P3) -> Result<u32, P3ApiError> {
         self.get(0x2bc, api)
     }
 }

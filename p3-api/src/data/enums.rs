@@ -1,7 +1,9 @@
 use num_derive::FromPrimitive;
+use serde::{Deserialize, Serialize};
 use strum::EnumIter;
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, EnumIter, FromPrimitive)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, EnumIter, FromPrimitive, Deserialize, Serialize)]
+#[repr(u16)]
 pub enum WareId {
     Grain = 0x00,
     Meat = 0x01,
@@ -29,7 +31,8 @@ pub enum WareId {
     Carbine = 0x17,
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, EnumIter, FromPrimitive)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, EnumIter, FromPrimitive, Deserialize, Serialize)]
+#[repr(u8)]
 pub enum TownId {
     Edinburgh = 0x00,
     Scarborough = 0x01,
@@ -89,18 +92,29 @@ pub enum BuildingId {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, EnumIter, FromPrimitive)]
+#[repr(u8)]
+// Extended from https://github.com/Sqoops/PatrizierKartenEditor
 pub enum TownGroundTypeId {
     // Road = 0x24, uses opcode 0x25
     Border = 0x06,
-    Wall = 0x0A,
-    Shipyard = 0x0b,
+    Wall = 0x09,
+    Wall2 = 0x0a,
+    CoastalBuilding = 0x0b,
     Water = 0x0c,
-    Coast = 0x0d,
-    Fisher = 0x0e,
+    Unusable = 0x0d,
+    FisherSite = 0x0e,
+    WallAdjacent = 0x11,
+    HouseSiteVertical = 0xa1,
+    HouseSiteHorizontal = 0xa2,
+    EnterpriseSiteInnerWallsIfAdjacent = 0x20,
+    EnterpriseSite = 0x3b,
+    InnerSite = 0x80,
+    StreetInnerWalls = 0x83,
+    StreetAdjacent = 0x84,
 }
 
 impl WareId {
-    pub fn get_scaling(&self) -> u32 {
+    pub fn get_scaling(&self) -> i32 {
         match self {
             WareId::Grain => 2000,
             WareId::Meat => 2000,

@@ -5,7 +5,7 @@ use super::{
     town::{TownPtr, TOWN_SIZE},
 };
 use crate::{p3_access_api::P3AccessApi, P3ApiError};
-use log::debug;
+use log::trace;
 use std::marker::PhantomData;
 
 pub const GAME_WORLD_ADDRESS: u32 = 0x006DE4A0;
@@ -37,15 +37,15 @@ impl<P3: P3AccessApi> GameWorldPtr<P3> {
         }
     }
 
-    pub fn get_offices_count(&self, api: &mut P3) -> Result<u16, P3ApiError> {
+    pub fn get_offices_count(&self, api: &P3) -> Result<u16, P3ApiError> {
         self.get(0x08, api)
     }
 
-    pub fn get_game_time_raw(&self, api: &mut P3) -> Result<u32, P3ApiError> {
+    pub fn get_game_time_raw(&self, api: &P3) -> Result<u32, P3ApiError> {
         api.read_u32(self.address + 0x14)
     }
 
-    pub fn get_game_time(&self, api: &mut P3) -> Result<GameWorldTime, P3ApiError> {
+    pub fn get_game_time(&self, api: &P3) -> Result<GameWorldTime, P3ApiError> {
         let raw = self.get_game_time_raw(api)?;
         let year = raw / TICKS_PER_YEAR;
         let day = 1 + raw / TICKS_PER_DAY;
@@ -62,16 +62,16 @@ impl<P3: P3AccessApi> GameWorldPtr<P3> {
         })
     }
 
-    pub fn get_town(&self, town_id: TownId, api: &mut P3) -> Result<TownPtr<P3>, P3ApiError> {
+    pub fn get_town(&self, town_id: TownId, api: &P3) -> Result<TownPtr<P3>, P3ApiError> {
         Ok(TownPtr::new(api.read_u32(self.address + 0x68)? + town_id as u32 * TOWN_SIZE))
     }
 
-    pub fn get_office(&self, office_id: u16, api: &mut P3) -> Result<OfficePtr<P3>, P3ApiError> {
+    pub fn get_office(&self, office_id: u16, api: &P3) -> Result<OfficePtr<P3>, P3ApiError> {
         let base_address: u32 = self.get(0x74, api)?;
         Ok(OfficePtr::new(base_address + office_id as u32 * OFFICE_SIZE))
     }
 
-    pub fn get_office_in_of(&self, town_id: TownId, merchant_id: u16, api: &mut P3) -> Result<Option<OfficePtr<P3>>, P3ApiError> {
+    pub fn get_office_in_of(&self, town_id: TownId, merchant_id: u16, api: &P3) -> Result<Option<OfficePtr<P3>>, P3ApiError> {
         let offices_count = self.get_offices_count(api)?;
         let town = self.get_town(town_id, api)?;
         let mut office_id = town.get_first_office_id(api)?;
@@ -82,11 +82,11 @@ impl<P3: P3AccessApi> GameWorldPtr<P3> {
 
             let office = self.get_office(office_id, api)?;
             if office.get_merchant_id(api)? == merchant_id {
-                debug!("returning office {:#x}", office_id);
+                trace!("returning office {:#x}", office_id);
                 return Ok(Some(office));
             }
 
-            debug!("{:?} belongs to someone else {:#x}", &office, office.get_merchant_id(api)?);
+            trace!("{:?} belongs to someone else {:#x}", &office, office.get_merchant_id(api)?);
             office_id = office.next_office_id(api)?;
         }
     }

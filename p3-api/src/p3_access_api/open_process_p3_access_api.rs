@@ -1,3 +1,5 @@
+use super::P3AccessApi;
+use crate::P3ApiError;
 use windows::{
     core::Error,
     Win32::{
@@ -6,10 +8,6 @@ use windows::{
     },
 };
 use windows_sys::Win32::System::Diagnostics::Debug::ReadProcessMemory;
-
-use crate::P3ApiError;
-
-use super::P3AccessApi;
 
 #[derive(Debug)]
 pub struct OpenProcessP3AccessApi {
@@ -26,7 +24,7 @@ impl OpenProcessP3AccessApi {
 }
 
 impl P3AccessApi for OpenProcessP3AccessApi {
-    fn read_memory(&mut self, address: u32, dst: &mut [u8]) -> Result<(), P3ApiError> {
+    fn read_memory(&self, address: u32, dst: &mut [u8]) -> Result<(), P3ApiError> {
         unsafe {
             debug_assert!(!dst.is_empty());
             let mut bytes_read: usize = 0;

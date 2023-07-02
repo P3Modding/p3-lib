@@ -7,6 +7,7 @@ extern crate num_derive;
 
 pub mod data;
 pub mod p3_access_api;
+pub mod routes;
 pub use strum;
 
 const SHIPS_PTR: u32 = 0x006DD7A4;

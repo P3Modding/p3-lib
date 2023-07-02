@@ -8,7 +8,9 @@ crate-type = ["cdylib"]
 
 [dependencies]
 p3-api = { path = "../p3-api" }
+glob = "0.3"
 log = "0.4"
+toml = "0.7"
 win_dbg_logger = "0.1"
 
 [dependencies.windows]

@@ -1,6 +1,5 @@
-use crate::{p3_access_api::P3AccessApi, P3ApiError};
-
 use super::p3_ptr::{self};
+use crate::{p3_access_api::P3AccessApi, P3ApiError};
 
 #[derive(Clone, Debug)]
 #[repr(C)]
@@ -32,7 +31,6 @@ pub struct ShipCapacityRaw {
     pub cog: [u8; 4],
     pub hulk: [u8; 4],
 }
-
 
 pub fn get_ship_costs<P3: P3AccessApi>(api: &mut P3) -> Result<ShipCosts, P3ApiError> {
     p3_ptr::get_from(0x0066DEB0, api)

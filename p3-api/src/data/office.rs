@@ -22,11 +22,11 @@ impl<P3: P3AccessApi> OfficePtr<P3> {
         StoragePtr::new(self.address)
     }
 
-    pub fn get_merchant_id(&self, api: &mut P3) -> Result<u16, P3ApiError> {
+    pub fn get_merchant_id(&self, api: &P3) -> Result<u16, P3ApiError> {
         self.get(0x2c4, api)
     }
 
-    pub fn next_office_id(&self, api: &mut P3) -> Result<u16, P3ApiError> {
+    pub fn next_office_id(&self, api: &P3) -> Result<u16, P3ApiError> {
         self.get(0x2ca, api)
     }
 }

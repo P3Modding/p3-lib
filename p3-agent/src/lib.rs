@@ -1,4 +1,7 @@
 #![allow(clippy::missing_safety_doc)]
+use ffi::_00535760_hook;
+use log::{debug, error, info, trace};
+use server::run_server;
 use std::{
     sync::{
         atomic::{AtomicU8, Ordering},
@@ -8,20 +11,17 @@ use std::{
     thread::{self},
     time::Duration,
 };
-
-use ffi::_00535760_hook;
-use log::{debug, error, info, trace};
-use server::run_server;
 use windows::{
     imp::GetLastError,
     Win32::System::Memory::{VirtualProtect, PAGE_EXECUTE, PAGE_PROTECTION_FLAGS, PAGE_READWRITE},
 };
 
 pub mod ffi;
+pub mod routes;
 pub mod server;
 
 static CONTEXT: Mutex<Option<AgentContext>> = Mutex::new(None);
-static STATUS: AtomicU8 = AtomicU8::new(0);
+static SERVER_STATUS: AtomicU8 = AtomicU8::new(0);
 
 const HOOK1_ADDRESS: u32 = 0x00546935;
 const HOOK1_ORIGINAL_VALUE: u32 = 0xfffeee27;
@@ -40,8 +40,10 @@ pub(crate) fn tick() {
 
     let context: &mut AgentContext = mg.as_mut().unwrap();
     if let Ok(command) = context.receiver.try_recv() {
-        ffi::schedule_operation(&command)
+        ffi::schedule_operation_raw(&command)
     }
+
+    routes::tick_routes();
 
     trace!("run done");
 }
@@ -62,9 +64,13 @@ pub unsafe extern "C" fn start() -> u32 {
     debug!("start()");
 
     // Setup
-    STATUS.store(STATUS_RUNNING, Ordering::SeqCst);
+    SERVER_STATUS.store(STATUS_RUNNING, Ordering::SeqCst);
     let mut mg = CONTEXT.lock().unwrap();
     *mg = Some(AgentContext::new());
+    if let Err(e) = routes::init_routes() {
+        error!("init_routes failed: {:?}", e);
+        return 0;
+    }
 
     // Hook
     let mut old_flags: PAGE_PROTECTION_FLAGS = windows::Win32::System::Memory::PAGE_PROTECTION_FLAGS(0);
@@ -84,7 +90,7 @@ pub unsafe extern "C" fn start() -> u32 {
         return 0;
     }
 
-    info!("Stop completed sucessfully");
+    info!("Start completed sucessfully");
     1
 }
 
@@ -109,9 +115,9 @@ pub unsafe extern "C" fn stop() -> u32 {
 
     // Shutdown server
     debug!("Shutting down server");
-    STATUS.store(STATUS_SHUTDOWN, Ordering::SeqCst);
+    SERVER_STATUS.store(STATUS_SHUTDOWN, Ordering::SeqCst);
     loop {
-        if STATUS.load(Ordering::SeqCst) == STATUS_SHUTDOWN_FINISHED {
+        if SERVER_STATUS.load(Ordering::SeqCst) == STATUS_SHUTDOWN_FINISHED {
             break;
         }
         thread::sleep(Duration::from_millis(10))

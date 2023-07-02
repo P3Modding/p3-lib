@@ -1,3 +1,5 @@
+use crate::{AgentContext, CONTEXT, SERVER_STATUS, STATUS_SHUTDOWN, STATUS_SHUTDOWN_FINISHED};
+use log::{debug, error, info};
 use std::{
     io::{self, BufRead, BufReader, Write},
     net::{SocketAddr, TcpListener, TcpStream},
@@ -6,10 +8,6 @@ use std::{
     thread::{self, sleep},
     time::Duration,
 };
-
-use log::{debug, error, info};
-
-use crate::{AgentContext, CONTEXT, STATUS, STATUS_SHUTDOWN, STATUS_SHUTDOWN_FINISHED};
 
 #[derive(Debug)]
 pub enum ClientConnectionError {
@@ -31,7 +29,7 @@ pub fn run_server() {
     }
 
     info!("run_server() stopped");
-    STATUS.store(STATUS_SHUTDOWN_FINISHED, Ordering::SeqCst);
+    SERVER_STATUS.store(STATUS_SHUTDOWN_FINISHED, Ordering::SeqCst);
 }
 
 fn accept_connections() -> Result<(), ServerError> {
@@ -40,7 +38,7 @@ fn accept_connections() -> Result<(), ServerError> {
     listener.set_nonblocking(true)?;
 
     loop {
-        if STATUS.load(Ordering::SeqCst) == STATUS_SHUTDOWN {
+        if SERVER_STATUS.load(Ordering::SeqCst) == STATUS_SHUTDOWN {
             break;
         }
 
@@ -75,7 +73,7 @@ fn handle_client(mut stream: TcpStream, address: SocketAddr) -> Result<(), Clien
 
     debug!("handle_client {:?}", address);
     loop {
-        if STATUS.load(Ordering::SeqCst) == STATUS_SHUTDOWN {
+        if SERVER_STATUS.load(Ordering::SeqCst) == STATUS_SHUTDOWN {
             break;
         }
 

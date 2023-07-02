@@ -37,7 +37,7 @@ impl<P3: P3AccessApi> TownPtr<P3> {
         StoragePtr::new(self.address)
     }
 
-    pub fn get_first_office_id(&self, api: &mut P3) -> Result<u16, P3ApiError> {
+    pub fn get_first_office_id(&self, api: &P3) -> Result<u16, P3ApiError> {
         self.get(0x784, api)
     }
 
@@ -48,29 +48,29 @@ impl<P3: P3AccessApi> TownPtr<P3> {
         }
     }
 
-    pub fn get_build_ship_capacity_markup(&self, api: &mut P3) -> Result<f32, P3ApiError> {
+    pub fn get_build_ship_capacity_markup(&self, api: &P3) -> Result<f32, P3ApiError> {
         self.get(0x818, api)
     }
 
-    pub fn get_build_ship_levels(&self, api: &mut P3) -> Result<ShipLevels, P3ApiError> {
+    pub fn get_build_ship_levels(&self, api: &P3) -> Result<ShipLevels, P3ApiError> {
         self.get(0x824, api)
     }
 
-    pub fn get_build_ship_828_always_0(&self, api: &mut P3) -> Result<[u8; 4], P3ApiError> {
+    pub fn get_build_ship_828_always_0(&self, api: &P3) -> Result<[u8; 4], P3ApiError> {
         self.get(0x828, api)
     }
 }
 
 impl<P3: P3AccessApi> TownMapPtr<P3> {
-    pub fn get_rows(&self, api: &mut P3) -> Result<u32, P3ApiError> {
+    pub fn get_rows(&self, api: &P3) -> Result<u32, P3ApiError> {
         self.get(0x08, api)
     }
 
-    pub fn get_cols(&self, api: &mut P3) -> Result<u32, P3ApiError> {
+    pub fn get_cols(&self, api: &P3) -> Result<u32, P3ApiError> {
         self.get(0x04, api)
     }
 
-    pub fn get_map_data(&self, api: &mut P3) -> Result<Vec<u8>, P3ApiError> {
+    pub fn get_map_data(&self, api: &P3) -> Result<Vec<u8>, P3ApiError> {
         let address: u32 = self.get(0x68, api)?;
         let cols = self.get_cols(api)? as usize;
         let rows = self.get_rows(api)? as usize;
