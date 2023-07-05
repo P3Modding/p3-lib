@@ -1,8 +1,7 @@
 use num_derive::FromPrimitive;
-use serde::{Deserialize, Serialize};
-use strum::EnumIter;
+use strum::{EnumIter, EnumString};
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, EnumIter, FromPrimitive, Deserialize, Serialize)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, EnumIter, EnumString, FromPrimitive)]
 #[repr(u16)]
 pub enum WareId {
     Grain = 0x00,
@@ -31,7 +30,7 @@ pub enum WareId {
     Carbine = 0x17,
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, EnumIter, FromPrimitive, Deserialize, Serialize)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, EnumIter, EnumString, FromPrimitive)]
 #[repr(u8)]
 pub enum TownId {
     Edinburgh = 0x00,

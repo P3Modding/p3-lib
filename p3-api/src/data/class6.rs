@@ -4,7 +4,6 @@ use super::{
     ship::{ShipPtr, SHIP_SIZE},
 };
 use crate::{p3_access_api::P3AccessApi, P3ApiError};
-use log::warn;
 use std::marker::PhantomData;
 
 pub const CLASS6_ADDRESS: u32 = 0x006dd7a0;
@@ -16,9 +15,9 @@ pub struct Class6Ptr<P3> {
 }
 
 impl<P3: P3AccessApi> Class6Ptr<P3> {
-    pub fn new(address: u32) -> Self {
+    pub const fn new() -> Self {
         Self {
-            address,
+            address: CLASS6_ADDRESS,
             api_type: PhantomData,
         }
     }
@@ -39,7 +38,6 @@ impl<P3: P3AccessApi> Class6Ptr<P3> {
                 return Ok(Some((ship, i)));
             }
         }
-        warn!("Could not find ship {}", name);
         Ok(None)
     }
 
@@ -58,12 +56,6 @@ impl<P3: P3AccessApi> Class6Ptr<P3> {
 
     pub fn get_convoys_size(&self, api: &P3) -> Result<u16, P3ApiError> {
         self.get(0xf6, api)
-    }
-}
-
-impl<P3: P3AccessApi> Default for Class6Ptr<P3> {
-    fn default() -> Self {
-        Self::new(CLASS6_ADDRESS)
     }
 }
 

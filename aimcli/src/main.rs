@@ -1,10 +1,9 @@
-use std::path::PathBuf;
-
 use clap::Parser;
 use glob::glob;
 use image::{ImageBuffer, ImageError, RgbaImage};
 use log::{debug, error, warn, LevelFilter};
 use p3_aim::P3AimError;
+use std::path::PathBuf;
 
 #[derive(clap::ValueEnum, Clone, Debug)]
 enum Operation {

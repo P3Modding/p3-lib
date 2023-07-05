@@ -48,7 +48,12 @@ impl<P3: P3AccessApi> ShipPtr<P3> {
         Ok(current_health)
     }
 
-    pub fn get_current_town_id(&self, api: &P3) -> Result<Option<TownId>, P3ApiError> {
+    pub fn get_destination_town_id(&self, api: &P3) -> Result<Option<TownId>, P3ApiError> {
+        let raw_town_id: u8 = self.get(0x38, api)?;
+        Ok(FromPrimitive::from_u8(raw_town_id))
+    }
+
+    pub fn get_last_town_id(&self, api: &P3) -> Result<Option<TownId>, P3ApiError> {
         let raw_town_id: u8 = self.get(0x39, api)?;
         Ok(FromPrimitive::from_u8(raw_town_id))
     }

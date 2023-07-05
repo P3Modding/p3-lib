@@ -5,3 +5,4 @@
 *.cpr
 p2arch0_eng
 *.txt
+generated.*.toml

@@ -50,7 +50,7 @@ async fn poll_town_wares(pid: u32) -> Result<(), Box<dyn std::error::Error>> {
     let bucket = "P3";
     let client = get_client();
     let api = OpenProcessP3AccessApi::new(pid).unwrap();
-    let game_world = GameWorldPtr::default();
+    let game_world = GameWorldPtr::new();
     let d = NaiveDate::from_ymd_opt(0, 1, 1).unwrap();
     let t = NaiveTime::from_hms_milli_opt(0, 0, 0, 0).unwrap();
     let dt = NaiveDateTime::new(d, t);

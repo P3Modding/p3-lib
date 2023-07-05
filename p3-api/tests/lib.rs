@@ -33,7 +33,7 @@ fn test_vispy_beer() {
     let s = System::new_all();
     for process in s.processes_by_name("Patrician") {
         let api = OpenProcessP3AccessApi::new(process.pid().as_u32()).unwrap();
-        let game_world = GameWorldPtr::default();
+        let game_world = GameWorldPtr::new();
         let vispy = game_world.get_town(TownId::Visby, &api).unwrap();
         let beer = vispy.get_storage().get_ware(WareId::Beer, &api).unwrap();
         info!("visby beer={}", beer);

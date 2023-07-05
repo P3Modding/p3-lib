@@ -35,6 +35,18 @@ impl<P3: P3AccessApi> StoragePtr<P3> {
         Ok(data)
     }
 
+    pub fn get_daily_consumptions_businesses(&self, api: &P3) -> Result<[i32; 0x18], P3ApiError> {
+        self.get(0x64, api)
+    }
+
+    pub fn get_daily_production(&self, api: &P3) -> Result<[i32; 0x18], P3ApiError> {
+        self.get(0xc4, api)
+    }
+
+    pub fn get_weird_daily_production(&self, api: &P3) -> Result<[i32; 0x18], P3ApiError> {
+        self.get(0x490, api)
+    }
+
     pub fn get_ship_weapons(&self, api: &P3) -> Result<Vec<u32>, P3ApiError> {
         let wares_count = ShipWeaponId::Cannon as usize + 1;
         let bytes_len = wares_count * mem::size_of::<u32>();

@@ -37,6 +37,10 @@ impl<P3: P3AccessApi> TownPtr<P3> {
         StoragePtr::new(self.address)
     }
 
+    pub fn get_daily_consumptions_citizens(&self, api: &P3) -> Result<[i32; 24], P3ApiError> {
+        self.get(0x310, api)
+    }
+
     pub fn get_first_office_id(&self, api: &P3) -> Result<u16, P3ApiError> {
         self.get(0x784, api)
     }

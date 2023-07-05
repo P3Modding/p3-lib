@@ -10,7 +10,7 @@ pub enum Operation {
         ship_id: u32,
     },
     MoveWaresConvoy {
-        amount: i32,
+        raw_amount: i32,
         convoy_id: u16,
         ware: WareId,
         merchant_id: u16,
@@ -36,7 +36,7 @@ impl Operation {
                 op[0x04..0x08].copy_from_slice(&ship_id.to_le_bytes());
             }
             Operation::MoveWaresConvoy {
-                amount,
+                raw_amount: amount,
                 convoy_id,
                 ware,
                 merchant_id,

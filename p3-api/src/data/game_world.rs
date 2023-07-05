@@ -30,9 +30,9 @@ pub struct GameWorldTime {
 }
 
 impl<P3: P3AccessApi> GameWorldPtr<P3> {
-    pub fn new(address: u32) -> Self {
+    pub const fn new() -> Self {
         Self {
-            address,
+            address: GAME_WORLD_ADDRESS,
             api_type: PhantomData,
         }
     }
@@ -89,12 +89,6 @@ impl<P3: P3AccessApi> GameWorldPtr<P3> {
             trace!("{:?} belongs to someone else {:#x}", &office, office.get_merchant_id(api)?);
             office_id = office.next_office_id(api)?;
         }
-    }
-}
-
-impl<P3: P3AccessApi> Default for GameWorldPtr<P3> {
-    fn default() -> Self {
-        Self::new(GAME_WORLD_ADDRESS)
     }
 }
 
