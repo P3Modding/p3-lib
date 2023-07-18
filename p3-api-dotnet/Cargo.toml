@@ -11,6 +11,8 @@ crate-type = ["cdylib"]
 p3-api = { path = "../p3-api" }
 log = "0.4"
 csbindgen = "1.7.0"
+num-traits = "0.2"
+num-derive = "0.3"
 
 [build-dependencies]
 csbindgen = "1.7.0"
