@@ -73,8 +73,11 @@ pub fn init_routes() -> Result<(), LoadRouteError> {
 
 pub fn create_route(hub_route_configuration: &HubRouteConfiguration) -> Result<HubRoute, LoadRouteError> {
     let hub_id = TownId::from_str(&hub_route_configuration.hub).or(Err(LoadRouteError::InvalidTown(hub_route_configuration.hub.clone())))?;
-    let satellite_id =  TownId::from_str(&hub_route_configuration.satellite).or(Err(LoadRouteError::InvalidTown(hub_route_configuration.satellite.clone())))?;
-    let (ship, ship_id) = CLASS6.get_ship_by_name(&format!("{:?}", satellite_id), &P3).unwrap().ok_or_else(||LoadRouteError::UnknownShip(format!("{:?}", satellite_id)))?;
+    let satellite_id = TownId::from_str(&hub_route_configuration.satellite).or(Err(LoadRouteError::InvalidTown(hub_route_configuration.satellite.clone())))?;
+    let (ship, ship_id) = CLASS6
+        .get_ship_by_name(&format!("{:?}", satellite_id), &P3)
+        .unwrap()
+        .ok_or_else(|| LoadRouteError::UnknownShip(format!("{:?}", satellite_id)))?;
     let destination_town = ship.get_destination_town_id(&P3).unwrap();
     // We can rely on either last_town or destination town being set.
     // To stop running vanilla traderoutes, we issue a move command to the infered destination.

@@ -1,4 +1,7 @@
-use p3_api::{data::{ship::Ship, town::TownPtr}, p3_access_api::open_process_p3_access_api::OpenProcessP3AccessApi};
+use p3_api::{
+    data::{ship::Ship, town::TownPtr},
+    p3_access_api::open_process_p3_access_api::OpenProcessP3AccessApi,
+};
 
 #[repr(C)]
 pub struct DotnetTown {

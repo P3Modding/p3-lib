@@ -1,6 +1,6 @@
 use crate::tick;
 use log::debug;
-use p3_api::{data::{operation::Operation}};
+use p3_api::data::operation::Operation;
 use std::arch::{asm, global_asm};
 
 const INSERT_INTO_PENDING_OPERATIONS_WRAPPER: u32 = 0x0054AA70;

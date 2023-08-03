@@ -1,6 +1,9 @@
-use std::ptr;
 use num_traits::cast::FromPrimitive;
-use p3_api::{p3_access_api::open_process_p3_access_api::OpenProcessP3AccessApi, data::{enums::TownId, game_world::GameWorldPtr}};
+use p3_api::{
+    data::{enums::TownId, game_world::GameWorldPtr},
+    p3_access_api::open_process_p3_access_api::OpenProcessP3AccessApi,
+};
+use std::ptr;
 use structs::{ship::DotnetShip, town::DotnetTown};
 
 pub mod structs;
