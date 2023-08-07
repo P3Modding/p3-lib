@@ -31,6 +31,31 @@ pub enum WareId {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, EnumIter, EnumString, FromPrimitive)]
+#[repr(u16)]
+pub enum ProductionId {
+    Spices = 0x00,
+    Weaponsmith = 0x03,
+    HuntingLodge = 0x04,
+    FishermansHouse = 0x05,
+    Brewery = 0x06,
+    Workshop = 0x07,
+    Apiary = 0x08,
+    GrainFarm = 0x09,
+    CattleFarm = 0x0a,
+    Sawmill = 0x0b,
+    WeavingMill = 0x0c,
+    Saltery = 0x0d,
+    Ironsmelter = 0x0e,
+    SheepFarm = 0x0f,
+    Vineyard = 0x10,
+    Pottery = 0x11,
+    Brickworks = 0x12,
+    Pitchmaker = 0x13,
+    HempFarm = 0x14,
+    FishermansHouseWhale = 0xff,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq, EnumIter, EnumString, FromPrimitive)]
 #[repr(u8)]
 pub enum TownId {
     Edinburgh = 0x00,

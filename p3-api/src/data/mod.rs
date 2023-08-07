@@ -2,6 +2,7 @@ pub mod class6;
 pub mod convoy;
 pub mod enums;
 pub mod game_world;
+pub mod mission;
 pub mod missions;
 pub mod office;
 pub mod operation;
