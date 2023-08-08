@@ -24,6 +24,12 @@ namespace CsBindgen
         [DllImport(__DllName, EntryPoint = "read_town", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern DotnetTown* read_town(DotnetOpenProcessP3AccessApi* api, ushort town_id);
 
+        [DllImport(__DllName, EntryPoint = "free_town", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void free_town(DotnetTown* town);
+
+        [DllImport(__DllName, EntryPoint = "free_ship", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void free_ship(DotnetShip* town);
+
 
     }
 
@@ -46,6 +52,7 @@ namespace CsBindgen
     [StructLayout(LayoutKind.Sequential)]
     internal unsafe partial struct DotnetTown
     {
+        public ushort raw_town_id;
         public fixed int wares[24];
         public fixed int daily_consumption_businesses[24];
         public fixed int daily_production[24];

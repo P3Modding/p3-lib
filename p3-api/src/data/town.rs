@@ -1,4 +1,4 @@
-use super::{p3_ptr::P3Pointer, storage::StoragePtr};
+use super::{p3_ptr::P3Pointer, storage::StoragePtr, enums::RawTownId};
 use crate::{p3_access_api::P3AccessApi, P3ApiError};
 use std::marker::PhantomData;
 
@@ -37,7 +37,7 @@ impl<P3: P3AccessApi> TownPtr<P3> {
         StoragePtr::new(self.address)
     }
 
-    pub fn get_raw_town_id(&self, api: &P3) -> Result<u8, P3ApiError> {
+    pub fn get_raw_town_id(&self, api: &P3) -> Result<RawTownId, P3ApiError> {
         self.get(0x2c1, api)
     }
 

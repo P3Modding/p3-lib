@@ -86,6 +86,51 @@ pub enum TownId {
     Newcastle = 0x19,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq, EnumIter, EnumString, FromPrimitive)]
+#[repr(u8)]
+pub enum RawTownId {
+    Edinburgh = 0x00,
+    Newcastle = 0x01,
+    Scarborough = 0x02,
+    Boston = 0x03,
+    London = 0x04,
+    Bruges = 0x05,
+    Haarlem = 0x06,
+    Harlingen = 0x07,
+    Groningen = 0x08,
+    Cologne = 0x09,
+    Bremen = 0x0a,
+    Ripen = 0x0b,
+    Hamburg = 0x0c,
+    Flensburg = 0x0d,
+    Luebeck = 0x0e,
+    Rostock = 0x0f,
+    Bergen = 0x10,
+    Stavanger = 0x11,
+    Toensberg = 0x12,
+    Oslo = 0x13,
+    Aalborg = 0x14,
+    Goeteborg = 0x15,
+    Naestved = 0x16,
+    Malmoe = 0x17,
+    Ahus = 0x18,
+    Stockholm = 0x19,
+    Visby = 0x1a,
+    Helsinki = 0x1b,
+    Stettin = 0x1c,
+    Ruegenwald = 0x1d,
+    Gdansk = 0x1e,
+    Torun = 0x1f,
+    Koenigsberg = 0x20,
+    Memel = 0x21,
+    Windau = 0x22,
+    Riga = 0x23,
+    Pernau = 0x24,
+    Reval = 0x25,
+    Ladoga = 0x26,
+    Novogorod = 0x27
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq, EnumIter, FromPrimitive)]
 pub enum ShipWeaponId {
     SmallCatapult = 0x00,

@@ -48,5 +48,19 @@ pub extern "C" fn read_town(api: *mut DotnetOpenProcessP3AccessApi, town_id: u16
     }
 }
 
+#[no_mangle]
+pub extern "C" fn free_town(town: *mut DotnetTown) {
+    unsafe {
+        drop(Box::from_raw(town))
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn free_ship(town: *mut DotnetShip) {
+    unsafe {
+        drop(Box::from_raw(town))
+    }
+}
+
 #[repr(C)]
 pub struct DotnetOpenProcessP3AccessApi;
