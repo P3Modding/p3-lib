@@ -4,7 +4,7 @@ use num_traits::cast::FromPrimitive;
 use p3_api::{
     data::{
         class6::Class6Ptr,
-        enums::{TownId, WareId},
+        enums::{WareId, TownId},
         game_world::GameWorldPtr,
         operation::Operation,
         ship::ShipPtr,
@@ -375,9 +375,9 @@ impl<P3: P3AccessApi> Debug for TownStatistics<P3> {
 }
 
 impl<P3: P3AccessApi> TownStatistics<P3> {
-    pub fn new(game_world: &GameWorldPtr<P3>, town_id: TownId, api: &P3) -> Self {
-        let town = game_world.get_town(town_id, api).unwrap();
-        let office = game_world.get_office_in_of(town_id, 0x24, api).unwrap().unwrap();
+    pub fn new(game_world: &GameWorldPtr<P3>, raw_town_id: TownId, api: &P3) -> Self {
+        let town = game_world.get_town(raw_town_id, api).unwrap().unwrap();
+        let office = game_world.get_office_in_of(raw_town_id, 0x24, api).unwrap().unwrap();
         Self {
             daily_consumptions_citizens: town.get_daily_consumptions_citizens(api).unwrap(),
             daily_consumptions_town_businesses: town.get_storage().get_daily_consumptions_businesses(api).unwrap(),

@@ -1,5 +1,8 @@
-
-use super::{p3_ptr::P3Pointer, storage::StoragePtr, mission::{MISSION_SIZE, MissionPtr}};
+#![allow(clippy::new_without_default)]
+use super::{
+    mission::{MissionPtr, MISSION_SIZE},
+    p3_ptr::P3Pointer,
+};
 use crate::{p3_access_api::P3AccessApi, P3ApiError};
 use std::marker::PhantomData;
 
@@ -19,7 +22,7 @@ impl<P3: P3AccessApi> MissionsPtr<P3> {
         }
     }
 
-    pub fn get_mission(&self, mission_id: u16, api: &P3) -> Result<Option<MissionPtr<P3>>, P3ApiError>{
+    pub fn get_mission(&self, mission_id: u16, api: &P3) -> Result<Option<MissionPtr<P3>>, P3ApiError> {
         if mission_id < self.get_missions_size(api)? {
             let base_address: u32 = self.get(0x00, api)?;
             Ok(Some(MissionPtr::new(base_address + mission_id as u32 * MISSION_SIZE)))

@@ -1,6 +1,6 @@
-use std::marker::PhantomData;
-use crate::{p3_access_api::P3AccessApi, P3ApiError};
 use super::p3_ptr::P3Pointer;
+use crate::{p3_access_api::P3AccessApi, P3ApiError};
+use std::marker::PhantomData;
 
 pub const MISSION_SIZE: u32 = 0x18;
 

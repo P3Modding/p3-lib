@@ -14,12 +14,12 @@ pub enum WareId {
     Wine = 0x07,
     Cloth = 0x08,
     Skins = 0x09,
-    WhaleOil = 0x0A,
-    Timber = 0x0B,
-    IronGoods = 0x0C,
-    Leather = 0x0D,
-    Wool = 0x0E,
-    Pitch = 0x0F,
+    WhaleOil = 0x0a,
+    Timber = 0x0b,
+    IronGoods = 0x0c,
+    Leather = 0x0d,
+    Wool = 0x0e,
+    Pitch = 0x0f,
     PigIron = 0x10,
     Hemp = 0x11,
     Pottery = 0x12,
@@ -56,39 +56,8 @@ pub enum ProductionId {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, EnumIter, EnumString, FromPrimitive)]
-#[repr(u8)]
+#[repr(u16)]
 pub enum TownId {
-    Edinburgh = 0x00,
-    Scarborough = 0x01,
-    London = 0x02,
-    Bruges = 0x03,
-    Groningen = 0x04,
-    Cologne = 0x05,
-    Bremen = 0x06,
-    Ripen = 0x07,
-    Hamburg = 0x08,
-    Luebeck = 0x09,
-    Rostock = 0x0A,
-    Bergen = 0x0B,
-    Oslo = 0x0C,
-    Aalborg = 0x0D,
-    Malmoe = 0x0E,
-    Stockholm = 0x0F,
-    Visby = 0x10,
-    Stettin = 0x11,
-    Gdansk = 0x12,
-    Torun = 0x13,
-    Riga = 0x14,
-    Reval = 0x15,
-    Ladoga = 0x16,
-    Novgorod = 0x17,
-    Koenigsberg = 0x18,
-    Newcastle = 0x19,
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq, EnumIter, EnumString, FromPrimitive)]
-#[repr(u8)]
-pub enum RawTownId {
     Edinburgh = 0x00,
     Newcastle = 0x01,
     Scarborough = 0x02,
@@ -128,7 +97,7 @@ pub enum RawTownId {
     Pernau = 0x24,
     Reval = 0x25,
     Ladoga = 0x26,
-    Novogorod = 0x27
+    Novgorod = 0x27,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, EnumIter, FromPrimitive)]

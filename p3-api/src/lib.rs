@@ -6,6 +6,8 @@ use std::mem;
 extern crate num_derive;
 
 pub mod data;
+pub mod dotnet;
+pub mod export;
 pub mod p3_access_api;
 pub use strum;
 

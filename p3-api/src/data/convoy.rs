@@ -1,4 +1,4 @@
-use super::{enums::TownId, p3_ptr::P3Pointer};
+use super::{p3_ptr::P3Pointer};
 use crate::{p3_access_api::P3AccessApi, P3ApiError};
 use num_traits::FromPrimitive;
 use std::marker::PhantomData;
@@ -18,7 +18,7 @@ impl<P3: P3AccessApi> ConvoyPtr<P3> {
         }
     }
 
-    pub fn get_current_town_id(&self, api: &P3) -> Result<Option<TownId>, P3ApiError> {
+    pub fn get_current_town_index(&self, api: &P3) -> Result<Option<u16>, P3ApiError> {
         let raw_town_id: u8 = self.get(0x39, api)?;
         Ok(FromPrimitive::from_u8(raw_town_id))
     }

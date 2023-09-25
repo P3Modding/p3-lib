@@ -8,8 +8,6 @@ members = [
     "p3-aim",
     "p3-aim-sys",
     "p3-api",
-    "p3-api-dotnet",
-    "p3-influxdb",
 ]
 exclude = [
 ]

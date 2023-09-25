@@ -2,14 +2,17 @@
 name = "p3-api"
 version = "0.1.0"
 edition = "2021"
+build = "build.rs"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 log = "0.4"
 num-traits = "0.2"
 num-derive = "0.3"
 strum = { version = "0.24", features = ["derive"] }
+csbindgen = { version = "1.7.0", optional = true }
 
 [dev-dependencies]
 simple_logger = "4.1"
@@ -31,3 +34,9 @@ features = [
     "Win32_Foundation",
     "Win32_System_Diagnostics_Debug",
 ]
+
+[build-dependencies]
+csbindgen = { version = "1.7.0", optional = true }
+
+[features]
+bindings-dotnet = ["dep:csbindgen"]

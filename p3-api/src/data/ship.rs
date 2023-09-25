@@ -49,13 +49,13 @@ impl<P3: P3AccessApi> ShipPtr<P3> {
     }
 
     pub fn get_destination_town_id(&self, api: &P3) -> Result<Option<TownId>, P3ApiError> {
-        let raw_town_id: u8 = self.get(0x38, api)?;
-        Ok(FromPrimitive::from_u8(raw_town_id))
+        let town_index: u8 = self.get(0x38, api)?;
+        Ok(FromPrimitive::from_u8(town_index))
     }
 
     pub fn get_last_town_id(&self, api: &P3) -> Result<Option<TownId>, P3ApiError> {
-        let raw_town_id: u8 = self.get(0x39, api)?;
-        Ok(FromPrimitive::from_u8(raw_town_id))
+        let town_index: u8 = self.get(0x39, api)?;
+        Ok(FromPrimitive::from_u8(town_index))
     }
 
     pub fn get_status(&self, api: &P3) -> Result<u16, P3ApiError> {
