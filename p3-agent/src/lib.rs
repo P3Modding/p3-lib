@@ -1,5 +1,4 @@
 #![allow(clippy::missing_safety_doc)]
-use ffi::_00535760_hook;
 use log::{debug, error, info, trace};
 use server::run_server;
 use std::{
@@ -80,7 +79,7 @@ pub unsafe extern "C" fn start() -> u32 {
     }
 
     let ptr: *mut u32 = HOOK1_ADDRESS as _;
-    let new_address = _00535760_hook as usize as u32;
+    let new_address = ffi::calculate_game_time_hook as usize as u32;
     let new_value = new_address.wrapping_sub(HOOK1_ADDRESS - 1 + 5); // -1 for E8, +5 for the size of the call
     debug!("Patching {:#x} to call {:#x}", HOOK1_ADDRESS, new_address);
     ptr.write_volatile(new_value);

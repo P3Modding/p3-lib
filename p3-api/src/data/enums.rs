@@ -33,7 +33,7 @@ pub enum WareId {
 #[derive(Clone, Copy, Debug, Eq, PartialEq, EnumIter, EnumString, FromPrimitive)]
 #[repr(u16)]
 pub enum ProductionId {
-    Spices = 0x00,
+    Militia = 0x00,
     Weaponsmith = 0x03,
     HuntingLodge = 0x04,
     FishermansHouse = 0x05,

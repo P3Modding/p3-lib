@@ -4,7 +4,7 @@ use num_traits::cast::FromPrimitive;
 use p3_api::{
     data::{
         class6::Class6Ptr,
-        enums::{WareId, TownId},
+        enums::{TownId, WareId},
         game_world::GameWorldPtr,
         operation::Operation,
         ship::ShipPtr,
@@ -83,20 +83,20 @@ pub fn create_route(hub_route_configuration: &HubRouteConfiguration) -> Result<H
     // To stop running vanilla traderoutes, we issue a move command to the infered destination.
     let next_action = if let Some(destination_town) = destination_town {
         if destination_town == hub_id {
-            ffi::schedule_operation(&Operation::MoveShipToTown {
+            ffi::execute_operation(&Operation::MoveShipToTown {
                 ship_id: ship_id as u32,
                 town: hub_id,
             });
             NextAction::HubUnload
         } else if destination_town == satellite_id {
-            ffi::schedule_operation(&Operation::MoveShipToTown {
+            ffi::execute_operation(&Operation::MoveShipToTown {
                 ship_id: ship_id as u32,
                 town: satellite_id,
             });
             NextAction::Satellite
         } else {
             warn!("{:?} is travelling to unexpected town {:?}", satellite_id, destination_town);
-            ffi::schedule_operation(&Operation::MoveShipToTown {
+            ffi::execute_operation(&Operation::MoveShipToTown {
                 ship_id: ship_id as u32,
                 town: hub_id,
             });
@@ -104,7 +104,7 @@ pub fn create_route(hub_route_configuration: &HubRouteConfiguration) -> Result<H
         }
     } else {
         warn!("{:?} is not travelling", satellite_id);
-        ffi::schedule_operation(&Operation::MoveShipToTown {
+        ffi::execute_operation(&Operation::MoveShipToTown {
             ship_id: ship_id as u32,
             town: hub_id,
         });
@@ -179,7 +179,7 @@ impl HubRoute {
         // Unload all
         debug!("{:?} unloading all", self.hub_id);
         for ware in WareId::iter() {
-            ffi::schedule_operation(&Operation::MoveWaresConvoy {
+            ffi::execute_operation(&Operation::MoveWaresConvoy {
                 raw_amount: (i32::MAX / ware.get_scaling()) * ware.get_scaling(),
                 convoy_id,
                 ware,
@@ -191,7 +191,7 @@ impl HubRoute {
         // Repair if needed
         if ship.get_current_health(&P3).unwrap() != ship.get_max_health(&P3).unwrap() {
             debug!("{:?} repairing", self.satellite_id);
-            ffi::schedule_operation(&Operation::RepairConvoy { convoy_id: convoy_id as u32 });
+            ffi::execute_operation(&Operation::RepairConvoy { convoy_id: convoy_id as u32 });
         }
 
         self.next_action = NextAction::HubLoad;
@@ -233,7 +233,7 @@ impl HubRoute {
                 }
 
                 debug!("Loading {} {:?}", amount, ware_id);
-                ffi::schedule_operation(&Operation::MoveWaresConvoy {
+                ffi::execute_operation(&Operation::MoveWaresConvoy {
                     raw_amount: amount * ware_id.get_scaling(),
                     convoy_id,
                     ware: ware_id,
@@ -250,7 +250,7 @@ impl HubRoute {
 
         // Travel to satellite
         debug!("Moving convoy {:#04x} to satellite {:?}", convoy_id, self.satellite_id);
-        ffi::schedule_operation(&Operation::MoveShipToTown {
+        ffi::execute_operation(&Operation::MoveShipToTown {
             ship_id: ship_id as u32,
             town: self.satellite_id,
         });
@@ -285,7 +285,7 @@ impl HubRoute {
             if desired_level > office_ware {
                 let diff = desired_level - office_ware;
                 debug!("{:?} unloading {} {:?}", self.satellite_id, diff, ware_id);
-                ffi::schedule_operation(&Operation::MoveWaresConvoy {
+                ffi::execute_operation(&Operation::MoveWaresConvoy {
                     raw_amount: diff * ware_id.get_scaling(),
                     convoy_id,
                     ware: ware_id,
@@ -304,7 +304,7 @@ impl HubRoute {
             }
 
             debug!("Load maximum {:?} (prod={} cons={:?})", ware_id, weekly_production, weekly_consumption);
-            ffi::schedule_operation(&Operation::MoveWaresConvoy {
+            ffi::execute_operation(&Operation::MoveWaresConvoy {
                 raw_amount: 999999 * ware_id.get_scaling(),
                 convoy_id,
                 ware: ware_id,
@@ -315,7 +315,7 @@ impl HubRoute {
 
         // Travel to hub
         debug!("Moving {:?} to {:?}", self.satellite_id, self.hub_id);
-        ffi::schedule_operation(&Operation::MoveShipToTown {
+        ffi::execute_operation(&Operation::MoveShipToTown {
             ship_id: ship_id as u32,
             town: self.hub_id,
         });
