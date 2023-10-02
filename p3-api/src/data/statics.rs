@@ -32,10 +32,10 @@ pub struct ShipCapacityRaw {
     pub hulk: [u8; 4],
 }
 
-pub fn get_ship_costs<P3: P3AccessApi>(api: &mut P3) -> Result<ShipCosts, P3ApiError> {
+pub fn get_ship_costs<P3: P3AccessApi>(api: &P3) -> Result<ShipCosts, P3ApiError> {
     p3_ptr::get_from(0x0066DEB0, api)
 }
 
-pub fn get_ship_capacities_raw<P3: P3AccessApi>(api: &mut P3) -> Result<ShipCapacityRaw, P3ApiError> {
+pub fn get_ship_capacities_raw<P3: P3AccessApi>(api: &P3) -> Result<ShipCapacityRaw, P3ApiError> {
     p3_ptr::get_from(0x00673838, api)
 }

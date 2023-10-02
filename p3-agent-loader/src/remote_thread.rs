@@ -14,7 +14,7 @@ pub struct RemoteThread {
 }
 
 impl RemoteThread {
-    pub unsafe fn new(remote_process: &mut RemoteProcess, start_address: u32, arg: Option<u32>) -> Result<RemoteThread, P3AgentLoaderError> {
+    pub unsafe fn new(remote_process: &RemoteProcess, start_address: u32, arg: Option<u32>) -> Result<RemoteThread, P3AgentLoaderError> {
         let thread = CreateRemoteThread(remote_process.handle, None, 0, mem::transmute(start_address), arg.map(|u| u as _), 0, None)
             .map_err(P3AgentLoaderError::CreateRemoteThreadFailed)?;
 

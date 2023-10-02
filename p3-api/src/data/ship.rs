@@ -48,14 +48,18 @@ impl<P3: P3AccessApi> ShipPtr<P3> {
         Ok(current_health)
     }
 
-    pub fn get_destination_town_id(&self, api: &P3) -> Result<Option<TownId>, P3ApiError> {
+    pub fn get_destination_town_index(&self, api: &P3) -> Result<Option<u8>, P3ApiError> {
         let town_index: u8 = self.get(0x38, api)?;
         Ok(FromPrimitive::from_u8(town_index))
     }
 
-    pub fn get_last_town_id(&self, api: &P3) -> Result<Option<TownId>, P3ApiError> {
+    pub fn get_last_town_index(&self, api: &P3) -> Result<Option<u8>, P3ApiError> {
         let town_index: u8 = self.get(0x39, api)?;
-        Ok(FromPrimitive::from_u8(town_index))
+        if town_index != 0xff {
+            Ok(Some(town_index))
+        } else {
+            Ok(None)
+        }
     }
 
     pub fn get_status(&self, api: &P3) -> Result<u16, P3ApiError> {

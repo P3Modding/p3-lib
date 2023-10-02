@@ -72,11 +72,25 @@ impl<P3: P3AccessApi> GameWorldPtr<P3> {
         Ok(FromPrimitive::from_u8(self.get(0x18 + index as u32, api)?))
     }
 
-    pub fn get_town(&self, raw_town_id: TownId, api: &P3) -> Result<Option<TownPtr<P3>>, P3ApiError> {
+    pub fn get_town(&self, town_index: u8, api: &P3) -> Result<Option<TownPtr<P3>>, P3ApiError> {
+        Ok(Some(TownPtr::new(api.read_u32(self.address + 0x68)? + town_index as u32 * TOWN_SIZE)))
+    }
+
+    pub fn get_town_by_id(&self, raw_town_id: TownId, api: &P3) -> Result<Option<TownPtr<P3>>, P3ApiError> {
         let raw_ids = self.get_raw_town_ids(api)?;
         for (index, raw_id) in raw_ids.iter().enumerate() {
             if *raw_id == raw_town_id as u8 {
                 return Ok(Some(TownPtr::new(api.read_u32(self.address + 0x68)? + index as u32 * TOWN_SIZE)));
+            }
+        }
+        Ok(None)
+    }
+
+    pub fn get_town_index(&self, raw_town_id: TownId, api: &P3) -> Result<Option<u8>, P3ApiError> {
+        let raw_ids = self.get_raw_town_ids(api)?;
+        for (index, raw_id) in raw_ids.iter().enumerate() {
+            if *raw_id == raw_town_id as u8 {
+                return Ok(Some(index as u8))
             }
         }
         Ok(None)
@@ -87,9 +101,9 @@ impl<P3: P3AccessApi> GameWorldPtr<P3> {
         Ok(OfficePtr::new(base_address + office_id as u32 * OFFICE_SIZE))
     }
 
-    pub fn get_office_in_of(&self, raw_town_id: TownId, merchant_id: u16, api: &P3) -> Result<Option<OfficePtr<P3>>, P3ApiError> {
+    pub fn get_office_in_of(&self, town_index: u8, merchant_id: u16, api: &P3) -> Result<Option<OfficePtr<P3>>, P3ApiError> {
         let offices_count = self.get_offices_count(api)?;
-        let town = self.get_town(raw_town_id, api)?.unwrap();
+        let town = self.get_town(town_index, api)?.unwrap();
         let mut office_id = town.get_first_office_id(api)?;
         loop {
             if office_id >= offices_count {

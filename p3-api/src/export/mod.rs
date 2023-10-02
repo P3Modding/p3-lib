@@ -35,7 +35,7 @@ pub struct StorageData {
 impl TownData {
     pub fn read(raw_town_id: TownId, api: &OpenProcessP3AccessApi) -> Result<Option<Self>, P3ApiError> {
         let game_word = GameWorldPtr::new();
-        let town = match game_word.get_town(raw_town_id, api)? {
+        let town = match game_word.get_town_by_id(raw_town_id, api)? {
             Some(town) => town,
             None => return Ok(None),
         };

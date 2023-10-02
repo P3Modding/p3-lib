@@ -19,7 +19,7 @@ pub struct RemoteVirtualAllocation {
 }
 
 impl RemoteVirtualAllocation {
-    pub unsafe fn new(handle: &mut RemoteProcess, len: usize) -> Result<RemoteVirtualAllocation, P3AgentLoaderError> {
+    pub unsafe fn new(handle: &RemoteProcess, len: usize) -> Result<RemoteVirtualAllocation, P3AgentLoaderError> {
         debug!("VirtualAllocEx");
         let ptr = VirtualAllocEx(handle.handle, None, len, MEM_COMMIT, PAGE_READWRITE);
         if ptr.is_null() {

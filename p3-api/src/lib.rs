@@ -18,7 +18,7 @@ pub enum P3ApiError {
     ReadError,
 }
 
-pub fn read_ship<Api: P3AccessApi>(api: &mut Api, ship_id: u16) -> Result<Ship, P3ApiError> {
+pub fn read_ship<Api: P3AccessApi>(api: &Api, ship_id: u16) -> Result<Ship, P3ApiError> {
     let raw_ship = read_raw_ship(api, ship_id)?;
     Ok(Ship {
         merchant_id: raw_ship.field_0_merchant_id,
@@ -31,7 +31,7 @@ pub fn read_ship<Api: P3AccessApi>(api: &mut Api, ship_id: u16) -> Result<Ship, 
     })
 }
 
-pub fn read_raw_ship<Api: P3AccessApi>(api: &mut Api, ship_id: u16) -> Result<RawShip, P3ApiError> {
+pub fn read_raw_ship<Api: P3AccessApi>(api: &Api, ship_id: u16) -> Result<RawShip, P3ApiError> {
     let ships: u32 = api.read_u32(SHIPS_PTR)?;
     debug!("Ships array is at {:#x}", ships);
     let ship_address: u32 = ships + (ship_id as u32 * mem::size_of::<RawShip>() as u32);

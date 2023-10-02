@@ -1,9 +1,8 @@
-use crate::ffi;
+use crate::ffi::{self, CLASS6, P3, GAME_WORLD};
 use log::{debug, error, info, trace, warn};
 use num_traits::cast::FromPrimitive;
 use p3_api::{
     data::{
-        class6::Class6Ptr,
         enums::{TownId, WareId},
         game_world::GameWorldPtr,
         operation::Operation,
@@ -17,9 +16,6 @@ use std::{fmt::Debug, str::FromStr};
 use std::{fs, marker::PhantomData, sync::Mutex};
 
 static CONTEXT: Mutex<Option<RoutesContext>> = Mutex::new(None);
-const P3: RawP3AccessApi = RawP3AccessApi::new();
-const GAME_WORLD: GameWorldPtr<RawP3AccessApi> = GameWorldPtr::new();
-const CLASS6: Class6Ptr<RawP3AccessApi> = Class6Ptr::new();
 
 #[derive(Debug)]
 pub enum LoadRouteError {
@@ -47,8 +43,8 @@ pub struct HubRouteConfiguration {
 
 #[derive(Debug)]
 pub struct HubRoute {
-    pub hub_id: TownId,
-    pub satellite_id: TownId,
+    hub_index: u8,
+    satellite_index: u8,
     next_action: NextAction,
 }
 
@@ -71,49 +67,51 @@ pub fn init_routes() -> Result<(), LoadRouteError> {
     Ok(())
 }
 
-pub fn create_route(hub_route_configuration: &HubRouteConfiguration) -> Result<HubRoute, LoadRouteError> {
+fn create_route(hub_route_configuration: &HubRouteConfiguration) -> Result<HubRoute, LoadRouteError> {
     let hub_id = TownId::from_str(&hub_route_configuration.hub).or(Err(LoadRouteError::InvalidTown(hub_route_configuration.hub.clone())))?;
     let satellite_id = TownId::from_str(&hub_route_configuration.satellite).or(Err(LoadRouteError::InvalidTown(hub_route_configuration.satellite.clone())))?;
-    let (ship, ship_id) = CLASS6
+    let hub_index = GAME_WORLD.get_town_index(hub_id, &P3).unwrap().unwrap();
+    let satellite_index = GAME_WORLD.get_town_index(satellite_id, &P3).unwrap().unwrap();
+    let (ship, ship_index) = CLASS6
         .get_ship_by_name(&format!("{:?}", satellite_id), &P3)
         .unwrap()
         .ok_or_else(|| LoadRouteError::UnknownShip(format!("{:?}", satellite_id)))?;
-    let destination_town = ship.get_destination_town_id(&P3).unwrap();
+    let destination_town = ship.get_destination_town_index(&P3).unwrap();
     // We can rely on either last_town or destination town being set.
-    // To stop running vanilla traderoutes, we issue a move command to the infered destination.
+    // To stop running vanilla traderoutes, we issue a move command to the inferred destination.
     let next_action = if let Some(destination_town) = destination_town {
-        if destination_town == hub_id {
+        if destination_town == hub_index {
             ffi::execute_operation(&Operation::MoveShipToTown {
-                ship_id: ship_id as u32,
-                town: hub_id,
+                ship_index: ship_index as u32,
+                town_index: hub_index,
             });
             NextAction::HubUnload
-        } else if destination_town == satellite_id {
+        } else if destination_town == satellite_index {
             ffi::execute_operation(&Operation::MoveShipToTown {
-                ship_id: ship_id as u32,
-                town: satellite_id,
+                ship_index: ship_index as u32,
+                town_index: satellite_index,
             });
             NextAction::Satellite
         } else {
             warn!("{:?} is travelling to unexpected town {:?}", satellite_id, destination_town);
             ffi::execute_operation(&Operation::MoveShipToTown {
-                ship_id: ship_id as u32,
-                town: hub_id,
+                ship_index: ship_index as u32,
+                town_index: hub_index,
             });
             NextAction::HubUnload
         }
     } else {
         warn!("{:?} is not travelling", satellite_id);
         ffi::execute_operation(&Operation::MoveShipToTown {
-            ship_id: ship_id as u32,
-            town: hub_id,
+            ship_index: ship_index as u32,
+            town_index: hub_index,
         });
         NextAction::HubUnload
     };
 
     let route = HubRoute {
-        hub_id,
-        satellite_id,
+        hub_index,
+        satellite_index,
         next_action,
     };
     debug!("Hub Route {:?} loaded", &route);
@@ -132,10 +130,10 @@ pub fn tick_routes() {
 
 impl HubRoute {
     fn tick(&mut self) {
-        let (ship, ship_id) = match CLASS6.get_ship_by_name(&format!("{:?}", self.satellite_id), &P3).unwrap() {
+        let (ship, ship_id) = match CLASS6.get_ship_by_name(&format!("{:?}", GAME_WORLD.get_raw_town_id(self.satellite_index, &P3).unwrap().unwrap()), &P3).unwrap() {
             Some(s) => s,
             None => {
-                error!("Could not find flagship {:?}", self.satellite_id);
+                error!("Could not find flagship {:?}", self.satellite_index);
                 return;
             }
         };
@@ -169,46 +167,46 @@ impl HubRoute {
     }
 
     fn handle_hub_unload(&mut self, ship: &ShipPtr<RawP3AccessApi>, convoy_id: u16) {
-        let last_town = ship.get_last_town_id(&P3).unwrap().unwrap();
+        let last_town = ship.get_last_town_index(&P3).unwrap().unwrap();
 
-        if last_town != self.hub_id {
-            trace!("Ship is not on the way, but also not at {:?}", self.hub_id);
+        if last_town != self.hub_index {
+            trace!("Ship is not on the way, but also not at {:?}", self.hub_index);
             return;
         }
 
         // Unload all
-        debug!("{:?} unloading all", self.hub_id);
+        debug!("{:?} unloading all", self.hub_index);
         for ware in WareId::iter() {
             ffi::execute_operation(&Operation::MoveWaresConvoy {
                 raw_amount: (i32::MAX / ware.get_scaling()) * ware.get_scaling(),
-                convoy_id,
+                convoy_index: convoy_id,
                 ware,
-                merchant_id: 0x24,
+                merchant_index: 0x24,
                 to_ship: false,
             });
         }
 
         // Repair if needed
         if ship.get_current_health(&P3).unwrap() != ship.get_max_health(&P3).unwrap() {
-            debug!("{:?} repairing", self.satellite_id);
-            ffi::execute_operation(&Operation::RepairConvoy { convoy_id: convoy_id as u32 });
+            debug!("{:?} repairing", self.satellite_index);
+            ffi::execute_operation(&Operation::RepairConvoy { convoy_index: convoy_id as u32 });
         }
 
         self.next_action = NextAction::HubLoad;
     }
 
     fn handle_hub_load(&mut self, ship_id: u16, ship: &ShipPtr<RawP3AccessApi>, convoy_id: u16) {
-        let current_town = ship.get_last_town_id(&P3).unwrap().unwrap();
-        let hub_office = GAME_WORLD.get_office_in_of(self.hub_id, 0x24, &P3).unwrap().unwrap();
-        let satellite_statistics: TownStatistics<RawP3AccessApi> = TownStatistics::new(&GAME_WORLD, self.satellite_id, &P3);
+        let current_town = ship.get_last_town_index(&P3).unwrap().unwrap();
+        let hub_office = GAME_WORLD.get_office_in_of(self.hub_index, 0x24, &P3).unwrap().unwrap();
+        let satellite_statistics: TownStatistics<RawP3AccessApi> = TownStatistics::new(&GAME_WORLD, self.satellite_index, &P3);
 
-        if current_town != self.hub_id {
-            trace!("Ship is not on the way, but also not at {:?}", self.hub_id);
+        if current_town != self.hub_index {
+            trace!("Ship is not on the way, but also not at {:?}", self.hub_index);
             return;
         }
 
         // Load from Hub
-        debug!("{:?} loading from hub", self.satellite_id);
+        debug!("{:?} loading from hub", self.satellite_index);
         for ware_id in WareId::iter() {
             let weekly_consumption = satellite_statistics.get_weekly_consumption_rounded(ware_id);
             let weekly_production = satellite_statistics.get_weekly_production_rounded(ware_id);
@@ -235,9 +233,9 @@ impl HubRoute {
                 debug!("Loading {} {:?}", amount, ware_id);
                 ffi::execute_operation(&Operation::MoveWaresConvoy {
                     raw_amount: amount * ware_id.get_scaling(),
-                    convoy_id,
+                    convoy_index: convoy_id,
                     ware: ware_id,
-                    merchant_id: 0x24,
+                    merchant_index: 0x24,
                     to_ship: true,
                 });
             } else {
@@ -249,24 +247,24 @@ impl HubRoute {
         }
 
         // Travel to satellite
-        debug!("Moving convoy {:#04x} to satellite {:?}", convoy_id, self.satellite_id);
+        debug!("Moving convoy {:#04x} to satellite {:?}", convoy_id, self.satellite_index);
         ffi::execute_operation(&Operation::MoveShipToTown {
-            ship_id: ship_id as u32,
-            town: self.satellite_id,
+            ship_index: ship_id as u32,
+            town_index: self.satellite_index,
         });
         self.next_action = NextAction::Satellite;
     }
 
     fn handle_satellite(&mut self, ship_id: u16, ship: &ShipPtr<RawP3AccessApi>, convoy_id: u16) {
-        let satellite_office = GAME_WORLD.get_office_in_of(self.satellite_id, 0x24, &P3).unwrap().unwrap();
-        let satellite_statistics: TownStatistics<RawP3AccessApi> = TownStatistics::new(&GAME_WORLD, self.satellite_id, &P3);
-        let last_town_id = ship.get_last_town_id(&P3).unwrap();
-        let destination_town_id = ship.get_destination_town_id(&P3).unwrap();
-        if last_town_id != destination_town_id {
+        let satellite_office = GAME_WORLD.get_office_in_of(self.satellite_index, 0x24, &P3).unwrap().unwrap();
+        let satellite_statistics: TownStatistics<RawP3AccessApi> = TownStatistics::new(&GAME_WORLD, self.satellite_index, &P3);
+        let last_town_index = ship.get_last_town_index(&P3).unwrap();
+        let destination_town_index = ship.get_destination_town_index(&P3).unwrap();
+        if last_town_index != destination_town_index {
             return;
         }
 
-        if last_town_id.unwrap() != self.satellite_id {
+        if last_town_index.unwrap() != self.satellite_index {
             return;
         }
 
@@ -284,12 +282,12 @@ impl HubRoute {
             let office_ware = satellite_office.get_storage().get_ware(ware_id, &P3).unwrap() / ware_id.get_scaling();
             if desired_level > office_ware {
                 let diff = desired_level - office_ware;
-                debug!("{:?} unloading {} {:?}", self.satellite_id, diff, ware_id);
+                debug!("{:?} unloading {} {:?}", self.satellite_index, diff, ware_id);
                 ffi::execute_operation(&Operation::MoveWaresConvoy {
                     raw_amount: diff * ware_id.get_scaling(),
-                    convoy_id,
+                    convoy_index: convoy_id,
                     ware: ware_id,
-                    merchant_id: 0x24,
+                    merchant_index: 0x24,
                     to_ship: false,
                 });
             }
@@ -306,18 +304,18 @@ impl HubRoute {
             debug!("Load maximum {:?} (prod={} cons={:?})", ware_id, weekly_production, weekly_consumption);
             ffi::execute_operation(&Operation::MoveWaresConvoy {
                 raw_amount: 999999 * ware_id.get_scaling(),
-                convoy_id,
+                convoy_index: convoy_id,
                 ware: ware_id,
-                merchant_id: 0x24,
+                merchant_index: 0x24,
                 to_ship: true,
             });
         }
 
         // Travel to hub
-        debug!("Moving {:?} to {:?}", self.satellite_id, self.hub_id);
+        debug!("Moving {:?} to {:?}", self.satellite_index, self.hub_index);
         ffi::execute_operation(&Operation::MoveShipToTown {
-            ship_id: ship_id as u32,
-            town: self.hub_id,
+            ship_index: ship_id as u32,
+            town_index: self.hub_index,
         });
         self.next_action = NextAction::HubUnload;
     }
@@ -375,9 +373,9 @@ impl<P3: P3AccessApi> Debug for TownStatistics<P3> {
 }
 
 impl<P3: P3AccessApi> TownStatistics<P3> {
-    pub fn new(game_world: &GameWorldPtr<P3>, raw_town_id: TownId, api: &P3) -> Self {
-        let town = game_world.get_town(raw_town_id, api).unwrap().unwrap();
-        let office = game_world.get_office_in_of(raw_town_id, 0x24, api).unwrap().unwrap();
+    pub fn new(game_world: &GameWorldPtr<P3>, town_index: u8, api: &P3) -> Self {
+        let town = game_world.get_town(town_index, api).unwrap().unwrap();
+        let office = game_world.get_office_in_of(town_index, 0x24, api).unwrap().unwrap();
         Self {
             daily_consumptions_citizens: town.get_daily_consumptions_citizens(api).unwrap(),
             daily_consumptions_town_businesses: town.get_storage().get_daily_consumptions_businesses(api).unwrap(),
