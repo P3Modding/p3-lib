@@ -70,8 +70,8 @@ pub fn init_routes() -> Result<(), LoadRouteError> {
 fn create_route(hub_route_configuration: &HubRouteConfiguration) -> Result<HubRoute, LoadRouteError> {
     let hub_id = TownId::from_str(&hub_route_configuration.hub).or(Err(LoadRouteError::InvalidTown(hub_route_configuration.hub.clone())))?;
     let satellite_id = TownId::from_str(&hub_route_configuration.satellite).or(Err(LoadRouteError::InvalidTown(hub_route_configuration.satellite.clone())))?;
-    let hub_index = GAME_WORLD.get_town_index(hub_id, &P3).unwrap().unwrap();
-    let satellite_index = GAME_WORLD.get_town_index(satellite_id, &P3).unwrap().unwrap();
+    let hub_index = GAME_WORLD.get_town_index(hub_id, &P3).unwrap().ok_or(LoadRouteError::InvalidTown(hub_route_configuration.hub.clone()))?;
+    let satellite_index = GAME_WORLD.get_town_index(satellite_id, &P3).unwrap().ok_or(LoadRouteError::InvalidTown(hub_route_configuration.satellite.clone()))?;
     let (ship, ship_index) = CLASS6
         .get_ship_by_name(&format!("{:?}", satellite_id), &P3)
         .unwrap()
