@@ -24,12 +24,14 @@ pub mod server;
 static CONTEXT: Mutex<Option<AgentContext>> = Mutex::new(None);
 static SERVER_STATUS: AtomicU8 = AtomicU8::new(0);
 
-const HOOK1_ADDRESS: u32 = 0x00531036;
+const HOOK1_ADDRESS: u32 = 0x00531036; // Class11 tick
 const HOOK1_ORIGINAL_VALUE: u32 = 0x000E1786;
 const HOOK2_ADDRESS: u32 = 0x00519D73; // ship docked notification
 const HOOK2_ORIGINAL_VALUE: u32 = 0x0002EF29;
 const HOOK3_ADDRESS: u32 = 0x0050777D; // convoy docked notification
 const HOOK3_ORIGINAL_VALUE: u32 = 0x0004151F;
+const HOOK4_ADDRESS: u32 = 0x00508E6A; // repair complete notification
+const HOOK4_ORIGINAL_VALUE: u32 = 0x0003fe32;
 const STATUS_RUNNING: u8 = 1;
 const STATUS_SHUTDOWN: u8 = 2;
 const STATUS_SHUTDOWN_FINISHED: u8 = 3;
@@ -107,7 +109,7 @@ pub unsafe extern "C" fn start() -> u32 {
     }
 
     let ptr: *mut u32 = HOOK2_ADDRESS as _;
-    let new_address = ffi::handle_ship_docked_do_notification_hook as usize as u32;
+    let new_address = ffi::handle_ship_docked_do_notification_wrapper_hook as usize as u32;
     let new_value = new_address.wrapping_sub(HOOK2_ADDRESS - 1 + 5); // -1 for E8, +5 for the size of the call
     debug!("Patching {:#x} to call {:#x}", HOOK2_ADDRESS, new_address);
     ptr.write_volatile(new_value);
@@ -125,7 +127,7 @@ pub unsafe extern "C" fn start() -> u32 {
     }
 
     let ptr: *mut u32 = HOOK3_ADDRESS as _;
-    let new_address = ffi::handle_ship_docked_do_notification_hook as usize as u32;
+    let new_address = ffi::handle_ship_docked_do_notification_wrapper_hook as usize as u32;
     let new_value = new_address.wrapping_sub(HOOK3_ADDRESS - 1 + 5); // -1 for E8, +5 for the size of the call
     debug!("Patching {:#x} to call {:#x}", HOOK3_ADDRESS, new_address);
     ptr.write_volatile(new_value);
@@ -135,14 +137,33 @@ pub unsafe extern "C" fn start() -> u32 {
         return 0;
     }
 
-    info!("Start completed sucessfully");
+    // Hook 4
+    let mut old_flags: PAGE_PROTECTION_FLAGS = windows::Win32::System::Memory::PAGE_PROTECTION_FLAGS(0);
+    if !VirtualProtect(HOOK4_ADDRESS as _, 4, PAGE_READWRITE, &mut old_flags).as_bool() {
+        error!("VirtualProtect PAGE_READWRITE failed: {}", GetLastError());
+        return 0;
+    }
+
+    let ptr: *mut u32 = HOOK4_ADDRESS as _;
+    let new_address = ffi::handle_repair_complete_do_notification_wrapper_hook as usize as u32;
+    let new_value = new_address.wrapping_sub(HOOK4_ADDRESS - 1 + 5); // -1 for E8, +5 for the size of the call
+    debug!("Patching {:#x} to call {:#x}", HOOK4_ADDRESS, new_address);
+    ptr.write_volatile(new_value);
+
+    if !VirtualProtect(HOOK4_ADDRESS as _, 4, PAGE_EXECUTE, &mut old_flags).as_bool() {
+        error!("VirtualProtect restore failed: {}", GetLastError());
+        return 0;
+    }
+
+    info!("Start completed sucessfully!");
     1
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn stop() -> u32 {
     debug!("stop()");
-    // Remove Hook
+
+    // Remove Hook 1
     let mut old_flags: PAGE_PROTECTION_FLAGS = windows::Win32::System::Memory::PAGE_PROTECTION_FLAGS(0);
     if !VirtualProtect(HOOK1_ADDRESS as _, 4, PAGE_READWRITE, &mut old_flags).as_bool() {
         error!("VirtualProtect PAGE_READWRITE failed: {}", GetLastError());
@@ -154,6 +175,54 @@ pub unsafe extern "C" fn stop() -> u32 {
     ptr.write_volatile(HOOK1_ORIGINAL_VALUE);
 
     if !VirtualProtect(HOOK1_ADDRESS as _, 4, PAGE_EXECUTE, &mut old_flags).as_bool() {
+        error!("VirtualProtect restore failed: {}", GetLastError());
+        return 0;
+    }
+
+    // Remove Hook 2
+    let mut old_flags: PAGE_PROTECTION_FLAGS = windows::Win32::System::Memory::PAGE_PROTECTION_FLAGS(0);
+    if !VirtualProtect(HOOK2_ADDRESS as _, 4, PAGE_READWRITE, &mut old_flags).as_bool() {
+        error!("VirtualProtect PAGE_READWRITE failed: {}", GetLastError());
+        return 0;
+    }
+
+    let ptr: *mut u32 = HOOK2_ADDRESS as _;
+    debug!("Back-patching {:#x} to call {:#x} again", HOOK2_ADDRESS, HOOK3_ORIGINAL_VALUE);
+    ptr.write_volatile(HOOK2_ORIGINAL_VALUE);
+
+    if !VirtualProtect(HOOK2_ADDRESS as _, 4, PAGE_EXECUTE, &mut old_flags).as_bool() {
+        error!("VirtualProtect restore failed: {}", GetLastError());
+        return 0;
+    }
+
+    // Remove Hook 3
+    let mut old_flags: PAGE_PROTECTION_FLAGS = windows::Win32::System::Memory::PAGE_PROTECTION_FLAGS(0);
+    if !VirtualProtect(HOOK3_ADDRESS as _, 4, PAGE_READWRITE, &mut old_flags).as_bool() {
+        error!("VirtualProtect PAGE_READWRITE failed: {}", GetLastError());
+        return 0;
+    }
+
+    let ptr: *mut u32 = HOOK3_ADDRESS as _;
+    debug!("Back-patching {:#x} to call {:#x} again", HOOK3_ADDRESS, HOOK3_ORIGINAL_VALUE);
+    ptr.write_volatile(HOOK3_ORIGINAL_VALUE);
+
+    if !VirtualProtect(HOOK3_ADDRESS as _, 4, PAGE_EXECUTE, &mut old_flags).as_bool() {
+        error!("VirtualProtect restore failed: {}", GetLastError());
+        return 0;
+    }
+
+    // Remove Hook 4
+    let mut old_flags: PAGE_PROTECTION_FLAGS = windows::Win32::System::Memory::PAGE_PROTECTION_FLAGS(0);
+    if !VirtualProtect(HOOK4_ADDRESS as _, 4, PAGE_READWRITE, &mut old_flags).as_bool() {
+        error!("VirtualProtect PAGE_READWRITE failed: {}", GetLastError());
+        return 0;
+    }
+
+    let ptr: *mut u32 = HOOK4_ADDRESS as _;
+    debug!("Back-patching {:#x} to call {:#x} again", HOOK4_ADDRESS, HOOK4_ORIGINAL_VALUE);
+    ptr.write_volatile(HOOK4_ORIGINAL_VALUE);
+
+    if !VirtualProtect(HOOK4_ADDRESS as _, 4, PAGE_EXECUTE, &mut old_flags).as_bool() {
         error!("VirtualProtect restore failed: {}", GetLastError());
         return 0;
     }

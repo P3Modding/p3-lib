@@ -18,8 +18,20 @@ pub extern "thiscall" fn handle_class11_tick_hook(class11: u32, unknown: u8) {
     tick();
 }
 
-pub extern "thiscall" fn handle_ship_docked_do_notification_hook(operations: u32, merchant_index: u16, a3: u8, a4: i32, town_index: i32, string_index: u32, index: u16) {
-    debug!("handle_ship_docked_do_notification_hook()");
+pub extern "thiscall" fn handle_ship_docked_do_notification_wrapper_hook(operations: u32, merchant_index: u16, _a3: u8, a4: i32, town_index: i32, string_index: u32, index: u16) {
+    debug!("handle_ship_docked_do_notification_wrapper_hook()");
+    let do_notification: extern "thiscall" fn(operations: u32, merchant_index: u16, a3: u8, a4: i32, town_index: i32, string_index: u32, index: u16) = unsafe { transmute(DO_NOTIFICATION_ADDRESS) };
+    do_notification(operations, merchant_index, 0xff, a4, town_index, string_index, index);
+}
+
+pub extern "thiscall" fn handle_convoy_docked_do_notification_wrapper_hook(operations: u32, merchant_index: u16, _a3: u8, a4: i32, town_index: i32, string_index: u32, index: u16) {
+    debug!("handle_convoy_docked_do_notification_wrapper_hook()");
+    let do_notification: extern "thiscall" fn(operations: u32, merchant_index: u16, a3: u8, a4: i32, town_index: i32, string_index: u32, index: u16) = unsafe { transmute(DO_NOTIFICATION_ADDRESS) };
+    do_notification(operations, merchant_index, 0xff, a4, town_index, string_index, index);
+}
+
+pub extern "thiscall" fn handle_repair_complete_do_notification_wrapper_hook(operations: u32, merchant_index: u16, _a3: u8, a4: i32, town_index: i32, string_index: u32, index: u16) {
+    debug!("handle_repair_complete_do_notification_wrapper_hook()");
     let do_notification: extern "thiscall" fn(operations: u32, merchant_index: u16, a3: u8, a4: i32, town_index: i32, string_index: u32, index: u16) = unsafe { transmute(DO_NOTIFICATION_ADDRESS) };
     do_notification(operations, merchant_index, 0xff, a4, town_index, string_index, index);
 }
