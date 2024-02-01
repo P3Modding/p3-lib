@@ -1,7 +1,6 @@
-use std::ffi::CString;
 use std::sync::Mutex;
 
-use log::trace;
+use log::{debug, trace};
 use p3_aim_sys::ffi;
 use p3_aim_sys::raw_aim_file::RawAimFile;
 
@@ -17,14 +16,21 @@ pub struct ParsedAimFile {
 #[derive(Clone, Debug)]
 pub enum P3AimError {
     ParsingFailed,
-    UnknownPixelWidth(u32, u32),
+    UnknownPixelEncoding(u32),
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub enum PixelWidth {
-    OneWithPalette,
-    Four,
-    One,
+pub enum PixelEncoding {
+    Compact,
+    Palette,
+    NoAlpha,
+    Simple,
+}
+
+fn str_to_latin1(s: &str) -> Vec<u8> {
+    let mut vec: Vec<u8> = s.chars().map(|c| c as u8).collect();
+    vec.push(0);
+    vec
 }
 
 /// Reads an AIM file into memory.
@@ -38,66 +44,94 @@ pub fn read_aim_file(path: &str) -> Result<ParsedAimFile, P3AimError> {
 
         let mut raw_aim_file = RawAimFile::default();
         ffi::aim_init(&mut raw_aim_file);
-        let path_ptr = CString::new(path).unwrap();
-        ffi::aim_convert_file(&mut raw_aim_file, path_ptr.as_ptr());
+        ffi::aim_convert_file(&mut raw_aim_file, str_to_latin1(path).as_ptr() as _);
         trace!("Converted aim file: {:#x?}", raw_aim_file);
 
         if raw_aim_file.buf_ptr.is_null() {
             return Err(P3AimError::ParsingFailed);
         }
 
-        let pixel_width = get_pixel_width(&raw_aim_file)?;
-        let height = raw_aim_file.height;
-        let width = match pixel_width {
-            PixelWidth::OneWithPalette => raw_aim_file.width2,
-            PixelWidth::Four => raw_aim_file.width1,
-            PixelWidth::One => raw_aim_file.width1,
-        };
-        let pixels = width * height;
-        let mut data = Vec::with_capacity((4 * pixels).try_into().unwrap());
+        let encoding = get_pixel_encoding(&raw_aim_file)?;
+        debug!("Using encoding: {:?} ({}/{})", encoding, raw_aim_file.width1, raw_aim_file.width2);
+        let mut data = vec![];
 
-        if pixel_width == PixelWidth::OneWithPalette {
-            for i in 0..pixels {
-                let pixel_id = *raw_aim_file.buf_ptr.offset(i.try_into().unwrap());
-                let pixel = *raw_aim_file.palette_ptr.offset(pixel_id.try_into().unwrap());
-                data.extend_from_slice(&pixel.to_le_bytes());
+        match encoding {
+            PixelEncoding::Compact => {
+                // TODO this is probably wrong
+                assert!(raw_aim_file.palette_ptr.is_null());
+                let input_pixels = raw_aim_file.width1 * (raw_aim_file.height + 1);
+                for i in 0..input_pixels {
+                    let pixel = *raw_aim_file.buf_ptr.offset(i.try_into().unwrap());
+                    let a = (pixel & 0b11) << 6;
+                    let r = ((pixel >> 3) & 0b11) << 4;
+                    let g = ((pixel >> 5) & 0b11) << 2;
+                    let b = (pixel >> 5) & 0b11;
+                    data.push(b);
+                    data.push(g);
+                    data.push(r);
+                    data.push(a);
+                }
+                Ok(ParsedAimFile { data, width: raw_aim_file.width1, height: raw_aim_file.height })
             }
-        } else if pixel_width == PixelWidth::Four {
-            let dword_ptr = raw_aim_file.buf_ptr as *const u32;
-            for i in 0..pixels {
-                let pixel = *dword_ptr.offset(i.try_into().unwrap());
-                data.extend_from_slice(&pixel.to_le_bytes());
+            PixelEncoding::Palette => {
+                let mut i = 0;
+                for _ in 0..raw_aim_file.height {
+                    for _ in 0..raw_aim_file.width1 {
+                        let pixel_id = *raw_aim_file.buf_ptr.offset(i.try_into().unwrap());
+                        let pixel = *raw_aim_file.palette_ptr.offset(pixel_id.try_into().unwrap());
+                        data.extend_from_slice(&pixel.to_le_bytes());
+                        i += 1;
+                    }
+                    // Skip the not set bytes and replace with transparency
+                    for _ in raw_aim_file.width1..raw_aim_file.width2 {
+                        data.push(0xff);
+                        data.push(0x00);
+                        data.push(0xff);
+                        data.push(0xff);
+                        i += 1;
+                    }
+                }
+                Ok(ParsedAimFile { data, width: raw_aim_file.width2, height: raw_aim_file.height })
             }
-        } else if pixel_width == PixelWidth::One {
-            for i in 0..pixels {
-                let pixel = *raw_aim_file.buf_ptr.offset(i.try_into().unwrap());
-                let a = (pixel & 0b11) << 6;
-                let r = ((pixel >> 3) & 0b11) << 4;
-                let g = ((pixel >> 5) & 0b11) << 2;
-                let b = (pixel >> 5) & 0b11;
-                data.push(b);
-                data.push(g);
-                data.push(r);
-                data.push(a);
+            PixelEncoding::NoAlpha => {
+                assert!(raw_aim_file.palette_ptr.is_null());
+                assert_eq!(raw_aim_file.width1 * 3, raw_aim_file.width2);
+                let input_pixels = raw_aim_file.width1 * raw_aim_file.height;
+                let mut i = 0;
+                while i < input_pixels * 3 {
+                    let r = *raw_aim_file.buf_ptr.offset(i.try_into().unwrap());
+                    let g = *raw_aim_file.buf_ptr.offset((i + 1).try_into().unwrap());
+                    let b = *raw_aim_file.buf_ptr.offset((i + 2).try_into().unwrap());
+                    i += 3;
+                    let a = 0xff;
+                    data.push(b);
+                    data.push(g);
+                    data.push(r);
+                    data.push(a);
+                }
+                Ok(ParsedAimFile { data, width: raw_aim_file.width1, height: raw_aim_file.height })
             }
-        } else {
-            return Err(P3AimError::UnknownPixelWidth(raw_aim_file.bytes_per_pixel1, raw_aim_file.bytes_per_pixel2));
+            PixelEncoding::Simple => {
+                assert!(raw_aim_file.palette_ptr.is_null());
+                assert_eq!(raw_aim_file.width1 * 4, raw_aim_file.width2);
+                let input_pixels = raw_aim_file.width1 * raw_aim_file.height;
+                let dword_ptr = raw_aim_file.buf_ptr as *const u32;
+                for i in 0..input_pixels {
+                    let pixel = *dword_ptr.offset(i.try_into().unwrap());
+                    data.extend_from_slice(&pixel.to_le_bytes());
+                }
+                Ok(ParsedAimFile { data, width: raw_aim_file.width1, height: raw_aim_file.height })
+            }
         }
-
-        let parsed_file = ParsedAimFile { data, width, height };
-
-        Ok(parsed_file)
     }
 }
 
-fn get_pixel_width(raw_aim_file: &RawAimFile) -> Result<PixelWidth, P3AimError> {
-    if raw_aim_file.bytes_per_pixel1 == 1 && raw_aim_file.bytes_per_pixel2 == 1 {
-        Ok(PixelWidth::OneWithPalette)
-    } else if raw_aim_file.bytes_per_pixel1 == 4 && raw_aim_file.bytes_per_pixel2 == 4 {
-        Ok(PixelWidth::Four)
-    } else if raw_aim_file.bytes_per_pixel1 == 0 && raw_aim_file.bytes_per_pixel2 == 15 {
-        Ok(PixelWidth::One)
-    } else {
-        Err(P3AimError::UnknownPixelWidth(raw_aim_file.bytes_per_pixel1, raw_aim_file.bytes_per_pixel2))
+fn get_pixel_encoding(raw_aim_file: &RawAimFile) -> Result<PixelEncoding, P3AimError> {
+    match raw_aim_file.pixel_encoding {
+        0 => Ok(PixelEncoding::Compact),
+        1 => Ok(PixelEncoding::Palette),
+        3 => Ok(PixelEncoding::NoAlpha),
+        4 => Ok(PixelEncoding::Simple),
+        _ => Err(P3AimError::UnknownPixelEncoding(raw_aim_file.pixel_encoding)),
     }
 }

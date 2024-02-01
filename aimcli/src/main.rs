@@ -62,7 +62,9 @@ fn aim_to_bmp(input_file: &PathBuf) -> Result<(), AimCliError> {
 
     let converted_file = p3_aim::read_aim_file(input_file.as_os_str().to_str().unwrap())?;
     let mut bmp: RgbaImage = ImageBuffer::new(converted_file.width, converted_file.height);
+    // assert_eq!(converted_file.width * converted_file.height * 4, converted_file.data.len() as u32);
     let mut i = 0;
+
     for y in 0..converted_file.height {
         for x in 0..converted_file.width {
             let pixel = image::Rgba([

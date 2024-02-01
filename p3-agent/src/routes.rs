@@ -45,6 +45,7 @@ pub struct HubRouteConfiguration {
 pub struct HubRoute {
     hub_index: u8,
     satellite_index: u8,
+    satellite: String,
     next_action: NextAction,
 }
 
@@ -112,6 +113,7 @@ fn create_route(hub_route_configuration: &HubRouteConfiguration) -> Result<HubRo
     let route = HubRoute {
         hub_index,
         satellite_index,
+        satellite: hub_route_configuration.satellite.clone(),
         next_action,
     };
     debug!("Hub Route {:?} loaded", &route);
@@ -133,7 +135,7 @@ impl HubRoute {
         let (ship, ship_id) = match CLASS6.get_ship_by_name(&format!("{:?}", GAME_WORLD.get_raw_town_id(self.satellite_index, &P3).unwrap().unwrap()), &P3).unwrap() {
             Some(s) => s,
             None => {
-                error!("Could not find flagship {:?}", self.satellite_index);
+                error!("Could not find flagship {}", self.satellite);
                 return;
             }
         };

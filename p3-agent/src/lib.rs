@@ -85,7 +85,7 @@ pub unsafe extern "C" fn start() -> u32 {
 
     // Hook 1
     let mut old_flags: PAGE_PROTECTION_FLAGS = windows::Win32::System::Memory::PAGE_PROTECTION_FLAGS(0);
-    if !VirtualProtect(HOOK1_ADDRESS as _, 4, PAGE_READWRITE, &mut old_flags).as_bool() {
+    if !VirtualProtect(HOOK1_ADDRESS as _, 4, PAGE_READWRITE, &mut old_flags).as_bool() { // shouldn't we use RWX?
         error!("VirtualProtect PAGE_READWRITE failed: {}", GetLastError());
         return 0;
     }
