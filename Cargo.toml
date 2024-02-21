@@ -9,6 +9,7 @@ members = [
     "p3-aim",
     "p3-aim-sys",
     "p3-api",
+    "p3-rou",
 ]
 exclude = [
 ]

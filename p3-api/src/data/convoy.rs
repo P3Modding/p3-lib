@@ -1,4 +1,4 @@
-use super::{p3_ptr::P3Pointer};
+use super::p3_ptr::P3Pointer;
 use crate::{p3_access_api::P3AccessApi, P3ApiError};
 use num_traits::FromPrimitive;
 use std::marker::PhantomData;

@@ -1,4 +1,4 @@
-use super::enums::{WareId};
+use super::enums::WareId;
 
 #[derive(Debug)]
 pub enum Operation {
@@ -25,7 +25,10 @@ impl Operation {
     pub fn to_raw(&self) -> [u8; 0x14] {
         let mut op: [u8; 0x14] = [0; 0x14];
         match self {
-            Operation::MoveShipToTown { ship_index: ship_id, town_index: town } => {
+            Operation::MoveShipToTown {
+                ship_index: ship_id,
+                town_index: town,
+            } => {
                 let town_id: u16 = *town as _;
                 op[0x04..0x08].copy_from_slice(&ship_id.to_le_bytes());
                 op[0x08..0x0c].copy_from_slice(&(town_id as u32).to_le_bytes());

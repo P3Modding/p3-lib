@@ -1,4 +1,4 @@
-use crate::ffi::{self, CLASS6, P3, GAME_WORLD};
+use crate::ffi::{self, CLASS6, GAME_WORLD, P3};
 use log::{debug, error, info, trace, warn};
 use num_traits::cast::FromPrimitive;
 use p3_api::{
@@ -71,8 +71,14 @@ pub fn init_routes() -> Result<(), LoadRouteError> {
 fn create_route(hub_route_configuration: &HubRouteConfiguration) -> Result<HubRoute, LoadRouteError> {
     let hub_id = TownId::from_str(&hub_route_configuration.hub).or(Err(LoadRouteError::InvalidTown(hub_route_configuration.hub.clone())))?;
     let satellite_id = TownId::from_str(&hub_route_configuration.satellite).or(Err(LoadRouteError::InvalidTown(hub_route_configuration.satellite.clone())))?;
-    let hub_index = GAME_WORLD.get_town_index(hub_id, &P3).unwrap().ok_or(LoadRouteError::InvalidTown(hub_route_configuration.hub.clone()))?;
-    let satellite_index = GAME_WORLD.get_town_index(satellite_id, &P3).unwrap().ok_or(LoadRouteError::InvalidTown(hub_route_configuration.satellite.clone()))?;
+    let hub_index = GAME_WORLD
+        .get_town_index(hub_id, &P3)
+        .unwrap()
+        .ok_or(LoadRouteError::InvalidTown(hub_route_configuration.hub.clone()))?;
+    let satellite_index = GAME_WORLD
+        .get_town_index(satellite_id, &P3)
+        .unwrap()
+        .ok_or(LoadRouteError::InvalidTown(hub_route_configuration.satellite.clone()))?;
     let (ship, ship_index) = CLASS6
         .get_ship_by_name(&format!("{:?}", satellite_id), &P3)
         .unwrap()
@@ -132,7 +138,10 @@ pub fn tick_routes() {
 
 impl HubRoute {
     fn tick(&mut self) {
-        let (ship, ship_id) = match CLASS6.get_ship_by_name(&format!("{:?}", GAME_WORLD.get_raw_town_id(self.satellite_index, &P3).unwrap().unwrap()), &P3).unwrap() {
+        let (ship, ship_id) = match CLASS6
+            .get_ship_by_name(&format!("{:?}", GAME_WORLD.get_raw_town_id(self.satellite_index, &P3).unwrap().unwrap()), &P3)
+            .unwrap()
+        {
             Some(s) => s,
             None => {
                 error!("Could not find flagship {}", self.satellite);
@@ -191,7 +200,9 @@ impl HubRoute {
         // Repair if needed
         if ship.get_current_health(&P3).unwrap() != ship.get_max_health(&P3).unwrap() {
             debug!("{:?} repairing", self.satellite_index);
-            ffi::execute_operation(&Operation::RepairConvoy { convoy_index: convoy_id as u32 });
+            ffi::execute_operation(&Operation::RepairConvoy {
+                convoy_index: convoy_id as u32,
+            });
         }
 
         self.next_action = NextAction::HubLoad;

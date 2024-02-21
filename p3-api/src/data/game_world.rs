@@ -90,7 +90,7 @@ impl<P3: P3AccessApi> GameWorldPtr<P3> {
         let raw_ids = self.get_raw_town_ids(api)?;
         for (index, raw_id) in raw_ids.iter().enumerate() {
             if *raw_id == raw_town_id as u8 {
-                return Ok(Some(index as u8))
+                return Ok(Some(index as u8));
             }
         }
         Ok(None)

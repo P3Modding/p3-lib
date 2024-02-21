@@ -44,7 +44,7 @@ pub(crate) struct AgentContext {
 pub(crate) fn tick() {
     let time = GAME_WORLD.get_game_time_raw(&P3).unwrap();
     if time & 0b00001111 != 0b00001111 {
-        return
+        return;
     }
     let mut mg = CONTEXT.lock().unwrap();
     debug!("tick()");
@@ -85,7 +85,8 @@ pub unsafe extern "C" fn start() -> u32 {
 
     // Hook 1
     let mut old_flags: PAGE_PROTECTION_FLAGS = windows::Win32::System::Memory::PAGE_PROTECTION_FLAGS(0);
-    if !VirtualProtect(HOOK1_ADDRESS as _, 4, PAGE_READWRITE, &mut old_flags).as_bool() { // shouldn't we use RWX?
+    if !VirtualProtect(HOOK1_ADDRESS as _, 4, PAGE_READWRITE, &mut old_flags).as_bool() {
+        // shouldn't we use RWX?
         error!("VirtualProtect PAGE_READWRITE failed: {}", GetLastError());
         return 0;
     }

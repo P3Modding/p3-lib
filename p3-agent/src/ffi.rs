@@ -1,6 +1,9 @@
 use crate::tick;
 use log::debug;
-use p3_api::{data::{operation::Operation, game_world::GameWorldPtr, class6::Class6Ptr}, p3_access_api::raw_p3_access_api::RawP3AccessApi};
+use p3_api::{
+    data::{class6::Class6Ptr, game_world::GameWorldPtr, operation::Operation},
+    p3_access_api::raw_p3_access_api::RawP3AccessApi,
+};
 use std::mem::transmute;
 
 const HANDLE_CLASS11_TICK: u32 = 0x006127C0;
@@ -18,28 +21,56 @@ pub extern "thiscall" fn handle_class11_tick_hook(class11: u32, unknown: u8) {
     tick();
 }
 
-pub extern "thiscall" fn handle_ship_docked_do_notification_wrapper_hook(operations: u32, merchant_index: u16, a3: u8, a4: i32, town_index: i32, string_index: u32, index: u16) {
+pub extern "thiscall" fn handle_ship_docked_do_notification_wrapper_hook(
+    operations: u32,
+    merchant_index: u16,
+    a3: u8,
+    a4: i32,
+    town_index: i32,
+    string_index: u32,
+    index: u16,
+) {
     debug!("handle_ship_docked_do_notification_wrapper_hook()");
-    let do_notification: extern "thiscall" fn(operations: u32, merchant_index: u16, a3: u8, a4: i32, town_index: i32, string_index: u32, index: u16) = unsafe { transmute(DO_NOTIFICATION_ADDRESS) };
+    let do_notification: extern "thiscall" fn(operations: u32, merchant_index: u16, a3: u8, a4: i32, town_index: i32, string_index: u32, index: u16) =
+        unsafe { transmute(DO_NOTIFICATION_ADDRESS) };
     do_notification(operations, merchant_index, a3, a4, town_index, string_index, index);
 }
 
-pub extern "thiscall" fn handle_convoy_docked_do_notification_wrapper_hook(operations: u32, merchant_index: u16, _a3: u8, a4: i32, town_index: i32, string_index: u32, index: u16) {
+pub extern "thiscall" fn handle_convoy_docked_do_notification_wrapper_hook(
+    operations: u32,
+    merchant_index: u16,
+    _a3: u8,
+    a4: i32,
+    town_index: i32,
+    string_index: u32,
+    index: u16,
+) {
     debug!("handle_convoy_docked_do_notification_wrapper_hook()");
     return;
-    let do_notification: extern "thiscall" fn(operations: u32, merchant_index: u16, a3: u8, a4: i32, town_index: i32, string_index: u32, index: u16) = unsafe { transmute(DO_NOTIFICATION_ADDRESS) };
+    let do_notification: extern "thiscall" fn(operations: u32, merchant_index: u16, a3: u8, a4: i32, town_index: i32, string_index: u32, index: u16) =
+        unsafe { transmute(DO_NOTIFICATION_ADDRESS) };
     do_notification(operations, merchant_index, 0xff, a4, town_index, string_index, index);
 }
 
-pub extern "thiscall" fn handle_repair_complete_do_notification_wrapper_hook(operations: u32, merchant_index: u16, _a3: u8, a4: i32, town_index: i32, string_index: u32, index: u16) {
+pub extern "thiscall" fn handle_repair_complete_do_notification_wrapper_hook(
+    operations: u32,
+    merchant_index: u16,
+    _a3: u8,
+    a4: i32,
+    town_index: i32,
+    string_index: u32,
+    index: u16,
+) {
     debug!("handle_repair_complete_do_notification_wrapper_hook()");
     return;
-    let do_notification: extern "thiscall" fn(operations: u32, merchant_index: u16, a3: u8, a4: i32, town_index: i32, string_index: u32, index: u16) = unsafe { transmute(DO_NOTIFICATION_ADDRESS) };
+    let do_notification: extern "thiscall" fn(operations: u32, merchant_index: u16, a3: u8, a4: i32, town_index: i32, string_index: u32, index: u16) =
+        unsafe { transmute(DO_NOTIFICATION_ADDRESS) };
     do_notification(operations, merchant_index, 0xff, a4, town_index, string_index, index);
 }
 
 pub fn schedule_operation_raw(op: &[u8]) {
-    let insert_into_pending_operations_wrapper: extern "thiscall" fn(operations: u32, input: u32) = unsafe { transmute(INSERT_INTO_PENDING_OPERATIONS_WRAPPER_ADDRESS) };
+    let insert_into_pending_operations_wrapper: extern "thiscall" fn(operations: u32, input: u32) =
+        unsafe { transmute(INSERT_INTO_PENDING_OPERATIONS_WRAPPER_ADDRESS) };
     insert_into_pending_operations_wrapper(STATIC_OPERATIONS_ADDRESS, op.as_ptr() as u32)
 }
 

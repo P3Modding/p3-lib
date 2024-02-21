@@ -71,7 +71,11 @@ pub fn read_aim_file(path: &str) -> Result<ParsedAimFile, P3AimError> {
                     data.push(r);
                     data.push(a);
                 }
-                Ok(ParsedAimFile { data, width: raw_aim_file.width1, height: raw_aim_file.height })
+                Ok(ParsedAimFile {
+                    data,
+                    width: raw_aim_file.width1,
+                    height: raw_aim_file.height,
+                })
             }
             PixelEncoding::Palette => {
                 let mut i = 0;
@@ -91,7 +95,11 @@ pub fn read_aim_file(path: &str) -> Result<ParsedAimFile, P3AimError> {
                         i += 1;
                     }
                 }
-                Ok(ParsedAimFile { data, width: raw_aim_file.width2, height: raw_aim_file.height })
+                Ok(ParsedAimFile {
+                    data,
+                    width: raw_aim_file.width2,
+                    height: raw_aim_file.height,
+                })
             }
             PixelEncoding::NoAlpha => {
                 assert!(raw_aim_file.palette_ptr.is_null());
@@ -109,7 +117,11 @@ pub fn read_aim_file(path: &str) -> Result<ParsedAimFile, P3AimError> {
                     data.push(r);
                     data.push(a);
                 }
-                Ok(ParsedAimFile { data, width: raw_aim_file.width1, height: raw_aim_file.height })
+                Ok(ParsedAimFile {
+                    data,
+                    width: raw_aim_file.width1,
+                    height: raw_aim_file.height,
+                })
             }
             PixelEncoding::Simple => {
                 assert!(raw_aim_file.palette_ptr.is_null());
@@ -120,7 +132,11 @@ pub fn read_aim_file(path: &str) -> Result<ParsedAimFile, P3AimError> {
                     let pixel = *dword_ptr.offset(i.try_into().unwrap());
                     data.extend_from_slice(&pixel.to_le_bytes());
                 }
-                Ok(ParsedAimFile { data, width: raw_aim_file.width1, height: raw_aim_file.height })
+                Ok(ParsedAimFile {
+                    data,
+                    width: raw_aim_file.width1,
+                    height: raw_aim_file.height,
+                })
             }
         }
     }
