@@ -3,7 +3,9 @@ name = "p3-rou"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[[bin]]
+name = "cli"
+path = "src/cli.rs"
 
 [dependencies]
 bitvec = "1"

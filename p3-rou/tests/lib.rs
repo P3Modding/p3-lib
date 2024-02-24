@@ -24,5 +24,7 @@ const A_ROU: &[u8; 2 * 220] = &[
 fn simple_route() {
     simple_logger::SimpleLogger::new().with_level(LevelFilter::Debug).env().init().unwrap();
     let data = read_rou("tests/a.rou");
-    assert_eq!(&data, A_ROU)
+    assert_eq!(&data, A_ROU);
+    assert_eq!(data[0x02], 0x06);
+    assert_eq!(data[0x02 + 220], 0x07);
 }
