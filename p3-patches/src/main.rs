@@ -9,6 +9,10 @@ fn panic(_: &core::panic::PanicInfo) -> ! {
     loop {}
 }
 
+const STATIC_CLASS35_PTR: u32 = 0x006CBDC8;
+
+struct Class35Ptr {}
+
 struct Class37Ptr {
     address: u32,
 }
@@ -17,6 +21,8 @@ struct PointPtr<T> {
     address: u32,
     phantom: PhantomData<T>,
 }
+
+impl Class35Ptr {}
 
 impl Class37Ptr {
     unsafe fn get_point(&self) -> PointPtr<i32> {
