@@ -8,8 +8,18 @@ members = [
     "p3-agent-loader",
     "p3-aim",
     "p3-aim-sys",
-    "p3-api",
+    "p3-api", "p3-patches",
     "p3-rou",
 ]
 exclude = [
 ]
+
+[profile.dev]
+panic = "abort"
+codegen-units = 1
+
+[profile.release]
+panic = "abort"
+opt-level = "z"
+lto = true
+codegen-units = 1
