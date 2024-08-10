@@ -3,7 +3,6 @@
 
 use core::{marker::PhantomData, ptr::read_volatile};
 
-
 #[panic_handler]
 fn panic(_: &core::panic::PanicInfo) -> ! {
     loop {}
@@ -58,7 +57,7 @@ unsafe extern "thiscall" fn _start(this: u32, a2: u32) -> u32 {
     let draw_geometry: extern "cdecl" fn(x1: i32, y1: i32, x1: i32, y2: i32) = core::mem::transmute(0x004BD680);
     let x = class37.get_offset_thing().get_x();
     let y = class37.get_offset_thing().get_y();
-    draw_geometry(0-x as i32, 0-y as i32, 1000-x as i32, 1000-y as i32);
+    draw_geometry(0 - x as i32, 0 - y as i32, 1000 - x as i32, 1000 - y as i32);
     let draw_navigation_line: extern "thiscall" fn(this: u32, a2: u32) -> u32 = core::mem::transmute(0x0044B330);
     draw_navigation_line(this, a2)
 }
