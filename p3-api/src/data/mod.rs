@@ -1,4 +1,3 @@
-pub mod class6;
 pub mod convoy;
 pub mod enums;
 pub mod game_world;
@@ -8,6 +7,7 @@ pub mod office;
 pub mod operation;
 pub mod p3_ptr;
 pub mod ship;
+pub mod ships;
 pub mod statics;
 pub mod storage;
 pub mod town;

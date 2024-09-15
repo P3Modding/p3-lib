@@ -48,6 +48,14 @@ impl<P3: P3AccessApi> ShipPtr<P3> {
         Ok(current_health)
     }
 
+    pub fn get_x(&self, api: &P3) -> Result<i32, P3ApiError> {
+        self.get(0x1c, api)
+    }
+
+    pub fn get_y(&self, api: &P3) -> Result<i32, P3ApiError> {
+        self.get(0x20, api)
+    }
+
     pub fn get_destination_town_index(&self, api: &P3) -> Result<Option<u8>, P3ApiError> {
         let town_index: u8 = self.get(0x38, api)?;
         Ok(FromPrimitive::from_u8(town_index))

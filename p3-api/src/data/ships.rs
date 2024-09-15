@@ -9,12 +9,12 @@ use std::marker::PhantomData;
 pub const CLASS6_ADDRESS: u32 = 0x006dd7a0;
 
 #[derive(Clone, Debug)]
-pub struct Class6Ptr<P3> {
+pub struct ShipsPtr<P3> {
     pub address: u32,
     api_type: PhantomData<P3>,
 }
 
-impl<P3: P3AccessApi> Class6Ptr<P3> {
+impl<P3: P3AccessApi> ShipsPtr<P3> {
     pub const fn new() -> Self {
         Self {
             address: CLASS6_ADDRESS,
@@ -59,7 +59,7 @@ impl<P3: P3AccessApi> Class6Ptr<P3> {
     }
 }
 
-impl<P3: P3AccessApi> P3Pointer for Class6Ptr<P3> {
+impl<P3: P3AccessApi> P3Pointer for ShipsPtr<P3> {
     fn get_address(&self) -> u32 {
         self.address
     }

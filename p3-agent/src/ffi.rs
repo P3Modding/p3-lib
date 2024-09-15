@@ -1,7 +1,7 @@
 use crate::tick;
 use log::debug;
 use p3_api::{
-    data::{class6::Class6Ptr, game_world::GameWorldPtr, operation::Operation},
+    data::{game_world::GameWorldPtr, operation::Operation, ships::ShipsPtr},
     p3_access_api::raw_p3_access_api::RawP3AccessApi,
 };
 use std::mem::transmute;
@@ -13,7 +13,7 @@ const INSERT_INTO_PENDING_OPERATIONS_WRAPPER_ADDRESS: u32 = 0x0054AA70;
 const DO_NOTIFICATION_ADDRESS: u32 = 0x00548CA0;
 pub const P3: RawP3AccessApi = RawP3AccessApi::new();
 pub const GAME_WORLD: GameWorldPtr<RawP3AccessApi> = GameWorldPtr::new();
-pub const CLASS6: Class6Ptr<RawP3AccessApi> = Class6Ptr::new();
+pub const CLASS6: ShipsPtr<RawP3AccessApi> = ShipsPtr::new();
 
 pub extern "thiscall" fn handle_class11_tick_hook(class11: u32, unknown: u8) {
     let calculate_game_time_orig: extern "thiscall" fn(class11: u32, unknown: u8) = unsafe { transmute(HANDLE_CLASS11_TICK) };

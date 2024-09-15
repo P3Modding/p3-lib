@@ -1,0 +1,20 @@
+[package]
+name = "mod-render-all-ships"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+name="render_all_ships"
+
+[dependencies]
+p3-api = { path = "../p3-api" }
+log = { workspace = true }
+win_dbg_logger = { workspace = true }
+
+[dependencies.windows]
+version = "0.48"
+features = [
+    "Win32_Foundation",
+    "Win32_System_Memory",
+]
