@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [[bin]]
-name = "cli"
+name = "roucli"
 path = "src/cli.rs"
 
 [dependencies]

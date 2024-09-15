@@ -4,7 +4,7 @@ resolver = "2"
 members = [
     "aimcli",
     "cprcli",
-    "mod-render-all-ships",
+    "mod-scrollmap-render-all-ships",
     #"p3-agent",
     "p3-agent-loader",
     "p3-aim",

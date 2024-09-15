@@ -1,0 +1,25 @@
+name: Release Build
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+    - run: rustup target add i686-pc-windows-msvc
+    - run: rustup target add i686-pc-windows-msvc
+    - run: cargo build --release
+    - run: |
+        mkdir mods
+        mv target/i686-pc-windows-msvc/release/scrollmap_render_all_ships.dll ./mods/
+        mkdir files
+        mv target/i686-pc-windows-msvc/release/aimcli.exe ./files
+        mv target/i686-pc-windows-msvc/release/cprcli.exe ./files
+        mv target/i686-pc-windows-msvc/release/roucli.exe ./files
+        Compress-Archive -Path ./mods -DestinationPath ./mods.zip
+        gh release upload ${{ github.ref_name }} ./mods.zip ./files/aimcli.exe ./files/cprcli.exe ./files/roucli.exe
+      env:
+        GITHUB_TOKEN: ${{ github.TOKEN }}
