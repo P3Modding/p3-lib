@@ -6,3 +6,5 @@
 p2arch0_eng
 *.txt
 generated.*.toml
+/deploy*.bat
+/deploy*.ps1
