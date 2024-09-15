@@ -30,6 +30,12 @@ pub struct GameWorldTime {
     pub minute_of_hour: u32,
 }
 
+impl<P3: P3AccessApi> Default for GameWorldPtr<P3> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<P3: P3AccessApi> GameWorldPtr<P3> {
     pub const fn new() -> Self {
         Self {

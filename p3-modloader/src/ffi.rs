@@ -13,25 +13,22 @@ static HOOK_PTR: AtomicPtr<CallRel32Hook> = AtomicPtr::new(std::ptr::null_mut())
 
 #[no_mangle]
 extern "system" fn DllMain(_hist_dll: *const u8, fdw_reason: u32, _lpv_reserved: *const u8) -> u32 {
-    match fdw_reason {
-        DLL_PROCESS_ATTACH => {
-            let _ = log::set_logger(&win_dbg_logger::DEBUGGER_LOGGER);
-            log::set_max_level(log::LevelFilter::Trace);
-            debug!("DllMain patching WinMain call");
-            unsafe {
-                let hook = match hook_call_rel32(s!("Patrician3_patched.exe"), 0x0023CA22, WinMain_hook as usize) {
-                    Ok(hook) => hook,
-                    Err(e) => {
-                        error!("Failed to set hook: {:?}", e);
-                        return 1;
-                    }
-                };
-                debug!("Storing hook");
-                HOOK_PTR.store(Box::into_raw(Box::new(hook)), Ordering::SeqCst);
-            }
-            debug!("DllMain finished successfully")
+    if fdw_reason == DLL_PROCESS_ATTACH {
+        let _ = log::set_logger(&win_dbg_logger::DEBUGGER_LOGGER);
+        log::set_max_level(log::LevelFilter::Trace);
+        debug!("DllMain patching WinMain call");
+        unsafe {
+            let hook = match hook_call_rel32(s!("Patrician3_patched.exe"), 0x0023CA22, WinMain_hook as usize) {
+                Ok(hook) => hook,
+                Err(e) => {
+                    error!("Failed to set hook: {:?}", e);
+                    return 1;
+                }
+            };
+            debug!("Storing hook");
+            HOOK_PTR.store(Box::into_raw(Box::new(hook)), Ordering::SeqCst);
         }
-        _ => {}
+        debug!("DllMain finished successfully")
     }
     1
 }

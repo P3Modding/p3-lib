@@ -14,6 +14,12 @@ pub struct ShipsPtr<P3> {
     api_type: PhantomData<P3>,
 }
 
+impl<P3: P3AccessApi> Default for ShipsPtr<P3> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<P3: P3AccessApi> ShipsPtr<P3> {
     pub const fn new() -> Self {
         Self {

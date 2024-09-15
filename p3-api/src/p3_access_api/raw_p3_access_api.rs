@@ -5,6 +5,12 @@ use std::ptr;
 #[derive(Debug)]
 pub struct RawP3AccessApi {}
 
+impl Default for RawP3AccessApi {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl RawP3AccessApi {
     pub const fn new() -> Self {
         Self {}

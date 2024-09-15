@@ -82,7 +82,7 @@ pub fn read_aim_file(path: &str) -> Result<ParsedAimFile, P3AimError> {
                 for _ in 0..raw_aim_file.height {
                     for _ in 0..raw_aim_file.width1 {
                         let pixel_id = *raw_aim_file.buf_ptr.offset(i.try_into().unwrap());
-                        let pixel = *raw_aim_file.palette_ptr.offset(pixel_id.try_into().unwrap());
+                        let pixel = *raw_aim_file.palette_ptr.offset(pixel_id.into());
                         data.extend_from_slice(&pixel.to_le_bytes());
                         i += 1;
                     }

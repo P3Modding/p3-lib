@@ -17,10 +17,10 @@ fn test_ships() {
 
     let s = System::new_all();
     for process in s.processes_by_name("Patrician") {
-        let mut api = OpenProcessP3AccessApi::new(process.pid().as_u32()).unwrap();
+        let api = OpenProcessP3AccessApi::new(process.pid().as_u32()).unwrap();
         //let ship_id = 0xd9; // crayer 25
         let ship_id = 0x00;
-        let ship = read_ship(&mut api, ship_id);
+        let ship = read_ship(&api, ship_id);
         info!("{:?}", ship);
     }
 }

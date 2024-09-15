@@ -98,7 +98,7 @@ fn extract(input_file: PathBuf, output_path: PathBuf) -> Result<(), CprCliError>
         }
 
         for index_entry in &index_entries {
-            reader.seek(io::SeekFrom::Start(index_entry.offset.try_into().unwrap()))?;
+            reader.seek(io::SeekFrom::Start(index_entry.offset.into()))?;
             let mut path = output_path.clone();
             path.push(Path::new(&index_entry.file_path));
             let prefix = path.parent().unwrap();

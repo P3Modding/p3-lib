@@ -1,4 +1,4 @@
-use super::{enums::TownId, p3_ptr::P3Pointer};
+use super::p3_ptr::P3Pointer;
 use crate::{latin1_to_string, p3_access_api::P3AccessApi, P3ApiError};
 use num_traits::FromPrimitive;
 use std::marker::PhantomData;
