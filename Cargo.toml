@@ -8,8 +8,16 @@ members = [
     "p3-agent-loader",
     "p3-aim",
     "p3-aim-sys",
-    "p3-api",
+    "p3-api", "p3-modloader",
     "p3-rou",
 ]
 exclude = [
 ]
+
+[workspace.dependencies]
+hooklet = "^0.1.3"
+clap = { version = "4.3.0", features = ["derive"] }
+simple_logger = "4.1"
+log = "0.4"
+sysinfo = "0.29"
+win_dbg_logger = "0.1"

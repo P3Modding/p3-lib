@@ -1,0 +1,20 @@
+[package]
+name = "p3-modloader"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+hooklet = { workspace = true }
+#hooklet = { path = "../../hooklet" }
+log = { workspace = true }
+win_dbg_logger = { workspace = true }
+
+[dependencies.windows]
+version = "0.48"
+features = [
+    "Win32_Foundation",
+    "Win32_System_Memory",
+]

@@ -13,3 +13,4 @@ clap = { version = "4.3.0", features = ["derive"] }
 log = "0.4"
 simple_logger = "4.1"
 image = "0.24"
+sysinfo = "0.29"
