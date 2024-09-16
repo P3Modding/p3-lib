@@ -4,7 +4,9 @@ resolver = "2"
 members = [
     "aimcli",
     "cprcli",
-    "mod-scrollmap-render-all-ships", "mod-tavern-show-all-sailors",
+    "mod-fix-market-hall-production-town",
+    "mod-scrollmap-render-all-ships",
+    "mod-tavern-show-all-sailors",
     #"p3-agent",
     "p3-agent-loader",
     "p3-aim",

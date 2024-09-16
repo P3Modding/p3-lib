@@ -1,0 +1,19 @@
+[package]
+name = "mod-fix-market-hall-production-town"
+edition = "2021"
+version.workspace = true
+
+[lib]
+crate-type = ["cdylib"]
+name="fix_market_hall_production_town"
+
+[dependencies]
+log = { workspace = true }
+win_dbg_logger = { workspace = true }
+
+[dependencies.windows]
+version = "0.48"
+features = [
+    "Win32_Foundation",
+    "Win32_System_Memory",
+]

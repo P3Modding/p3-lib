@@ -1,6 +1,6 @@
-use std::{arch::global_asm, os::raw::c_void};
+use std::{arch::global_asm, ffi::c_void};
 
-use log::{debug, error};
+use log::{debug, error, LevelFilter};
 use p3_api::{data::ships::ShipsPtr, p3_access_api::raw_p3_access_api::RawP3AccessApi};
 use windows::Win32::{
     Foundation::{GetLastError, WIN32_ERROR},
@@ -13,7 +13,7 @@ pub const P3: RawP3AccessApi = RawP3AccessApi::new();
 #[no_mangle]
 pub unsafe extern "C" fn start() -> u32 {
     let _ = log::set_logger(&win_dbg_logger::DEBUGGER_LOGGER);
-    log::set_max_level(log::LevelFilter::Trace);
+    log::set_max_level(LevelFilter::Trace);
     let trampoline_address: u32 = (&draw_all_ships_trampoline) as *const _ as _;
     let relative_trampoline_address: u32 = trampoline_address.wrapping_sub(PATCH_ADDRESS) - 5; //TODO move pointer calcs to hooklet
 
