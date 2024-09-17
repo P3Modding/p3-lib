@@ -1,0 +1,19 @@
+[package]
+name = "mod-increase-alderman-found-settlement-mission-limit"
+edition = "2021"
+version.workspace = true
+
+[lib]
+crate-type = ["cdylib"]
+name="increase_alderman_found_settlement_mission_limit"
+
+[dependencies]
+log = { workspace = true }
+win_dbg_logger = { workspace = true }
+
+[dependencies.windows]
+version = "0.48"
+features = [
+    "Win32_Foundation",
+    "Win32_System_Memory",
+]
