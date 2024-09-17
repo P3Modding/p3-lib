@@ -42,7 +42,7 @@ pub unsafe extern "C" fn start() -> u32 {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn fixup_all_ships(spotted_y: *mut i32, spotted_index: *mut u32) -> u32 {
+pub unsafe extern "cdecl" fn fixup_all_ships(spotted_y: *mut i32, spotted_index: *mut u32) -> u32 {
     let ships = ShipsPtr::<RawP3AccessApi>::new();
     let mut new_spotted_size = 0;
     for i in 0..ships.get_ships_size(&P3).unwrap() {
