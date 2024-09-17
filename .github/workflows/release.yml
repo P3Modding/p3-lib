@@ -14,6 +14,7 @@ jobs:
     - run: cargo build --release
     - run: |
         mkdir mods
+        mv target/i686-pc-windows-msvc/release/fix_damage_to_offside_ship_artillery.dll ./mods/
         mv target/i686-pc-windows-msvc/release/fix_market_hall_production_town.dll ./mods/
         mv target/i686-pc-windows-msvc/release/fix_new_settlement_ware_production.dll ./mods/
         mv target/i686-pc-windows-msvc/release/fix_siege_beggar_satisfaction_bonus.dll ./mods/

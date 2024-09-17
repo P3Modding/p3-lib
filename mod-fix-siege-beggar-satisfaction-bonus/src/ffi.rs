@@ -19,7 +19,7 @@ pub unsafe extern "C" fn start() -> u32 {
         return 1;
     }
 
-    debug!("Patching comparison at {:#x}", PATCH_ADDRESS);
+    debug!("Patching loop count at {:#x}", PATCH_ADDRESS);
     *patch_ptr = 0x03;
 
     if !VirtualProtect(patch_ptr as _, 5, old_flags, &mut old_flags).as_bool() {
