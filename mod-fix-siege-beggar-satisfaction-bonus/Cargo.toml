@@ -1,0 +1,19 @@
+[package]
+name = "mod-fix-siege-beggar-satisfaction-bonus"
+edition = "2021"
+version.workspace = true
+
+[lib]
+crate-type = ["cdylib"]
+name="fix_siege_beggar_satisfaction_bonus"
+
+[dependencies]
+log = { workspace = true }
+win_dbg_logger = { workspace = true }
+
+[dependencies.windows]
+version = "0.48"
+features = [
+    "Win32_Foundation",
+    "Win32_System_Memory",
+]

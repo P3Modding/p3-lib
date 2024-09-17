@@ -6,6 +6,7 @@ members = [
     "cprcli",
     "mod-fix-market-hall-production-town",
     "mod-fix-new-settlement-ware-production",
+    "mod-fix-siege-beggar-satisfaction-bonus",
     "mod-increase-alderman-found-settlement-mission-limit",
     "mod-scrollmap-render-all-ships",
     "mod-tavern-show-all-sailors",
