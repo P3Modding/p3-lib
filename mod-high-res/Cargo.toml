@@ -11,7 +11,7 @@ name="high_res"
 log = { workspace = true }
 win_dbg_logger = { workspace = true }
 p3-api = { path = "../p3-api" }
-hooklet = { path = "../../hooklet" }
+hooklet = { workspace = true }
 
 [dependencies.windows]
 version = "0.48"
