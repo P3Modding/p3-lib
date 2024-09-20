@@ -112,20 +112,6 @@ pub unsafe extern "cdecl" fn overwrite_resolution(width: *mut u32, height: *mut 
     *height = 1080;
 }
 
-#[no_mangle]
-pub unsafe extern "cdecl" fn calculate_resolution_before_scene_load_custom(width: *mut u32, height: *mut u32) {
-    debug!("calculate_resolution_before_scene_load_custom() patching width and height");
-    *width = 1920;
-    *height = 1080;
-}
-
-#[no_mangle]
-pub unsafe extern "cdecl" fn calculate_resolution_after_scene_load_custom(width: *mut u32, height: *mut u32) {
-    debug!("calculate_resolution_after_scene_load_custom() patching width and height");
-    *width = 1920;
-    *height = 1080;
-}
-
 /// Overwrite the ANIM* entries from  screenGame.ini, if a custom resolution is selected.
 ///
 /// Returns the real vanilla resolution width, or 1280.
@@ -230,7 +216,7 @@ lea ecx, [esp + 0x3C + 0x0C]
 lea eax, [esp + 0x40 + 0x0C]
 push eax
 push ecx
-call {calculate_resolution_before_scene_load_custom}
+call {overwrite_resolution}
 #TODO sub
 pop eax
 pop eax
@@ -243,7 +229,7 @@ pop eax
 jmp [{continuation}]
 ",
 calculate_resolution_before_scene_load = sym calculate_resolution_before_scene_load,
-calculate_resolution_before_scene_load_custom = sym calculate_resolution_before_scene_load_custom,
+overwrite_resolution = sym overwrite_resolution,
 continuation = sym CALCULATE_RESOLUTION_BEFORE_SCENE_LOAD_CONTINUATION);
 
 global_asm!("
@@ -258,7 +244,7 @@ lea ecx, [esp + 0x24 + 0x0C]
 lea eax, [esp + 0x28 + 0x0C]
 push eax
 push ecx
-call {calculate_resolution_after_scene_load_custom}
+call {overwrite_resolution}
 pop eax
 pop eax
 
@@ -270,7 +256,7 @@ pop eax
 jmp [{continuation}]
 ",
 calculate_resolution_after_scene_load = sym calculate_resolution_after_scene_load,
-calculate_resolution_after_scene_load_custom = sym calculate_resolution_after_scene_load_custom,
+overwrite_resolution = sym overwrite_resolution,
 continuation = sym CALCULATE_RESOLUTION_AFTER_SCENE_LOAD_CONTINUATION);
 
 global_asm!("
