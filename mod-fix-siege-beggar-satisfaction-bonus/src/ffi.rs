@@ -4,7 +4,7 @@ use windows::Win32::{
     System::Memory::{VirtualProtect, PAGE_EXECUTE_READWRITE, PAGE_PROTECTION_FLAGS},
 };
 
-const PATCH_ADDRESS: u32 = 0x00629A51;
+const PATCH_ADDRESS: u32 = 0x00629A33;
 
 #[no_mangle]
 pub unsafe extern "C" fn start() -> u32 {
