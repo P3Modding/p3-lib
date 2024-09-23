@@ -1,9 +1,9 @@
-use std::mem;
+use std::{ffi::c_void, mem};
 
 pub mod class27;
+pub mod class48;
 pub mod convoy;
 pub mod enums;
-pub mod game_world;
 pub mod mission;
 pub mod missions;
 pub mod office;
@@ -15,7 +15,6 @@ pub mod ship;
 pub mod ships;
 pub mod statics;
 pub mod storage;
-pub mod town;
 
 const RESOLUTION_WIDTH_PTR: *const u32 = 0x006DCCE0 as _;
 const RESOLUTION_HEIGHT_PTR: *const u32 = 0x006DCCE4 as _;
@@ -62,4 +61,24 @@ pub fn ddraw_add_clip_rect(rect: [u32; 4]) {
 pub fn ddraw_set_clip_rect_r(rect: [u32; 4]) {
     let function: extern "cdecl" fn(rect: *const u32) = unsafe { mem::transmute(0x004BB820) };
     function(rect.as_ptr())
+}
+
+pub fn ddraw_set_text_mode(mode: u32) {
+    let function: extern "cdecl" fn(mode: u32) = unsafe { mem::transmute(0x004BBA10) };
+    function(mode)
+}
+
+pub fn render_window_title(text: *const c_void, window: *const c_void) {
+    let function: extern "stdcall" fn(text: *const c_void, window: *const c_void) = unsafe { mem::transmute(0x00420C70) };
+    function(text, window)
+}
+
+pub fn fill_p3_string(p3_string: *const c_void, input: &[u8]) {
+    let function: extern "thiscall" fn(text: *const c_void, window: *const c_void) = unsafe { mem::transmute(0x0064F2C1) };
+    function(p3_string, input.as_ptr() as _)
+}
+
+pub fn ui_render_text_at(x: i32, y: i32, text: &[u8]) {
+    let function: extern "cdecl" fn(x: i32, y: i32, text: *const c_void) = unsafe { mem::transmute(0x004BB3E0) };
+    function(x, y, text.as_ptr() as _)
 }

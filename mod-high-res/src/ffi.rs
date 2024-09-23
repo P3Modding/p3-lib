@@ -7,13 +7,8 @@ use std::{
 
 use hooklet::{CallRel32Hook, X86Rel32Type};
 use log::debug;
-use p3_api::{
-    data::{class27::Class27Ptr, ddraw_fill_solid_rect, ddraw_set_constant_color, ddraw_set_render_dest, get_resolution_height, get_resolution_width},
-    p3_access_api::raw_p3_access_api::RawP3AccessApi,
-};
+use p3_api::data::{class27::Class27Ptr, ddraw_fill_solid_rect, ddraw_set_constant_color, ddraw_set_render_dest, get_resolution_height, get_resolution_width};
 use windows::core::PCSTR;
-
-pub const P3: RawP3AccessApi = RawP3AccessApi::new();
 
 const CALCULATE_RESOLUTION_ON_OPTIONS_MENU_CLOSE_PATCH_ADDRESS: u32 = 0x00423BBD;
 static CALCULATE_RESOLUTION_ON_OPTIONS_MENU_CLOSE_CONTINUATION: u32 = 0x00423C00;
@@ -48,7 +43,7 @@ pub unsafe extern "C" fn start() -> u32 {
     )
     .is_err()
     {
-        return 0;
+        return 1;
     }
 
     // Replace the mapping from class24 resolution field to width and height values
@@ -59,7 +54,7 @@ pub unsafe extern "C" fn start() -> u32 {
     )
     .is_err()
     {
-        return 1;
+        return 2;
     }
 
     // Replace the mapping from ui options resolution field to width and height values
@@ -70,7 +65,7 @@ pub unsafe extern "C" fn start() -> u32 {
     )
     .is_err()
     {
-        return 2;
+        return 3;
     }
 
     debug!("Deploying resolution dependent ui positioning patch");
@@ -81,7 +76,7 @@ pub unsafe extern "C" fn start() -> u32 {
     )
     .is_err()
     {
-        return 3;
+        return 4;
     }
 
     debug!("Deploying resolution dependent top bar ui positioning patch");
@@ -92,14 +87,14 @@ pub unsafe extern "C" fn start() -> u32 {
     )
     .is_err()
     {
-        return 4;
+        return 5;
     }
 
     match hooklet::hook_call_rel32(PCSTR::from_raw(ptr::null()), 0x28649, maybe_render_all_objects_hook as usize) {
         Ok(hook) => {
             HOOK_PTR.store(Box::into_raw(Box::new(hook)), Ordering::SeqCst);
         }
-        Err(_) => return 5,
+        Err(_) => return 6,
     }
 
     0
@@ -126,16 +121,16 @@ pub unsafe extern "cdecl" fn reposition_ui_elements_custom() -> u32 {
     }
 
     // Fix ANIM42 Frame0 width
-    let class27 = Class27Ptr::<RawP3AccessApi>::new(&P3).unwrap();
+    let class27 = Class27Ptr::new();
     let anim42 = class27.get_anim_42();
-    let rect = anim42.get_screen_rectangle(0, &P3).unwrap();
+    let rect = anim42.get_screen_rectangle(0);
     let new_width = real_resolution_width - 284;
     debug!("{rect:X?} setting new ANIM42 width: {new_width}");
-    rect.set_width(new_width, &P3).unwrap();
+    rect.set_width(new_width);
 
     // Fix ANIM44 Pos
     let anim42 = class27.get_anim_44();
-    anim42.set_pos_x(real_resolution_width - 284, &P3).unwrap();
+    anim42.set_pos_x(real_resolution_width - 284);
 
     1280
 }

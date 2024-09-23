@@ -1,6 +1,3 @@
-use super::p3_ptr::{self};
-use crate::{p3_access_api::P3AccessApi, P3ApiError};
-
 #[derive(Clone, Debug)]
 #[repr(C)]
 pub struct ShipCost {
@@ -32,10 +29,26 @@ pub struct ShipCapacityRaw {
     pub hulk: [u8; 4],
 }
 
-pub fn get_ship_costs<P3: P3AccessApi>(api: &P3) -> Result<ShipCosts, P3ApiError> {
-    p3_ptr::get_from(0x0066DEB0, api)
+#[derive(Clone, Debug)]
+#[repr(C)]
+pub struct ShipyardLevelRequirements {
+    pub snaikka: [u16; 4],
+    pub crayer: [u16; 4],
+    pub cog: [u16; 4],
+    pub holk: [u16; 4],
 }
 
-pub fn get_ship_capacities_raw<P3: P3AccessApi>(api: &P3) -> Result<ShipCapacityRaw, P3ApiError> {
-    p3_ptr::get_from(0x00673838, api)
+pub fn get_ship_costs() -> ShipCosts {
+    let ptr: *const ShipCosts = 0x0066DEB0 as _;
+    unsafe { (*ptr).clone() }
+}
+
+pub fn get_ship_capacities_raw() -> ShipCapacityRaw {
+    let ptr: *const ShipCapacityRaw = 0x00673838 as _;
+    unsafe { (*ptr).clone() }
+}
+
+pub fn get_shipyard_level_requirements() -> &'static ShipyardLevelRequirements {
+    let ptr: *const ShipyardLevelRequirements = 0x00673818 as _;
+    unsafe { &*ptr }
 }

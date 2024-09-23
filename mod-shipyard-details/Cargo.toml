@@ -1,0 +1,14 @@
+[package]
+name = "mod-shipyard-details"
+edition = "2021"
+version.workspace = true
+
+[lib]
+crate-type = ["cdylib"]
+name="shipyard_details"
+
+[dependencies]
+log = { workspace = true }
+win_dbg_logger = { workspace = true }
+p3-api = { path = "../p3-api" }
+hooklet = { workspace = true }

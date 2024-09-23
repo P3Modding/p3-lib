@@ -1,45 +1,39 @@
-use super::{
-    enums::{ShipWeaponId, WareId},
-    p3_ptr::P3Pointer,
-};
-use crate::{p3_access_api::P3AccessApi, P3ApiError};
-use std::{marker::PhantomData, mem};
+use super::{enums::WareId, p3_ptr::P3Pointer};
 
 #[derive(Debug)]
-pub struct StoragePtr<P3> {
+pub struct StoragePtr {
     pub address: u32,
-    api_type: PhantomData<P3>,
 }
 
-impl<P3: P3AccessApi> StoragePtr<P3> {
+impl StoragePtr {
     pub fn new(address: u32) -> Self {
-        Self {
-            address,
-            api_type: PhantomData,
-        }
+        Self { address }
     }
 
-    pub fn get_ware(&self, ware: WareId, api: &P3) -> Result<i32, P3ApiError> {
-        self.get(0x04 + ware as u32 * 4, api)
+    pub fn get_ware(&self, ware: WareId) -> i32 {
+        unsafe { self.get(0x04 + ware as u32 * 4) }
     }
 
-    pub fn get_wares(&self, api: &P3) -> Result<[i32; 24], P3ApiError> {
-        self.get(0x04, api)
+    pub fn get_wares(&self) -> [i32; 24] {
+        unsafe { self.get(0x04) }
     }
 
-    pub fn get_daily_consumptions_businesses(&self, api: &P3) -> Result<[i32; 0x18], P3ApiError> {
-        self.get(0x64, api)
+    pub fn get_daily_consumptions_businesses(&self) -> [i32; 0x18] {
+        unsafe { self.get(0x64) }
     }
 
-    pub fn get_daily_production(&self, api: &P3) -> Result<[i32; 0x18], P3ApiError> {
-        self.get(0xc4, api)
+    pub fn get_daily_production(&self) -> [i32; 0x18] {
+        unsafe { self.get(0xc4) }
     }
 
-    pub fn get_weird_daily_production(&self, api: &P3) -> Result<[i32; 0x18], P3ApiError> {
-        self.get(0x490, api)
+    pub fn get_weird_daily_production(&self) -> [i32; 0x18] {
+        unsafe { self.get(0x490) }
     }
 
-    pub fn get_ship_weapons(&self, api: &P3) -> Result<Vec<u32>, P3ApiError> {
+    pub fn get_ship_weapons(&self) -> Vec<u32> {
+        todo!()
+        /*
+        Removed during refactoring. If you need this, reach out
         let wares_count = ShipWeaponId::Cannon as usize + 1;
         let bytes_len = wares_count * mem::size_of::<u32>();
         let mut input_data: Vec<u8> = vec![0; bytes_len];
@@ -48,15 +42,15 @@ impl<P3: P3AccessApi> StoragePtr<P3> {
         for i in 0..wares_count {
             data.push(u32::from_le_bytes(input_data[i * 4..(i * 4) + 4].try_into().unwrap()))
         }
-        Ok(data)
+        Ok(data)*/
     }
 
-    pub fn get_cutlasses(&self, api: &P3) -> Result<u32, P3ApiError> {
-        self.get(0x2bc, api)
+    pub fn get_cutlasses(&self) -> u32 {
+        unsafe { self.get(0x2bc) }
     }
 }
 
-impl<P3: P3AccessApi> P3Pointer for StoragePtr<P3> {
+impl P3Pointer for StoragePtr {
     fn get_address(&self) -> u32 {
         self.address
     }

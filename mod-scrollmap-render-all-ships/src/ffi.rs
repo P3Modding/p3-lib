@@ -1,14 +1,13 @@
 use std::{arch::global_asm, ffi::c_void};
 
 use log::{debug, error, LevelFilter};
-use p3_api::{data::ships::ShipsPtr, p3_access_api::raw_p3_access_api::RawP3AccessApi};
+use p3_api::data::ships::ShipsPtr;
 use windows::Win32::{
     Foundation::{GetLastError, WIN32_ERROR},
     System::Memory::{VirtualProtect, PAGE_EXECUTE_READWRITE, PAGE_PROTECTION_FLAGS},
 };
 
 const PATCH_ADDRESS: u32 = 0x00451759;
-pub const P3: RawP3AccessApi = RawP3AccessApi::new();
 
 #[no_mangle]
 pub unsafe extern "C" fn start() -> u32 {
@@ -43,17 +42,17 @@ pub unsafe extern "C" fn start() -> u32 {
 
 #[no_mangle]
 pub unsafe extern "cdecl" fn fixup_all_ships(spotted_y: *mut i32, spotted_index: *mut u32) -> u32 {
-    let ships = ShipsPtr::<RawP3AccessApi>::new();
+    let ships = ShipsPtr::new();
     let mut new_spotted_size = 0;
-    for i in 0..ships.get_ships_size(&P3).unwrap() {
-        let ship = ships.get_ship(i, &P3).unwrap().unwrap();
-        let ship_status = ship.get_status(&P3).unwrap();
+    for i in 0..ships.get_ships_size() {
+        let ship = ships.get_ship(i).unwrap();
+        let ship_status = ship.get_status();
 
         if ship_status != 0x12 && ship_status != 0x0f {
             continue;
         }
 
-        *spotted_y.add(new_spotted_size as _) = ship.get_y(&P3).unwrap() >> 16;
+        *spotted_y.add(new_spotted_size as _) = ship.get_y() >> 16;
         *spotted_index.add(new_spotted_size as _) = i as _;
         new_spotted_size += 1;
     }
