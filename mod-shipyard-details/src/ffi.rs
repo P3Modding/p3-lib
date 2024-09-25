@@ -19,8 +19,8 @@ use p3_api::{
 
 pub static TITLE: &CStr = c"Details";
 pub static EMPLOYEES: &CStr = c"Employees";
-pub static EXPERIENCE: &CStr = c"Experience";
-pub static PENDING_EXPERIENCE: &CStr = c"Pending Experience";
+pub static EXPERIENCE: &CStr = c"Experience (scaled)";
+pub static PENDING_EXPERIENCE: &CStr = c"Pending Experience (scaled)";
 pub static UTILIZATION_MARKUP: &CStr = c"Utilization Markup";
 pub static SNAIKKA: &CStr = c"Snaikka";
 pub static CRAYER: &CStr = c"Crayer";
@@ -28,6 +28,9 @@ pub static COG: &CStr = c"Cog";
 pub static HOLK: &CStr = c"Holk";
 pub static QUALITY_LEVEL: &CStr = c"Quality Level";
 pub static REQUIRED_XP: &CStr = c"Required XP";
+
+const SHIPYARD_WINDOW_OPEN_PATCH_ADDRESS: u32 = 0x005ADA56;
+static SHIPYARD_WINDOW_OPEN_CONTINUATION: u32 = 0x005ADA93;
 
 const LOAD_SHIPYARD_SELECTED_PAGE_PATCH_ADDRESS: u32 = 0x005F4320;
 static LOAD_SHIPYARD_SELECTED_PAGE_CONTINUATION: u32 = 0x005F4326;
@@ -40,8 +43,8 @@ pub unsafe extern "C" fn start() -> u32 {
     log::set_max_level(log::LevelFilter::Trace);
 
     if hooklet::deploy_rel32_raw(
-        LOAD_SHIPYARD_SELECTED_PAGE_PATCH_ADDRESS as _,
-        (&load_shipyard_selected_page_detour) as *const _ as _,
+        SHIPYARD_WINDOW_OPEN_PATCH_ADDRESS as _,
+        (&ui_shipyard_window_open_detour) as *const _ as _,
         X86Rel32Type::Jump,
     )
     .is_err()
@@ -49,7 +52,26 @@ pub unsafe extern "C" fn start() -> u32 {
         return 1;
     }
 
+    if hooklet::deploy_rel32_raw(
+        LOAD_SHIPYARD_SELECTED_PAGE_PATCH_ADDRESS as _,
+        (&load_shipyard_selected_page_detour) as *const _ as _,
+        X86Rel32Type::Jump,
+    )
+    .is_err()
+    {
+        return 2;
+    }
+
     0
+}
+
+#[no_mangle]
+pub unsafe extern "thiscall" fn shipyard_window_open_hook() {
+    debug!("shipyard_window_open_hook");
+    let class48 = Class48Ptr::new();
+    class48.set_ignore_below_gradient(0);
+    class48.set_gradient_y(200);
+    class48.clip_stuff();
 }
 
 #[no_mangle]
@@ -88,14 +110,14 @@ pub unsafe extern "thiscall" fn shipyard_rendering_hook() -> i32 {
         ui_render_text_at(x + 100, y, employees_cstring.to_bytes());
         y += 20;
 
-        ui_render_text_at(x, y, PENDING_EXPERIENCE.to_bytes());
-        let pending_experience_cstring = CString::new(format!("{:.2}", shipyard.get_pending_experience() as f32 / 2800.0)).unwrap();
-        ui_render_text_at(x + 100, y, pending_experience_cstring.to_bytes());
-        y += 20;
-
         ui_render_text_at(x, y, UTILIZATION_MARKUP.to_bytes());
         let utilization_markup_cstring = CString::new(format!("{:.2}", shipyard.get_utilization_markup())).unwrap();
         ui_render_text_at(x + 100, y, utilization_markup_cstring.to_bytes());
+        y += 20;
+
+        ui_render_text_at(x, y, PENDING_EXPERIENCE.to_bytes());
+        let pending_experience_cstring = CString::new(format!("{:.2}", shipyard.get_pending_experience() as f32 / 2800.0)).unwrap();
+        ui_render_text_at(x + 100, y, pending_experience_cstring.to_bytes());
         y += 20;
 
         ui_render_text_at(x, y, EXPERIENCE.to_bytes());
@@ -146,8 +168,20 @@ pub unsafe extern "thiscall" fn shipyard_rendering_hook() -> i32 {
 }
 
 extern "C" {
+    static ui_shipyard_window_open_detour: c_void;
     static load_shipyard_selected_page_detour: c_void;
 }
+
+global_asm!("
+.global {ui_shipyard_window_open_detour}
+{ui_shipyard_window_open_detour}:
+# eax and edx are already saved, and ecx is already set
+call {shipyard_window_open_hook}
+jmp [{continuation}]
+",
+ui_shipyard_window_open_detour = sym ui_shipyard_window_open_detour,
+shipyard_window_open_hook = sym shipyard_window_open_hook,
+continuation = sym SHIPYARD_WINDOW_OPEN_CONTINUATION);
 
 global_asm!("
 .global {load_shipyard_selected_page_detour}

@@ -56,3 +56,7 @@ pub fn get_normal_font() -> DdrawFontPtr {
 pub fn get_header_font() -> DdrawFontPtr {
     DdrawFontContainerPtr::new(0x006DCD28).get_font()
 }
+
+pub fn get_scrollmap_town_name_font() -> DdrawFontPtr {
+    DdrawFontContainerPtr::new(0x006DCF20).get_font()
+}

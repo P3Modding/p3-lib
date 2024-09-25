@@ -1,3 +1,5 @@
+use std::{ffi::c_void, mem};
+
 use super::p3_ptr::P3Pointer;
 
 pub const CLASS48_PTR_ADDRESS: u32 = 0x006CC7E0;
@@ -27,6 +29,11 @@ impl Class48Ptr {
     pub fn set_ignore_below_gradient(&self, value: u8) {
         let ptr: *mut u8 = (self.address + 0xfc) as _;
         unsafe { *ptr = value }
+    }
+
+    pub unsafe fn clip_stuff(&self) {
+        let function: extern "thiscall" fn(this: *const c_void) = unsafe { mem::transmute(0x004665D0) };
+        function(self.address as _)
     }
 }
 

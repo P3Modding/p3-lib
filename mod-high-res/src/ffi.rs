@@ -153,8 +153,8 @@ pub unsafe extern "cdecl" fn reposition_ui_elements_top_bar_custom() -> u32 {
 pub unsafe extern "thiscall" fn maybe_render_all_objects_hook(this: u32, a2: u32, a3: u32, a4: u32, a5: u32) -> i32 {
     let orig: extern "thiscall" fn(this: u32, a2: u32, a3: u32, a4: u32, a5: u32) -> i32 = unsafe { mem::transmute(0x004B58C0) };
     orig(this, a2, a3, a4, a5);
-    let res_width = get_resolution_width();
-    let res_height = get_resolution_height();
+    let res_width = get_resolution_width() as i32;
+    let res_height = get_resolution_height() as i32;
 
     let old_render_dest = ddraw_set_render_dest(-1);
     ddraw_set_constant_color(0xff000000);

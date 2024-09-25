@@ -1,6 +1,24 @@
 use super::p3_ptr::P3Pointer;
 
 #[derive(Clone, Debug)]
+#[repr(C)]
+pub struct ScreenRectangle {
+    pub x: i32,
+    pub y: i32,
+    pub width: i32,
+    pub height: i32,
+}
+
+#[derive(Clone, Debug)]
+#[repr(C)]
+pub struct Rect {
+    pub left: i32,
+    pub top: i32,
+    pub right: i32,
+    pub bottom: i32,
+}
+
+#[derive(Clone, Debug)]
 pub struct ScreenRectanglePtr {
     pub address: u32,
 }

@@ -1,3 +1,4 @@
+#![allow(clippy::missing_safety_doc)]
 extern crate num_derive;
 
 pub mod data;
