@@ -3,6 +3,7 @@ use std::mem;
 use crate::data::screen_rectangle::Rect;
 
 pub mod class37;
+pub mod class73;
 pub mod font;
 pub mod ui_shipyard_window;
 

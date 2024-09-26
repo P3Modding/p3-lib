@@ -6,8 +6,11 @@ use std::{
 };
 
 use hooklet::{CallRel32Hook, X86Rel32Type};
-use log::debug;
-use p3_api::data::{class27::Class27Ptr, ddraw_fill_solid_rect, ddraw_set_constant_color, ddraw_set_render_dest, get_resolution_height, get_resolution_width};
+use log::{debug, warn};
+use p3_api::{
+    data::{class27::Class27Ptr, ddraw_fill_solid_rect, ddraw_set_constant_color, ddraw_set_render_dest, get_resolution_height, get_resolution_width},
+    ui::class73::Class73Ptr,
+};
 use windows::core::PCSTR;
 
 const CALCULATE_RESOLUTION_ON_OPTIONS_MENU_CLOSE_PATCH_ADDRESS: u32 = 0x00423BBD;
@@ -30,6 +33,11 @@ const REPOSITION_UI_ELEMENTS_TOP_BAR_PATCH_ADDRESS: u32 = 0x00429FE0; // Detour 
 static REPOSITION_UI_ELEMENTS_TOP_BAR_CONTINUATION_ADDRESS: u32 = 0x00429FE5; // Jump back to switch
 
 static HOOK_PTR: AtomicPtr<CallRel32Hook> = AtomicPtr::new(std::ptr::null_mut());
+static DECODE_SUPPORTED_FILES_HOOK_PTR: AtomicPtr<CallRel32Hook> = AtomicPtr::new(std::ptr::null_mut());
+// Overwrite accelMap resolution
+static LOAD_ACCEL_MAP_INI_HOOK_PTR: AtomicPtr<CallRel32Hook> = AtomicPtr::new(std::ptr::null_mut());
+
+static VOLLANSICHTSKARTE1920: &[u8] = include_bytes!("Vollansichtskarte1920.bmp");
 
 #[no_mangle]
 pub unsafe extern "C" fn start() -> u32 {
@@ -90,6 +98,8 @@ pub unsafe extern "C" fn start() -> u32 {
         return 5;
     }
 
+    // Fix empty bottom right corner
+    debug!("Deploying render_all_objects_hook");
     match hooklet::hook_call_rel32(PCSTR::from_raw(ptr::null()), 0x28649, maybe_render_all_objects_hook as usize) {
         Ok(hook) => {
             HOOK_PTR.store(Box::into_raw(Box::new(hook)), Ordering::SeqCst);
@@ -97,6 +107,31 @@ pub unsafe extern "C" fn start() -> u32 {
         Err(_) => return 6,
     }
 
+    // Fix acceleration map
+    debug!("Deploying dddraw_dll.dll decode_supported_files hook to replace the background image");
+    match hooklet::hook_call_rel32(
+        PCSTR::from_raw(c"aim.dll".as_ptr() as _),
+        0x2984,
+        ddraw_dll_decode_supported_files_hook as usize,
+    ) {
+        Ok(hook) => {
+            debug!("Hook {hook:?} set");
+            DECODE_SUPPORTED_FILES_HOOK_PTR.store(Box::into_raw(Box::new(hook)), Ordering::SeqCst);
+        }
+        Err(_) => return 7,
+    }
+
+    // Fix acceleration map
+    debug!("Deploying load screen settings from accelMap.ini");
+    match hooklet::hook_call_rel32(PCSTR::from_raw(ptr::null()), 0x12C5, class73_place_ui_element_hook as usize) {
+        Ok(hook) => {
+            debug!("Hook {hook:?} set");
+            LOAD_ACCEL_MAP_INI_HOOK_PTR.store(Box::into_raw(Box::new(hook)), Ordering::SeqCst);
+        }
+        Err(_) => return 8,
+    }
+
+    debug!("Mod loaded successfully");
     0
 }
 
@@ -130,7 +165,7 @@ pub unsafe extern "cdecl" fn reposition_ui_elements_custom() -> u32 {
 
     // Fix ANIM44 Pos
     let anim42 = class27.get_anim_44();
-    anim42.set_pos_x(real_resolution_width - 284);
+    anim42.set_pos_x(real_resolution_width as i32 - 284);
 
     1280
 }
@@ -162,6 +197,41 @@ pub unsafe extern "thiscall" fn maybe_render_all_objects_hook(this: u32, a2: u32
     ddraw_set_render_dest(old_render_dest);
 
     0
+}
+
+#[no_mangle]
+pub unsafe extern "cdecl" fn ddraw_dll_decode_supported_files_hook(aim_image_inner: u32, file_path: PCSTR, mut file_data: u32, mut file_size: u32) -> i32 {
+    let orig_address = (*DECODE_SUPPORTED_FILES_HOOK_PTR.load(Ordering::SeqCst)).old_absolute;
+
+    match file_path.to_string() {
+        Ok(path) => {
+            if path.ends_with("Vollansichtskarte1280.bmp") {
+                debug!("ddraw_dll_decode_supported_files_hook replacing Vollansichtskarte1280");
+                file_data = VOLLANSICHTSKARTE1920.as_ptr() as _;
+                file_size = VOLLANSICHTSKARTE1920.len() as _;
+            }
+        }
+        Err(e) => warn!("{e:?}"), // These are probably not utf8 but ansi?
+    }
+
+    let orig: extern "cdecl" fn(aim_image_inner: u32, file_path: PCSTR, file_data: u32, file_size: u32) -> i32 = unsafe { mem::transmute(orig_address) };
+    orig(aim_image_inner, file_path, file_data, file_size)
+}
+
+#[no_mangle]
+pub unsafe extern "thiscall" fn class73_place_ui_element_hook(this: u32, zero: u32, class74: u32) {
+    let class73 = Class73Ptr::new();
+    class73.set_x(0);
+    class73.set_y(0);
+    class73.set_width(1920);
+    class73.set_height(1080);
+    class73.get_anim_0_1_2().get_screen_rectangle(0).set_width(1920);
+    class73.get_anim_0_1_2().get_screen_rectangle(0).set_height(1080);
+
+    let orig_address = (*LOAD_ACCEL_MAP_INI_HOOK_PTR.load(Ordering::SeqCst)).old_absolute;
+    let orig: extern "thiscall" fn(this: u32, zero: u32, class74: u32) = unsafe { mem::transmute(orig_address) };
+    debug!("class73_place_ui_element_hook calling {orig_address:#X}");
+    orig(this, zero, class74)
 }
 
 extern "C" {

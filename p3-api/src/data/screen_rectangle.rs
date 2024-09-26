@@ -35,6 +35,14 @@ impl ScreenRectanglePtr {
             *ptr = width;
         }
     }
+
+    pub fn set_height(&self, height: u32) {
+        // TODO write through P3
+        let ptr: *mut u32 = (self.address + 0x0c) as _;
+        unsafe {
+            *ptr = height;
+        }
+    }
 }
 
 impl P3Pointer for ScreenRectanglePtr {

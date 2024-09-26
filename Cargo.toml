@@ -28,7 +28,7 @@ exclude = [
 version = "0.1.5"
 
 [workspace.dependencies]
-hooklet = "^0.1.4"
+hooklet = "^0.1.5"
 clap = { version = "4.3.0", features = ["derive"] }
 simple_logger = "4.1"
 log = "0.4"

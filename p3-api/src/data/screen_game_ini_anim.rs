@@ -3,6 +3,7 @@ use super::{
     screen_rectangle::{ScreenRectangleArrayPtr, ScreenRectanglePtr},
 };
 
+/// A.k.a. class74
 #[derive(Clone, Debug)]
 pub struct ScreenGameIniAnimPtr {
     pub address: u32,
@@ -13,9 +14,9 @@ impl ScreenGameIniAnimPtr {
         Self { address }
     }
 
-    pub fn set_pos_x(&self, x: u32) {
+    pub fn set_pos_x(&self, x: i32) {
         // TODO write through P3
-        let ptr: *mut u32 = (self.address + 0x20) as _;
+        let ptr: *mut i32 = (self.address + 0x20) as _;
         unsafe {
             *ptr = x;
         }
