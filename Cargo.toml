@@ -5,6 +5,7 @@ members = [
     "aimcli",
     "cprcli",
     "mod-fix-damage-to-offside-ship-artillery",
+    "mod-fix-invulnerable-ship-artillery-slots",
     "mod-fix-market-hall-production-town",
     "mod-fix-new-settlement-ware-production",
     "mod-fix-siege-beggar-satisfaction-bonus", 

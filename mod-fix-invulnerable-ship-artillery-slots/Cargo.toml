@@ -1,0 +1,14 @@
+[package]
+name = "mod-fix-invulnerable-ship-artillery-slots"
+edition = "2021"
+version.workspace = true
+
+[lib]
+crate-type = ["cdylib"]
+name="fix_invulnerable_ship_artillery_slots"
+
+[dependencies]
+p3-api = { path = "../p3-api" }
+log = { workspace = true }
+win_dbg_logger = { workspace = true }
+hooklet = { workspace = true }
