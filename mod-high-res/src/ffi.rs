@@ -1,6 +1,6 @@
 use std::{
     arch::global_asm,
-    ffi::c_void,
+    ffi::{c_void, CStr},
     mem, ptr,
     sync::atomic::{AtomicPtr, Ordering},
 };
@@ -12,6 +12,8 @@ use p3_api::{
     ui::class73::Class73Ptr,
 };
 use windows::core::PCSTR;
+
+const FULLHD_STRING: &CStr = c"1920 x 1080";
 
 const CALCULATE_RESOLUTION_ON_OPTIONS_MENU_CLOSE_PATCH_ADDRESS: u32 = 0x00423BBD;
 static CALCULATE_RESOLUTION_ON_OPTIONS_MENU_CLOSE_CONTINUATION: u32 = 0x00423C00;
@@ -130,6 +132,9 @@ pub unsafe extern "C" fn start() -> u32 {
         }
         Err(_) => return 8,
     }
+
+    let resolution_pcstr_ptr: *mut *const i8 = 0x0069AE40 as _;
+    *resolution_pcstr_ptr = FULLHD_STRING.as_ptr();
 
     debug!("Mod loaded successfully");
     0
