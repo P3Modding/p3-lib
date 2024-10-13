@@ -17,7 +17,7 @@ fn latin1_to_string(s: &[u8]) -> String {
     s.iter().take_while(|c| **c != 0).map(|&c| c as char).collect()
 }
 
-unsafe fn latin1_ptr_to_string(mut s: *const u8) -> String {
+pub unsafe fn latin1_ptr_to_string(mut s: *const u8) -> String {
     let mut result = String::new();
     while *s != 0 {
         result.push(*s as char);

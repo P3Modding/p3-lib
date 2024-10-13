@@ -6,9 +6,10 @@ use std::{
 };
 
 use hooklet::{CallRel32Hook, X86Rel32Type};
-use log::{debug, warn};
+use log::debug;
 use p3_api::{
     data::{class27::Class27Ptr, ddraw_fill_solid_rect, ddraw_set_constant_color, ddraw_set_render_dest, get_resolution_height, get_resolution_width},
+    latin1_ptr_to_string,
     ui::class73::Class73Ptr,
 };
 use windows::core::PCSTR;
@@ -205,21 +206,16 @@ pub unsafe extern "thiscall" fn maybe_render_all_objects_hook(this: u32, a2: u32
 }
 
 #[no_mangle]
-pub unsafe extern "cdecl" fn ddraw_dll_decode_supported_files_hook(aim_image_inner: u32, file_path: PCSTR, mut file_data: u32, mut file_size: u32) -> i32 {
+pub unsafe extern "cdecl" fn ddraw_dll_decode_supported_files_hook(aim_image_inner: u32, file_path: *const u8, mut file_data: u32, mut file_size: u32) -> i32 {
     let orig_address = (*DECODE_SUPPORTED_FILES_HOOK_PTR.load(Ordering::SeqCst)).old_absolute;
 
-    match file_path.to_string() {
-        Ok(path) => {
-            if path.ends_with("Vollansichtskarte1280.bmp") {
-                debug!("ddraw_dll_decode_supported_files_hook replacing Vollansichtskarte1280");
-                file_data = VOLLANSICHTSKARTE1920.as_ptr() as _;
-                file_size = VOLLANSICHTSKARTE1920.len() as _;
-            }
-        }
-        Err(e) => warn!("{e:?}"), // These are probably not utf8 but ansi?
+    if latin1_ptr_to_string(file_path).ends_with("Vollansichtskarte1280.bmp") {
+        debug!("ddraw_dll_decode_supported_files_hook replacing Vollansichtskarte1280");
+        file_data = VOLLANSICHTSKARTE1920.as_ptr() as _;
+        file_size = VOLLANSICHTSKARTE1920.len() as _;
     }
 
-    let orig: extern "cdecl" fn(aim_image_inner: u32, file_path: PCSTR, file_data: u32, file_size: u32) -> i32 = unsafe { mem::transmute(orig_address) };
+    let orig: extern "cdecl" fn(aim_image_inner: u32, file_path: *const u8, file_data: u32, file_size: u32) -> i32 = unsafe { mem::transmute(orig_address) };
     orig(aim_image_inner, file_path, file_data, file_size)
 }
 
