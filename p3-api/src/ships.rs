@@ -1,10 +1,11 @@
-use super::{
+use crate::data::{
     convoy::{ConvoyPtr, CONVOY_SIZE},
     p3_ptr::P3Pointer,
-    ship::{ShipPtr, SHIP_SIZE},
 };
 
-pub const CLASS6_ADDRESS: u32 = 0x006dd7a0;
+use super::ship::{ShipPtr, SHIP_SIZE};
+
+pub const SHIPS_ADDRESS: u32 = 0x006dd7a0;
 
 #[derive(Clone, Debug)]
 pub struct ShipsPtr {
@@ -19,7 +20,7 @@ impl Default for ShipsPtr {
 
 impl ShipsPtr {
     pub const fn new() -> Self {
-        Self { address: CLASS6_ADDRESS }
+        Self { address: SHIPS_ADDRESS }
     }
 
     pub fn get_ship(&self, ship_id: u16) -> Option<ShipPtr> {

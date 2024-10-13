@@ -9,12 +9,9 @@ pub mod enums;
 pub mod mission;
 pub mod missions;
 pub mod office;
-pub mod operation;
 pub mod p3_ptr;
 pub mod screen_game_ini_anim;
 pub mod screen_rectangle;
-pub mod ship;
-pub mod ships;
 pub mod statics;
 pub mod storage;
 

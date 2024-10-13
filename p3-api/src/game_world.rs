@@ -7,6 +7,7 @@ use crate::{
         office::{OfficePtr, OFFICE_SIZE},
         p3_ptr::P3Pointer,
     },
+    merchant::{MerchantPtr, MERCHANT_SIZE},
     town::{TownPtr, TOWN_SIZE},
 };
 
@@ -42,8 +43,16 @@ impl GameWorldPtr {
         Self { address: GAME_WORLD_ADDRESS }
     }
 
+    pub unsafe fn get_month(&self) -> u8 {
+        self.get(0x01)
+    }
+
     pub fn get_offices_count(&self) -> u16 {
         unsafe { self.get(0x08) }
+    }
+
+    pub unsafe fn get_towns_count(&self) -> u16 {
+        self.get(0x10)
     }
 
     pub fn get_game_time_raw(&self) -> u32 {
@@ -67,11 +76,11 @@ impl GameWorldPtr {
         }
     }
 
-    pub fn get_raw_town_ids(&self) -> [u8; 40] {
+    pub fn get_raw_town_ids(&self) -> [TownId; 40] {
         unsafe { self.get(0x18) }
     }
 
-    pub fn get_raw_town_id(&self, index: u8) -> Option<TownId> {
+    pub fn get_town_id(&self, index: u8) -> Option<TownId> {
         assert!(index < 40);
         FromPrimitive::from_u8(unsafe { self.get(0x18 + index as u32) })
     }
@@ -81,11 +90,11 @@ impl GameWorldPtr {
         TownPtr::new(towns_address + town_index as u32 * TOWN_SIZE)
     }
 
-    pub fn get_town_by_id(&self, raw_town_id: TownId) -> Option<TownPtr> {
+    pub fn get_town_by_id(&self, town_id: TownId) -> Option<TownPtr> {
         let towns_address: u32 = unsafe { self.get(0x68) };
         let raw_ids = self.get_raw_town_ids();
         for (index, raw_id) in raw_ids.iter().enumerate() {
-            if *raw_id == raw_town_id as u8 {
+            if *raw_id == town_id {
                 return Some(TownPtr::new(towns_address + index as u32 * TOWN_SIZE));
             }
         }
@@ -95,7 +104,7 @@ impl GameWorldPtr {
     pub fn get_town_index(&self, raw_town_id: TownId) -> Option<u8> {
         let raw_ids = self.get_raw_town_ids();
         for (index, raw_id) in raw_ids.iter().enumerate() {
-            if *raw_id == raw_town_id as u8 {
+            if *raw_id == raw_town_id {
                 return Some(index as u8);
             }
         }
@@ -105,6 +114,11 @@ impl GameWorldPtr {
     pub fn get_office(&self, office_index: u16) -> OfficePtr {
         let base_address: u32 = unsafe { self.get(0x74) };
         OfficePtr::new(base_address + office_index as u32 * OFFICE_SIZE)
+    }
+
+    pub unsafe fn get_merchant(&self, index: u16) -> MerchantPtr {
+        let base_address: u32 = self.get(0x78);
+        MerchantPtr::new(base_address + index as u32 * MERCHANT_SIZE)
     }
 
     pub fn get_office_in_of(&self, town_index: u8, merchant_id: u16) -> Option<OfficePtr> {
@@ -124,6 +138,25 @@ impl GameWorldPtr {
 
             trace!("{:?} belongs to someone else {:#x}", &office, office.get_merchant_id());
             office_id = office.next_office_id();
+        }
+    }
+
+    pub unsafe fn find_town_index(&self, town_id: TownId) -> Option<u8> {
+        let raw_ids = self.get_raw_town_ids();
+        for (index, id) in raw_ids.iter().enumerate() {
+            if *id == town_id {
+                return Some(index as _);
+            }
+        }
+        None
+    }
+
+    pub unsafe fn find_town_id(&self, town_index: u8) -> Option<TownId> {
+        let raw_ids = self.get_raw_town_ids();
+        if town_index < self.get_towns_count() as u8 {
+            Some(raw_ids[town_index as usize])
+        } else {
+            None
         }
     }
 }

@@ -56,7 +56,7 @@ pub enum ProductionId {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, EnumIter, EnumString, FromPrimitive)]
-#[repr(u16)]
+#[repr(u8)]
 pub enum TownId {
     Edinburgh = 0x00,
     Newcastle = 0x01,
@@ -152,7 +152,7 @@ pub enum TownGroundTypeId {
 }
 
 impl WareId {
-    pub fn get_scaling(&self) -> i32 {
+    pub const fn get_scaling(&self) -> i32 {
         match self {
             WareId::Grain => 2000,
             WareId::Meat => 2000,
@@ -180,10 +180,28 @@ impl WareId {
             WareId::Carbine => 10,
         }
     }
+
+    pub const fn is_barrel_ware(&self) -> bool {
+        match self {
+            WareId::Grain => false,
+            WareId::Meat => false,
+            WareId::Fish => false,
+            WareId::Timber => false,
+            WareId::Wool => false,
+            WareId::PigIron => false,
+            WareId::Hemp => false,
+            WareId::Bricks => false,
+            WareId::Sword => panic!(),
+            WareId::Bow => panic!(),
+            WareId::Crossbow => panic!(),
+            WareId::Carbine => panic!(),
+            _ => true,
+        }
+    }
 }
 
 impl ShipWeaponId {
-    pub fn get_scaling(&self) -> u32 {
+    pub const fn get_scaling(&self) -> u32 {
         match self {
             ShipWeaponId::SmallCatapult => 1000,
             ShipWeaponId::SmallBallista => 1000,

@@ -1,7 +1,7 @@
 use std::{arch::global_asm, ffi::c_void};
 
 use log::{debug, error, LevelFilter};
-use p3_api::data::ships::ShipsPtr;
+use p3_api::ships::ShipsPtr;
 use windows::Win32::{
     Foundation::{GetLastError, WIN32_ERROR},
     System::Memory::{VirtualProtect, PAGE_EXECUTE_READWRITE, PAGE_PROTECTION_FLAGS},

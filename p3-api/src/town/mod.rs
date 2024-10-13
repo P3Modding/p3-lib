@@ -1,16 +1,20 @@
 use log::debug;
 use map::TownMapPtr;
-use shipyard::{ShipLevels, ShipyardPtr};
+use shipyard::ShipyardPtr;
 
 use crate::{
     data::{enums::TownId, p3_ptr::P3Pointer, storage::StoragePtr},
     facility::{FacilityPtr, FACILITY_SIZE},
+    latin1_ptr_to_string,
 };
 
 pub mod map;
 pub mod shipyard;
+pub mod static_town_data;
 
 pub const TOWN_SIZE: u32 = 0x9F8;
+pub const TOWN_NAME_PTRS_ADDRESS: u32 = 0x006DDA00;
+pub const WARE_BASE_PRICES: *const f32 = 0x00673A18 as _;
 
 #[derive(Debug)]
 pub struct TownPtr {
@@ -26,13 +30,20 @@ impl TownPtr {
         StoragePtr::new(self.address)
     }
 
-    pub fn get_raw_town_id(&self) -> TownId {
-        //TODO enforce enum variant
-        unsafe { self.get(0x2c1) }
+    pub unsafe fn get_town_id(&self) -> TownId {
+        self.get(0x2c1)
+    }
+
+    pub unsafe fn get_town_id_u8(&self) -> u8 {
+        self.get(0x2c1)
     }
 
     pub fn get_daily_consumptions_citizens(&self) -> [i32; 24] {
         unsafe { self.get(0x310) }
+    }
+
+    pub fn get_production_values(&self) -> [i32; 24] {
+        unsafe { self.get(0x490) }
     }
 
     pub fn get_first_office_index(&self) -> u16 {
@@ -48,25 +59,29 @@ impl TownPtr {
         ShipyardPtr::new(self.address + 0x810)
     }
 
-    pub fn get_build_ship_capacity_markup(&self) -> f32 {
-        unsafe { self.get(0x818) }
-    }
-
-    pub fn get_build_ship_quality_levels(&self) -> ShipLevels {
-        unsafe { self.get(0x824) }
-    }
-
-    pub fn get_build_ship_828_always_0(&self) -> [u8; 4] {
-        unsafe { self.get(0x828) }
-    }
-
     pub fn get_facility(&self, index: u32) -> FacilityPtr {
         FacilityPtr::new(self.address + 0x840 + FACILITY_SIZE * index)
+    }
+
+    pub unsafe fn get_price_thresholds(&self) -> [[i32; 4]; 24] {
+        self.get(0x4f0)
     }
 }
 
 impl P3Pointer for TownPtr {
     fn get_address(&self) -> u32 {
         self.address
+    }
+}
+
+pub fn get_town_name(town_index: u8) -> Option<String> {
+    unsafe {
+        let town_names_ptr: *const *const u8 = TOWN_NAME_PTRS_ADDRESS as _;
+        let town_name_ptr = *town_names_ptr.add(town_index as _);
+        if town_name_ptr.is_null() {
+            None
+        } else {
+            Some(latin1_ptr_to_string(town_name_ptr))
+        }
     }
 }

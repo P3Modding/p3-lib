@@ -1,10 +1,8 @@
-use crate::latin1_to_string;
-
-use super::p3_ptr::P3Pointer;
+use crate::{data::p3_ptr::P3Pointer, latin1_to_string};
 
 pub const SHIP_SIZE: u32 = 0x180;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct ShipPtr {
     pub address: u32,
 }
@@ -12,6 +10,10 @@ pub struct ShipPtr {
 impl ShipPtr {
     pub fn new(address: u32) -> Self {
         Self { address }
+    }
+
+    pub unsafe fn get_next_ship_index_of_merchant(&self) -> u16 {
+        self.get(0x04)
     }
 
     pub fn get_next_ship_in_convoy(&self) -> u16 {
@@ -42,8 +44,8 @@ impl ShipPtr {
         unsafe { self.get(0x20) }
     }
 
-    pub fn get_destination_town_index(&self) -> Option<u8> {
-        unsafe { self.get(0x38) }
+    pub unsafe fn get_destination_town_index(&self) -> u8 {
+        self.get(0x38)
     }
 
     pub fn get_last_town_index(&self) -> Option<u8> {
@@ -55,6 +57,10 @@ impl ShipPtr {
         }
     }
 
+    pub fn get_wares(&self) -> [i32; 24] {
+        unsafe { self.get(0x54) }
+    }
+
     pub fn get_status(&self) -> u16 {
         unsafe { self.get(0x134) }
     }
@@ -62,6 +68,11 @@ impl ShipPtr {
     pub fn get_name(&self) -> String {
         let buf: [u8; 16] = unsafe { self.get(0x160) };
         latin1_to_string(&buf)
+    }
+
+    pub unsafe fn calc_free_capacity(&self) -> i32 {
+        //TODO weapons, sailors
+        self.get_capacity() as i32 - self.get_wares().iter().sum::<i32>() - 10000
     }
 }
 
