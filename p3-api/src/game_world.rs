@@ -121,7 +121,7 @@ impl GameWorldPtr {
         MerchantPtr::new(base_address + index as u32 * MERCHANT_SIZE)
     }
 
-    pub fn get_office_in_of(&self, town_index: u8, merchant_id: u16) -> Option<OfficePtr> {
+    pub unsafe fn get_office_in_of(&self, town_index: u8, merchant_id: u16) -> Option<OfficePtr> {
         let offices_count = self.get_offices_count();
         let town = self.get_town(town_index);
         let mut office_id = town.get_first_office_index();
@@ -137,7 +137,7 @@ impl GameWorldPtr {
             }
 
             trace!("{:?} belongs to someone else {:#x}", &office, office.get_merchant_id());
-            office_id = office.next_office_id();
+            office_id = office.next_office_in_town_index();
         }
     }
 

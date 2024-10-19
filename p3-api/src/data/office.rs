@@ -20,7 +20,7 @@ impl OfficePtr {
         unsafe { self.get(0x2c4) }
     }
 
-    pub fn next_office_id(&self) -> u16 {
+    pub fn next_office_in_town_index(&self) -> u16 {
         unsafe { self.get(0x2ca) }
     }
 }

@@ -1,4 +1,3 @@
-use log::debug;
 use map::TownMapPtr;
 use shipyard::ShipyardPtr;
 
@@ -46,9 +45,8 @@ impl TownPtr {
         unsafe { self.get(0x490) }
     }
 
-    pub fn get_first_office_index(&self) -> u16 {
-        debug!("town {:#X} getting first office index", self.address);
-        unsafe { self.get(0x784) }
+    pub unsafe fn get_first_office_index(&self) -> u16 {
+        self.get(0x784)
     }
 
     pub fn get_town_map(&self) -> TownMapPtr {

@@ -71,12 +71,10 @@ pub unsafe extern "thiscall" fn shipyard_window_open_hook() {
     let class48 = Class48Ptr::new();
     class48.set_ignore_below_gradient(0);
     class48.set_gradient_y(200);
-    class48.clip_stuff();
 }
 
 #[no_mangle]
 pub unsafe extern "thiscall" fn shipyard_rendering_hook() -> i32 {
-    debug!("shipyard_rendering_hook");
     let window = UIShipyardWindowPtr::new();
     let town_index = window.get_town_index();
     let selected_page = window.get_selected_page();

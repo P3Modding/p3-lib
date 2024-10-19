@@ -14,6 +14,7 @@ members = [
     "mod-scrollmap-render-all-ships",
     "mod-shipyard-details",
     "mod-tavern-show-all-sailors",
+    "mod-town-hall-details",
     #"p3-agent",
     "p3-agent-loader",
     "p3-aim",
@@ -29,9 +30,12 @@ exclude = [
 version = "0.1.6"
 
 [workspace.dependencies]
-hooklet = "^0.1.5"
+#hooklet = "^0.1.5"
+hooklet = { path = "../hooklet" }
 clap = { version = "4.3.0", features = ["derive"] }
 simple_logger = "4.1"
 log = "0.4"
 sysinfo = "0.29"
 win_dbg_logger = "0.1"
+num-traits = "0.2"
+num-derive = "0.3"

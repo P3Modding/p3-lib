@@ -110,8 +110,8 @@ pub fn fill_p3_string(p3_string: *const c_void, input: &[u8]) {
     function(p3_string, input.as_ptr() as _)
 }
 
-pub fn ui_render_text_at(x: i32, y: i32, text: &[u8]) {
-    let function: extern "cdecl" fn(x: i32, y: i32, text: *const c_void) = unsafe { mem::transmute(0x004BB3E0) };
+pub unsafe fn ui_render_text_at(x: i32, y: i32, text: &[u8]) {
+    let function: extern "cdecl" fn(x: i32, y: i32, text: *const c_void) = mem::transmute(0x004BB3E0);
     function(x, y, text.as_ptr() as _)
 }
 

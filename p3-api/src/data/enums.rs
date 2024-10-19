@@ -32,8 +32,10 @@ pub enum WareId {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, EnumIter, EnumString, FromPrimitive)]
 #[repr(u16)]
-pub enum ProductionId {
+pub enum FacilityId {
     Militia = 0x00,
+    Shipyard = 0x01,
+    Construction = 0x02,
     Weaponsmith = 0x03,
     HuntingLodge = 0x04,
     FishermansHouse = 0x05,
@@ -127,6 +129,16 @@ pub enum BuildingId {
     Apiary = 0x59,
     Warehouse = 0x66, // has a 0x20 next to it
     Mint = 0x67,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq, EnumIter, FromPrimitive)]
+#[repr(u8)]
+pub enum AldermanMissionType {
+    FoundTown = 0x00,
+    OverlandTradeRoute = 0x01,
+    NotoriousPirate = 0x02,
+    PirateHideout = 0x03,
+    SupplyProblems = 0x04,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, EnumIter, FromPrimitive)]
