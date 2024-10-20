@@ -10,10 +10,4 @@ name="fix_new_settlement_ware_production"
 [dependencies]
 log = { workspace = true }
 win_dbg_logger = { workspace = true }
-
-[dependencies.windows]
-version = "0.48"
-features = [
-    "Win32_Foundation",
-    "Win32_System_Memory",
-]
+hooklet = { workspace = true }

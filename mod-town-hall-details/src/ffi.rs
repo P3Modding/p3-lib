@@ -5,8 +5,8 @@ use std::{
     sync::atomic::{AtomicPtr, Ordering},
 };
 
-use hooklet::windows::x86::{deploy_rel32_raw, hook_call_rel32, CallRel32Hook, FunctionPointerHook, X86Rel32Type};
 use hooklet::windows::x86::hook_function_pointer;
+use hooklet::windows::x86::{deploy_rel32_raw, hook_call_rel32, CallRel32Hook, FunctionPointerHook, X86Rel32Type};
 use log::debug;
 use p3_api::ui::ui_town_hall_window::UITownHallWindowPtr;
 use windows::core::PCSTR;
