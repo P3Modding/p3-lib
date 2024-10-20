@@ -45,6 +45,10 @@ impl TownPtr {
         unsafe { self.get(0x490) }
     }
 
+    pub fn get_unknown_stock(&self) -> [i32; 24] {
+        unsafe { self.get(0x670) }
+    }
+
     pub unsafe fn get_first_office_index(&self) -> u16 {
         self.get(0x784)
     }

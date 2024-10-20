@@ -3,7 +3,7 @@ use std::{
     ffi::{c_void, CStr, CString},
 };
 
-use hooklet::X86Rel32Type;
+use hooklet::windows::x86::{deploy_rel32_raw, X86Rel32Type};
 use log::debug;
 use p3_api::{
     data::{
@@ -42,7 +42,7 @@ pub unsafe extern "C" fn start() -> u32 {
     let _ = log::set_logger(&win_dbg_logger::DEBUGGER_LOGGER);
     log::set_max_level(log::LevelFilter::Trace);
 
-    if hooklet::deploy_rel32_raw(
+    if deploy_rel32_raw(
         SHIPYARD_WINDOW_OPEN_PATCH_ADDRESS as _,
         (&ui_shipyard_window_open_detour) as *const _ as _,
         X86Rel32Type::Jump,
@@ -52,7 +52,7 @@ pub unsafe extern "C" fn start() -> u32 {
         return 1;
     }
 
-    if hooklet::deploy_rel32_raw(
+    if deploy_rel32_raw(
         LOAD_SHIPYARD_SELECTED_PAGE_PATCH_ADDRESS as _,
         (&load_shipyard_selected_page_detour) as *const _ as _,
         X86Rel32Type::Jump,

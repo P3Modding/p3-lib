@@ -5,7 +5,7 @@ use std::{
     sync::atomic::{AtomicPtr, Ordering},
 };
 
-use hooklet::{CallRel32Hook, X86Rel32Type};
+use hooklet::windows::x86::{deploy_rel32_raw, hook_call_rel32, CallRel32Hook, X86Rel32Type};
 use log::debug;
 use p3_api::{
     data::{class27::Class27Ptr, ddraw_fill_solid_rect, ddraw_set_constant_color, ddraw_set_render_dest, get_resolution_height, get_resolution_width},
@@ -47,7 +47,7 @@ pub unsafe extern "C" fn start() -> u32 {
     let _ = log::set_logger(&win_dbg_logger::DEBUGGER_LOGGER);
     log::set_max_level(log::LevelFilter::Trace);
 
-    if hooklet::deploy_rel32_raw(
+    if deploy_rel32_raw(
         CALCULATE_RESOLUTION_ON_OPTIONS_MENU_CLOSE_PATCH_ADDRESS as _,
         (&calculate_resolution_after_options_screen) as *const _ as _,
         X86Rel32Type::Jump,
@@ -58,7 +58,7 @@ pub unsafe extern "C" fn start() -> u32 {
     }
 
     // Replace the mapping from class24 resolution field to width and height values
-    if hooklet::deploy_rel32_raw(
+    if deploy_rel32_raw(
         CALCULATE_RESOLUTION_BEFORE_SCENE_LOAD_PATCH_ADDRESS as _,
         (&calculate_resolution_before_scene_load) as *const _ as _,
         X86Rel32Type::Jump,
@@ -69,7 +69,7 @@ pub unsafe extern "C" fn start() -> u32 {
     }
 
     // Replace the mapping from ui options resolution field to width and height values
-    if hooklet::deploy_rel32_raw(
+    if deploy_rel32_raw(
         CALCULATE_RESOLUTION_AFTER_SCENE_LOAD_PATCH_ADDRESS as _,
         (&calculate_resolution_after_scene_load) as *const _ as _,
         X86Rel32Type::Jump,
@@ -80,7 +80,7 @@ pub unsafe extern "C" fn start() -> u32 {
     }
 
     debug!("Deploying resolution dependent ui positioning patch");
-    if hooklet::deploy_rel32_raw(
+    if deploy_rel32_raw(
         REPOSITION_UI_ELEMENTS_PATCH_ADDRESS as _,
         (&reposition_ui_elements) as *const _ as _,
         X86Rel32Type::Jump,
@@ -91,7 +91,7 @@ pub unsafe extern "C" fn start() -> u32 {
     }
 
     debug!("Deploying resolution dependent top bar ui positioning patch");
-    if hooklet::deploy_rel32_raw(
+    if deploy_rel32_raw(
         REPOSITION_UI_ELEMENTS_TOP_BAR_PATCH_ADDRESS as _,
         (&reposition_ui_elements_top_bar) as *const _ as _,
         X86Rel32Type::Jump,
@@ -103,7 +103,7 @@ pub unsafe extern "C" fn start() -> u32 {
 
     // Fix empty bottom right corner
     debug!("Deploying render_all_objects_hook");
-    match hooklet::hook_call_rel32(PCSTR::from_raw(ptr::null()), 0x28649, maybe_render_all_objects_hook as usize) {
+    match hook_call_rel32(PCSTR::from_raw(ptr::null()), 0x28649, maybe_render_all_objects_hook as usize as u32) {
         Ok(hook) => {
             HOOK_PTR.store(Box::into_raw(Box::new(hook)), Ordering::SeqCst);
         }
@@ -112,10 +112,10 @@ pub unsafe extern "C" fn start() -> u32 {
 
     // Fix acceleration map
     debug!("Deploying dddraw_dll.dll decode_supported_files hook to replace the background image");
-    match hooklet::hook_call_rel32(
+    match hook_call_rel32(
         PCSTR::from_raw(c"aim.dll".as_ptr() as _),
         0x2984,
-        ddraw_dll_decode_supported_files_hook as usize,
+        ddraw_dll_decode_supported_files_hook as usize as u32,
     ) {
         Ok(hook) => {
             debug!("Hook {hook:?} set");
@@ -126,7 +126,7 @@ pub unsafe extern "C" fn start() -> u32 {
 
     // Fix acceleration map
     debug!("Deploying load screen settings from accelMap.ini");
-    match hooklet::hook_call_rel32(PCSTR::from_raw(ptr::null()), 0x12C5, class73_place_ui_element_hook as usize) {
+    match hook_call_rel32(PCSTR::from_raw(ptr::null()), 0x12C5, class73_place_ui_element_hook as usize as u32) {
         Ok(hook) => {
             debug!("Hook {hook:?} set");
             LOAD_ACCEL_MAP_INI_HOOK_PTR.store(Box::into_raw(Box::new(hook)), Ordering::SeqCst);

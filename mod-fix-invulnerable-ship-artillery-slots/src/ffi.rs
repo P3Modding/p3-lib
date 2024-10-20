@@ -1,6 +1,6 @@
 use std::{arch::global_asm, ffi::c_void};
 
-use hooklet::X86Rel32Type;
+use hooklet::windows::x86::{deploy_rel32_raw, X86Rel32Type};
 use log::{debug, LevelFilter};
 
 const PATCH_ADDRESS_1: u32 = 0x0061FDDB;
@@ -14,11 +14,11 @@ pub unsafe extern "C" fn start() -> u32 {
     let _ = log::set_logger(&win_dbg_logger::DEBUGGER_LOGGER);
     log::set_max_level(LevelFilter::Trace);
 
-    if hooklet::deploy_rel32_raw(PATCH_ADDRESS_1 as _, (&fix_index_calc1) as *const _ as _, X86Rel32Type::Jump).is_err() {
+    if deploy_rel32_raw(PATCH_ADDRESS_1 as _, (&fix_index_calc1) as *const _ as _, X86Rel32Type::Jump).is_err() {
         return 1;
     }
 
-    if hooklet::deploy_rel32_raw(PATCH_ADDRESS_2 as _, (&fix_index_calc2) as *const _ as _, X86Rel32Type::Jump).is_err() {
+    if deploy_rel32_raw(PATCH_ADDRESS_2 as _, (&fix_index_calc2) as *const _ as _, X86Rel32Type::Jump).is_err() {
         return 2;
     }
 

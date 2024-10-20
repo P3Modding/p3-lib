@@ -2,7 +2,7 @@ use crate::data::p3_ptr::P3Pointer;
 
 pub const STATIC_UI_TOWN_HALL_WINDOW_PTR_ADDRESS: *const u32 = 0x006E558C as _;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Copy)]
 pub struct UITownHallWindowPtr {
     pub address: u32,
 }
@@ -43,6 +43,10 @@ impl UITownHallWindowPtr {
 
     pub unsafe fn get_selected_alderman_mission_index(&self) -> u8 {
         self.get(0x1907)
+    }
+
+    pub unsafe fn set_field_1930_timestamp(&self, timestamp: u32) {
+        self.set(0x1930, &timestamp)
     }
 
     pub unsafe fn get_task_index(&self, mission_index: u8) -> u16 {
