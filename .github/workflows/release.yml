@@ -24,6 +24,7 @@ jobs:
         mv target/i686-pc-windows-msvc/release/scrollmap_render_all_ships.dll ./mods/
         mv target/i686-pc-windows-msvc/release/shipyard_details.dll ./mods/
         mv target/i686-pc-windows-msvc/release/tavern_show_all_sailors.dll ./mods/
+        mv target/i686-pc-windows-msvc/release/town_hall_details.dll ./mods/
         mkdir files
         mv target/i686-pc-windows-msvc/release/aimcli.exe ./files
         mv target/i686-pc-windows-msvc/release/cprcli.exe ./files

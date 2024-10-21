@@ -1,6 +1,7 @@
 #![allow(clippy::missing_safety_doc)]
 extern crate num_derive;
 
+pub mod class35;
 pub mod data;
 pub mod facility;
 pub mod game_world;
@@ -13,6 +14,19 @@ pub mod ship;
 pub mod ships;
 pub mod town;
 pub mod ui;
+
+#[derive(Clone, Debug)]
+#[repr(C)]
+pub struct Point<T> {
+    pub x: T,
+    pub y: T,
+}
+
+impl<T> Point<T> {
+    pub const fn new(x: T, y: T) -> Self {
+        Self { x, y }
+    }
+}
 
 // https://stackoverflow.com/a/28175593/1569755
 fn latin1_to_string(s: &[u8]) -> String {
