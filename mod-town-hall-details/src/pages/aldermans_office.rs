@@ -1,9 +1,11 @@
 use std::ffi::{CStr, CString};
 
+use log::warn;
 use p3_api::{
     data::{ddraw_set_constant_color, ui_render_text_at},
     game_world::GAME_WORLD_PTR,
     missions::alderman_missions::{AldermanMissionDataPtr, FoundTownPtr},
+    operations::OPERATIONS_PTR,
     scheduled_tasks::{scheduled_task::ScheduledTaskData, SCHEDULED_TASKS_PTR},
     ui::{
         font::{self, get_normal_font},
@@ -16,10 +18,15 @@ static TASK_RESCHEDULING_IN: &CStr = c"Rescheduling in";
 static TASK_RESCHEDULES_REMAINING: &CStr = c"Reschedule Counter";
 static TOWN: &CStr = c"Town";
 static EFFECTIVE_PRODUCTION: &CStr = c"Effective Production";
+static INEFFECTIVE_PRODUCTION: &CStr = c"Ineffective Production";
 
 pub(crate) unsafe fn draw_page(window: UITownHallWindowPtr) {
     let next_mission_index = window.get_next_mission_index();
     if next_mission_index == 0 {
+        return;
+    }
+
+    if SCHEDULED_TASKS_PTR.get_merchant_alderman_mission_task_index(OPERATIONS_PTR.get_player_merchant_index()) != -1 {
         return;
     }
 
@@ -72,6 +79,7 @@ pub(crate) unsafe fn draw_page(window: UITownHallWindowPtr) {
 
 unsafe fn render_aldermans_office_modifications_found_town(window: UITownHallWindowPtr, data: &FoundTownPtr) {
     let town = data.get_town();
+    let effective_raw = data.get_production_effective_raw();
     let effective = data.get_production_effective();
     let x = window.get_x();
     let mut y = window.get_y() + 100;
@@ -88,10 +96,48 @@ unsafe fn render_aldermans_office_modifications_found_town(window: UITownHallWin
     font::ddraw_set_text_mode(font::TextMode::AlignRight);
     let mut effective_string = String::new();
     for facility in effective {
-        effective_string.push_str(&format!("{facility:?}, "));
+        match facility {
+            p3_api::data::enums::FacilityId::Militia => warn!("Unexpected facility {facility:?}"),
+            p3_api::data::enums::FacilityId::Shipyard => warn!("Unexpected facility {facility:?}"),
+            p3_api::data::enums::FacilityId::Construction => warn!("Unexpected facility {facility:?}"),
+            p3_api::data::enums::FacilityId::Weaponsmith => warn!("Unexpected facility {facility:?}"),
+            p3_api::data::enums::FacilityId::HuntingLodge => effective_string.push_str("Skins, "),
+            p3_api::data::enums::FacilityId::FishermansHouse => {
+                if effective_raw & 0x20000 != 0 {
+                    effective_string.push_str("Whale Oil, ")
+                } else {
+                    effective_string.push_str("Fish, ")
+                }
+            }
+            p3_api::data::enums::FacilityId::Brewery => effective_string.push_str("Beer, "),
+            p3_api::data::enums::FacilityId::Workshop => effective_string.push_str("Iron Goods, "),
+            p3_api::data::enums::FacilityId::Apiary => effective_string.push_str("Honey, "),
+            p3_api::data::enums::FacilityId::GrainFarm => effective_string.push_str("Grain, "),
+            p3_api::data::enums::FacilityId::CattleFarm => effective_string.push_str("Meat, Leather, "),
+            p3_api::data::enums::FacilityId::Sawmill => effective_string.push_str("Timber, "),
+            p3_api::data::enums::FacilityId::WeavingMill => effective_string.push_str("Cloth, "),
+            p3_api::data::enums::FacilityId::Saltery => effective_string.push_str("Salt, "),
+            p3_api::data::enums::FacilityId::Ironsmelter => effective_string.push_str("Pig Iron, "),
+            p3_api::data::enums::FacilityId::SheepFarm => effective_string.push_str("Wool, "),
+            p3_api::data::enums::FacilityId::Vineyard => effective_string.push_str("Wine, "),
+            p3_api::data::enums::FacilityId::Pottery => effective_string.push_str("Pottery, "),
+            p3_api::data::enums::FacilityId::Brickworks => effective_string.push_str("Bricks, "),
+            p3_api::data::enums::FacilityId::Pitchmaker => effective_string.push_str("Pitch, "),
+            p3_api::data::enums::FacilityId::HempFarm => effective_string.push_str("Hemp, "),
+        }
     }
     effective_string.pop();
     effective_string.pop();
     let effective_cstring = CString::new(effective_string).unwrap();
     ui_render_text_at(x + COL_OFFSETS[1], y, effective_cstring.to_bytes());
+    y += 20;
+
+    font::ddraw_set_text_mode(font::TextMode::AlignLeft);
+    ui_render_text_at(x + COL_OFFSETS[0], y, INEFFECTIVE_PRODUCTION.to_bytes());
+
+    font::ddraw_set_text_mode(font::TextMode::AlignRight);
+    let mut ineffective_string = String::new();
+    if effective_raw & 0x20000 != 0 {
+        ineffective_string.push_str("Fish")
+    }
 }

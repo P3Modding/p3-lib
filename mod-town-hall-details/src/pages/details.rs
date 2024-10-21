@@ -79,6 +79,7 @@ pub(crate) unsafe fn draw_page(window: UITownHallWindowPtr) {
 
     let mut effective_prods_count = 0;
     font::ddraw_set_font(font::get_normal_font());
+    let mut has_meat_or_leather = false;
     for data in &hanse_data {
         let ware = WareId::from_usize(data.ware).unwrap();
         let ratio = data.get_ratio();
@@ -86,7 +87,14 @@ pub(crate) unsafe fn draw_page(window: UITownHallWindowPtr) {
             ddraw_set_constant_color(0xFFD3D3D3);
         } else if effective_prods_count < 3 {
             ddraw_set_constant_color(0xFF7CFC00);
-            effective_prods_count += 1;
+            if ware == WareId::Meat || ware == WareId::Leather {
+                if !has_meat_or_leather {
+                    effective_prods_count += 1;
+                    has_meat_or_leather = true;
+                }
+            } else {
+                effective_prods_count += 1;
+            }
         } else {
             ddraw_set_constant_color(0xFF000000);
         }

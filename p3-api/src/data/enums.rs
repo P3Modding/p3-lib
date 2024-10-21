@@ -54,7 +54,6 @@ pub enum FacilityId {
     Brickworks = 0x12,
     Pitchmaker = 0x13,
     HempFarm = 0x14,
-    FishermansHouseWhale = 0xff,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, EnumIter, EnumString, FromPrimitive)]
