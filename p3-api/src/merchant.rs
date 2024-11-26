@@ -12,6 +12,10 @@ impl MerchantPtr {
         Self { address }
     }
 
+    pub fn get_first_office_index(&self) -> u16 {
+        unsafe { self.get(0x0c) }
+    }
+
     pub fn get_first_ship_index(&self) -> u16 {
         unsafe { self.get(0x0e) }
     }

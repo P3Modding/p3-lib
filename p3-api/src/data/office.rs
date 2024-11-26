@@ -2,7 +2,7 @@ use super::{p3_ptr::P3Pointer, storage::StoragePtr};
 
 pub const OFFICE_SIZE: u32 = 0x44C;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct OfficePtr {
     pub address: u32,
 }
@@ -16,12 +16,24 @@ impl OfficePtr {
         StoragePtr::new(self.address)
     }
 
-    pub fn get_merchant_id(&self) -> u16 {
+    pub fn get_merchant_index(&self) -> u16 {
         unsafe { self.get(0x2c4) }
     }
 
-    pub fn next_office_in_town_index(&self) -> u16 {
+    pub fn get_next_office_of_merchant_index(&self) -> u16 {
+        unsafe { self.get(0x2c8) }
+    }
+
+    pub fn get_next_office_in_town_index(&self) -> u16 {
         unsafe { self.get(0x2ca) }
+    }
+
+    pub unsafe fn set_administrator_trade_prices(&self, prices: [i32; 20]) {
+        self.set(0x2f4, &prices)
+    }
+
+    pub unsafe fn set_administrator_trade_actions(&self, actions: [i32; 20]) {
+        self.set(0x2f4, &actions)
     }
 }
 

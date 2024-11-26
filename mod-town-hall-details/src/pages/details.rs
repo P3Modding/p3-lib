@@ -56,7 +56,7 @@ pub(crate) unsafe fn draw_page(window: UITownHallWindowPtr) {
                 hanse_data[ware].total_wares += office_stock[ware];
                 hanse_data[ware].total_consumption += office_consumption[ware];
             }
-            office_index = office.next_office_in_town_index();
+            office_index = office.get_next_office_in_town_index();
         }
     }
     hanse_data.sort_by_key(|a| a.get_ratio());

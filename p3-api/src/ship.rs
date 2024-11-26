@@ -1,4 +1,7 @@
-use crate::{data::p3_ptr::P3Pointer, latin1_to_string};
+use crate::{
+    data::{enums::ShipType, p3_ptr::P3Pointer},
+    latin1_to_string,
+};
 
 pub const SHIP_SIZE: u32 = 0x180;
 
@@ -22,6 +25,10 @@ impl ShipPtr {
 
     pub fn get_convoy_id(&self) -> u16 {
         unsafe { self.get(0x08) }
+    }
+
+    pub fn get_type(&self) -> ShipType {
+        unsafe { self.get(0x0e) }
     }
 
     pub fn get_capacity(&self) -> u32 {

@@ -1,6 +1,6 @@
 use std::ptr;
 
-pub trait P3Pointer {
+pub trait P3Pointer: Sized {
     fn get_address(&self) -> u32;
 
     /// # Safety
@@ -18,5 +18,9 @@ pub trait P3Pointer {
     unsafe fn set<T: Sized>(&self, offset: u32, data: &T) {
         let address = self.get_address() + offset;
         ptr::copy(data as *const _ as _, address as *mut u8, std::mem::size_of::<T>());
+    }
+
+    unsafe fn free(self) {
+        crate::free(self.get_address());
     }
 }

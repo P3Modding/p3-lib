@@ -23,6 +23,13 @@ pub enum Operation {
     RepairShip {
         ship_index: u32,
     },
+    ShipMoveWares {
+        amount: i32,
+        ship_index: u16,
+        ware_id: WareId,
+        merchant_index: u16,
+        to_ship: bool,
+    },
     MoveWaresConvoy {
         raw_amount: i32,
         convoy_index: u16,
@@ -77,6 +84,22 @@ impl Operation {
                 let opcode: u32 = 0x03;
                 op[0..4].copy_from_slice(&opcode.to_le_bytes());
                 op[0x04..0x08].copy_from_slice(&ship_id.to_le_bytes());
+            }
+            Operation::ShipMoveWares {
+                amount,
+                ship_index,
+                ware_id,
+                merchant_index,
+                to_ship,
+            } => {
+                let opcode: u32 = 0x08;
+                let ware_id: u16 = *ware_id as _;
+                op[0x00..0x04].copy_from_slice(&opcode.to_le_bytes());
+                op[0x04..0x08].copy_from_slice(&amount.to_le_bytes());
+                op[0x08..0x0a].copy_from_slice(&ship_index.to_le_bytes());
+                op[0x0a..0x0c].copy_from_slice(&ware_id.to_le_bytes());
+                op[0x0c..0x0e].copy_from_slice(&merchant_index.to_le_bytes());
+                op[0x0e] = *to_ship as u8;
             }
             Operation::MoveWaresConvoy {
                 raw_amount: amount,

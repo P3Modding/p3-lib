@@ -18,7 +18,7 @@ static TASK_RESCHEDULING_IN: &CStr = c"Rescheduling in";
 static TASK_RESCHEDULES_REMAINING: &CStr = c"Reschedule Counter";
 static TOWN: &CStr = c"Town";
 static EFFECTIVE_PRODUCTION: &CStr = c"Effective Production";
-static INEFFECTIVE_PRODUCTION: &CStr = c"Ineffective Production";
+static LOW_PRODUCTION: &CStr = c"Low Production";
 
 pub(crate) unsafe fn draw_page(window: UITownHallWindowPtr) {
     let next_mission_index = window.get_next_mission_index();
@@ -133,7 +133,7 @@ unsafe fn render_aldermans_office_modifications_found_town(window: UITownHallWin
     y += 20;
 
     font::ddraw_set_text_mode(font::TextMode::AlignLeft);
-    ui_render_text_at(x + COL_OFFSETS[0], y, INEFFECTIVE_PRODUCTION.to_bytes());
+    ui_render_text_at(x + COL_OFFSETS[0], y, LOW_PRODUCTION.to_bytes());
 
     font::ddraw_set_text_mode(font::TextMode::AlignRight);
     let mut ineffective_string = String::new();

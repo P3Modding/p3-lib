@@ -80,9 +80,8 @@ impl GameWorldPtr {
         unsafe { self.get(0x18) }
     }
 
-    pub fn get_town_id(&self, index: u8) -> Option<TownId> {
-        assert!(index < 40);
-        FromPrimitive::from_u8(unsafe { self.get(0x18 + index as u32) })
+    pub fn get_town_id(&self, index: u8) -> TownId {
+        FromPrimitive::from_u8(unsafe { self.get(0x18 + index as u32) }).unwrap()
     }
 
     pub fn get_town(&self, town_index: u8) -> TownPtr {
@@ -121,6 +120,26 @@ impl GameWorldPtr {
         MerchantPtr::new(base_address + index as u32 * MERCHANT_SIZE)
     }
 
+    pub unsafe fn get_office_index(&self, town_index: u8, merchant_id: u16) -> Option<u16> {
+        let offices_count = self.get_offices_count();
+        let town = self.get_town(town_index);
+        let mut office_index = town.get_first_office_index();
+        loop {
+            if office_index >= offices_count {
+                return None;
+            }
+
+            let office = self.get_office(office_index);
+            if office.get_merchant_index() == merchant_id {
+                trace!("returning office {:#x}", office_index);
+                return Some(office_index);
+            }
+
+            trace!("{:?} belongs to someone else {:#x}", &office, office.get_merchant_index());
+            office_index = office.get_next_office_in_town_index();
+        }
+    }
+
     pub unsafe fn get_office_in_of(&self, town_index: u8, merchant_id: u16) -> Option<OfficePtr> {
         let offices_count = self.get_offices_count();
         let town = self.get_town(town_index);
@@ -131,13 +150,13 @@ impl GameWorldPtr {
             }
 
             let office = self.get_office(office_id);
-            if office.get_merchant_id() == merchant_id {
+            if office.get_merchant_index() == merchant_id {
                 trace!("returning office {:#x}", office_id);
                 return Some(office);
             }
 
-            trace!("{:?} belongs to someone else {:#x}", &office, office.get_merchant_id());
-            office_id = office.next_office_in_town_index();
+            trace!("{:?} belongs to someone else {:#x}", &office, office.get_merchant_index());
+            office_id = office.get_next_office_in_town_index();
         }
     }
 

@@ -1,4 +1,5 @@
 #![allow(clippy::missing_safety_doc)]
+
 extern crate num_derive;
 
 pub mod class35;
@@ -40,4 +41,9 @@ pub unsafe fn latin1_ptr_to_string(mut s: *const u8) -> String {
         s = s.add(1);
     }
     result
+}
+
+pub unsafe fn free(address: u32) {
+    let orig: extern "cdecl" fn(ptr: u32) = std::mem::transmute(0x0063A1B6);
+    orig(address);
 }
