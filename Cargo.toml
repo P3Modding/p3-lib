@@ -15,6 +15,7 @@ members = [
     "mod-shipyard-details",
     "mod-tavern-show-all-sailors",
     "mod-town-hall-details",
+    "mod-trading-office-prices-synchronization",
     #"p3-agent",
     "p3-agent-loader",
     "p3-aim",
@@ -30,7 +31,7 @@ exclude = [
 version = "0.1.9"
 
 [workspace.dependencies]
-hooklet = "^0.1.6"
+hooklet = "^0.1.7"
 clap = { version = "4.3.0", features = ["derive"] }
 simple_logger = "4.1"
 log = "0.4"

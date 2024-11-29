@@ -3,7 +3,7 @@ use std::sync::atomic::{AtomicPtr, Ordering};
 
 use hooklet::windows::x86::{hook_call_rel32, CallRel32Hook};
 use log::{debug, error};
-use windows::core::{PCSTR, PSTR};
+use windows::core::PSTR;
 use windows::Win32::Foundation::HMODULE;
 use windows::Win32::System::SystemServices::DLL_PROCESS_ATTACH;
 
@@ -17,7 +17,7 @@ extern "system" fn DllMain(_hist_dll: *const u8, fdw_reason: u32, _lpv_reserved:
         log::set_max_level(log::LevelFilter::Trace);
         debug!("DllMain patching WinMain call");
         unsafe {
-            let hook = match hook_call_rel32(PCSTR::null(), 0x0023CA22, WinMain_hook as usize as u32) {
+            let hook = match hook_call_rel32(0x0023CA22, WinMain_hook as usize as u32) {
                 Ok(hook) => hook,
                 Err(e) => {
                     error!("Failed to set hook: {:?}", e);

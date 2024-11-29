@@ -1,14 +1,16 @@
 [package]
-name = "mod-high-res"
+name = "mod-trading-office-prices-synchronization"
 edition = "2021"
 version.workspace = true
 
 [lib]
 crate-type = ["cdylib"]
-name="high_res"
+name="trading_office_prices_synchronization"
 
 [dependencies]
 log = { workspace = true }
 win_dbg_logger = { workspace = true }
 p3-api = { path = "../p3-api" }
 hooklet = { workspace = true }
+num-traits = { workspace = true }
+num-derive = { workspace = true }

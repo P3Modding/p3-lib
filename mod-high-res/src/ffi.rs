@@ -1,18 +1,17 @@
 use std::{
     arch::global_asm,
     ffi::{c_void, CStr},
-    mem, ptr,
+    mem,
     sync::atomic::{AtomicPtr, Ordering},
 };
 
-use hooklet::windows::x86::{deploy_rel32_raw, hook_call_rel32, CallRel32Hook, X86Rel32Type};
+use hooklet::windows::x86::{deploy_rel32_raw, hook_call_rel32, hook_call_rel32_with_module, CallRel32Hook, X86Rel32Type};
 use log::debug;
 use p3_api::{
     data::{class27::Class27Ptr, ddraw_fill_solid_rect, ddraw_set_constant_color, ddraw_set_render_dest, get_resolution_height, get_resolution_width},
     latin1_ptr_to_string,
     ui::class73::Class73Ptr,
 };
-use windows::core::PCSTR;
 
 const FULLHD_STRING: &CStr = c"1920 x 1080";
 
@@ -103,7 +102,7 @@ pub unsafe extern "C" fn start() -> u32 {
 
     // Fix empty bottom right corner
     debug!("Deploying render_all_objects_hook");
-    match hook_call_rel32(PCSTR::from_raw(ptr::null()), 0x28649, maybe_render_all_objects_hook as usize as u32) {
+    match hook_call_rel32(0x28649, maybe_render_all_objects_hook as usize as u32) {
         Ok(hook) => {
             HOOK_PTR.store(Box::into_raw(Box::new(hook)), Ordering::SeqCst);
         }
@@ -112,11 +111,7 @@ pub unsafe extern "C" fn start() -> u32 {
 
     // Fix acceleration map
     debug!("Deploying dddraw_dll.dll decode_supported_files hook to replace the background image");
-    match hook_call_rel32(
-        PCSTR::from_raw(c"aim.dll".as_ptr() as _),
-        0x2984,
-        ddraw_dll_decode_supported_files_hook as usize as u32,
-    ) {
+    match hook_call_rel32_with_module("aim.dll", 0x2984, ddraw_dll_decode_supported_files_hook as usize as u32) {
         Ok(hook) => {
             debug!("Hook {hook:?} set");
             DECODE_SUPPORTED_FILES_HOOK_PTR.store(Box::into_raw(Box::new(hook)), Ordering::SeqCst);
@@ -126,7 +121,7 @@ pub unsafe extern "C" fn start() -> u32 {
 
     // Fix acceleration map
     debug!("Deploying load screen settings from accelMap.ini");
-    match hook_call_rel32(PCSTR::from_raw(ptr::null()), 0x12C5, class73_place_ui_element_hook as usize as u32) {
+    match hook_call_rel32(0x12C5, class73_place_ui_element_hook as usize as u32) {
         Ok(hook) => {
             debug!("Hook {hook:?} set");
             LOAD_ACCEL_MAP_INI_HOOK_PTR.store(Box::into_raw(Box::new(hook)), Ordering::SeqCst);

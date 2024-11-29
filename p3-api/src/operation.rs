@@ -40,6 +40,12 @@ pub enum Operation {
     RepairConvoy {
         convoy_index: u32,
     },
+    OfficeAutotradeSettingChange {
+        stock: i32,
+        price: i32,
+        office_index: u32,
+        ware_id: WareId,
+    },
 }
 
 impl Operation {
@@ -125,6 +131,20 @@ impl Operation {
                 let opcode: u32 = 0x1d;
                 op[0..4].copy_from_slice(&opcode.to_le_bytes());
                 op[0x04..0x08].copy_from_slice(&convoy_id.to_le_bytes());
+            }
+            Operation::OfficeAutotradeSettingChange {
+                stock,
+                price,
+                office_index,
+                ware_id,
+            } => {
+                let opcode: u32 = 0x5b;
+                let ware_id: u32 = *ware_id as _;
+                op[0..4].copy_from_slice(&opcode.to_le_bytes());
+                op[4..8].copy_from_slice(&stock.to_le_bytes());
+                op[8..0x0c].copy_from_slice(&price.to_le_bytes());
+                op[0x0c..0x10].copy_from_slice(&office_index.to_le_bytes());
+                op[0x10..0x14].copy_from_slice(&ware_id.to_le_bytes());
             }
         }
         op

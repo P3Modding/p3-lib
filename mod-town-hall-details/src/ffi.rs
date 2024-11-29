@@ -5,8 +5,8 @@ use std::{
     sync::atomic::{AtomicPtr, Ordering},
 };
 
-use hooklet::windows::x86::hook_function_pointer;
-use hooklet::windows::x86::{deploy_rel32_raw, hook_call_rel32, CallRel32Hook, FunctionPointerHook, X86Rel32Type};
+use hooklet::windows::x86::{deploy_rel32_raw, CallRel32Hook, FunctionPointerHook, X86Rel32Type};
+use hooklet::windows::x86::{hook_call_rel32, hook_function_pointer_width_module};
 use log::debug;
 use p3_api::ui::ui_town_hall_window::UITownHallWindowPtr;
 use windows::core::PCSTR;
@@ -26,7 +26,7 @@ pub unsafe extern "C" fn start() -> u32 {
     log::set_max_level(log::LevelFilter::Trace);
 
     debug!("Hooking town hall window's open function through vtable");
-    match hook_function_pointer(
+    match hook_function_pointer_width_module(
         PCSTR::from_raw(ptr::null()),
         TOWN_HALL_WINDOW_OPEN_POINTER_OFFSET,
         town_hall_window_open_hook as usize as u32,
@@ -42,7 +42,6 @@ pub unsafe extern "C" fn start() -> u32 {
 
     debug!("Hooking sidepanel's call to ui_town_hall_window_set_selected_page");
     match hook_call_rel32(
-        PCSTR::from_raw(ptr::null()),
         TOWN_HALL_SIDEPANEL_SET_SELECTED_PAGE_PATCH_OFFSET,
         town_hall_window_set_selected_page_hook as usize as u32,
     ) {

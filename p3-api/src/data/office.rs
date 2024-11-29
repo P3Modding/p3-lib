@@ -28,12 +28,24 @@ impl OfficePtr {
         unsafe { self.get(0x2ca) }
     }
 
+    pub unsafe fn get_administrator_trade_prices(&self) -> [i32; 20] {
+        self.get(0x2f4)
+    }
+
     pub unsafe fn set_administrator_trade_prices(&self, prices: [i32; 20]) {
         self.set(0x2f4, &prices)
     }
 
     pub unsafe fn set_administrator_trade_actions(&self, actions: [i32; 20]) {
         self.set(0x2f4, &actions)
+    }
+
+    pub unsafe fn get_administrator_trade_stock(&self) -> [i32; 20] {
+        self.get(0x354)
+    }
+
+    pub unsafe fn get_administrator_trade_lock_bitmap(&self) -> u32 {
+        self.get(0x3b4)
     }
 }
 
