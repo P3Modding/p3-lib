@@ -14,7 +14,7 @@ jobs:
     - run: cargo build --release
     - run: |
         mkdir mods
-        mv target/i686-pc-windows-msvc/release/fix_bath_house_bribe_blunders ./mods/
+        mv target/i686-pc-windows-msvc/release/fix_bath_house_bribe_blunders.dll ./mods/
         mv target/i686-pc-windows-msvc/release/fix_damage_to_offside_ship_artillery.dll ./mods/
         mv target/i686-pc-windows-msvc/release/fix_invulnerable_ship_artillery_slots.dll ./mods/
         mv target/i686-pc-windows-msvc/release/fix_market_hall_production_town.dll ./mods/
