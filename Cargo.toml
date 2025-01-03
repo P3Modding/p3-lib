@@ -4,6 +4,7 @@ resolver = "2"
 members = [
     "aimcli",
     "cprcli",
+    "mod-fix-bath-house-bribe-blunders",
     "mod-fix-damage-to-offside-ship-artillery",
     "mod-fix-invulnerable-ship-artillery-slots",
     "mod-fix-market-hall-production-town",

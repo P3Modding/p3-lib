@@ -49,6 +49,10 @@ impl TownPtr {
         unsafe { self.get(0x670) }
     }
 
+    pub fn get_councillor_bribes(&self) -> [u8; 4] {
+        unsafe { self.get(0x6dc) }
+    }
+
     pub unsafe fn get_first_office_index(&self) -> u16 {
         self.get(0x784)
     }

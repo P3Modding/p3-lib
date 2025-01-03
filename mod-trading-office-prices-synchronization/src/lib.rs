@@ -42,7 +42,7 @@ pub(crate) unsafe fn synchronize_autotrade_settings() {
             }
             let stock = stock[i];
             let price = setting_prices[i];
-            
+
             OPERATIONS_PTR.enqueue_operation(Operation::OfficeAutotradeSettingChange {
                 stock,
                 price,

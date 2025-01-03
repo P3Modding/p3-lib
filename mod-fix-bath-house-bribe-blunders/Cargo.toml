@@ -1,0 +1,13 @@
+[package]
+name = "mod-fix-bath-house-bribe-blunders"
+edition = "2021"
+version.workspace = true
+
+[lib]
+crate-type = ["cdylib"]
+name="fix_bath_house_bribe_blunders"
+
+[dependencies]
+log = { workspace = true }
+p3-api = { path = "../p3-api" }
+hooklet = { workspace = true }

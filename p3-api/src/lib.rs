@@ -8,6 +8,7 @@ pub mod facility;
 pub mod game_world;
 pub mod merchant;
 pub mod missions;
+pub mod mods;
 pub mod operation;
 pub mod operations;
 pub mod scheduled_tasks;
