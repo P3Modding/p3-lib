@@ -13,11 +13,8 @@ pub(crate) fn lock(lock: &AtomicU16) {
     }
 }
 
-pub(crate) fn try_lock(lock: &AtomicU16) -> u32 {
-    match lock.compare_exchange(0, 1, Ordering::SeqCst, Ordering::SeqCst) {
-        Ok(_) => 0,
-        Err(_) => 1
-    }
+pub(crate) fn try_lock(lock: &AtomicU16) -> bool {
+    lock.compare_exchange(0, 1, Ordering::SeqCst, Ordering::SeqCst).is_ok()
 }
 
 pub(crate) fn unlock(lock: &AtomicU16) {

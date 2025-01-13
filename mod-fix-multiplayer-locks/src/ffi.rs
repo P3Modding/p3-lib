@@ -124,7 +124,7 @@ pub unsafe extern "C" fn start() -> u32 {
     debug!("Fix operations_network_client_send_pending_operations pending lock");
     debug!("Fix operations_network_client_send_pending_operations pending unlock");
     let addr: u32 = &try_lock_current_clean as *const _ as _;
-    debug!("#### {addr}");
+    debug!("#### {addr:#X}");
 
     0
 }
@@ -137,12 +137,12 @@ unsafe extern "stdcall" fn lock_pending() {
 }
 
 #[no_mangle]
-unsafe extern "stdcall" fn try_lock_pending() -> u32 {
+unsafe extern "stdcall" fn try_lock_pending() -> bool {
     let thread_id = thread::current().id();
     debug!("try_lock_pending {thread_id:?}");
-    let in_use = crate::try_lock(&crate::PENDING_OPS_LOCK);
-    debug!("try_lock_pending {thread_id:?} {in_use}");
-    in_use
+    let locked = crate::try_lock(&crate::PENDING_OPS_LOCK);
+    debug!("try_lock_pending {thread_id:?} {locked}");
+    locked
 }
 
 #[no_mangle]
@@ -166,12 +166,12 @@ unsafe extern "stdcall" fn lock_current() {
 }
 
 #[no_mangle]
-unsafe extern "stdcall" fn try_lock_current() -> u32 {
+unsafe extern "stdcall" fn try_lock_current() -> bool {
     let thread_id = thread::current().id();
     debug!("try_lock_current {thread_id:?}");
-    let in_use = crate::try_lock(&crate::CURRENT_OPS_LOCK);
-    debug!("try_lock_current {thread_id:?} {in_use}");
-    in_use
+    let locked = crate::try_lock(&crate::CURRENT_OPS_LOCK);
+    debug!("try_lock_current {thread_id:?} {locked}");
+    !locked
 }
 
 #[no_mangle]
