@@ -1,4 +1,4 @@
-use std::panic;
+use std::{backtrace::Backtrace, panic};
 
 use log::error;
 
@@ -8,5 +8,7 @@ pub unsafe fn init_mod() {
 
     panic::set_hook(Box::new(|p| {
         error!("{p}");
+        let trace = Backtrace::force_capture();
+        error!("{}", trace)
     }));
 }
