@@ -12,8 +12,6 @@ log = "0.4"
 toml = "0.7"
 win_dbg_logger = "0.1"
 serde = { version = "1.0", features = ["derive"] }
-num-traits = "0.2"
-num-derive = "0.3"
 
 [dependencies.windows]
 version = "0.48"

@@ -9,8 +9,8 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 log = "0.4"
-num-traits = "0.2"
-num-derive = "0.3"
+num-traits = { workspace = true }
+num-derive = { workspace = true }
 strum = { version = "0.24", features = ["derive"] }
 csbindgen = { version = "1.7.0", optional = true }
 win_dbg_logger = { workspace = true }

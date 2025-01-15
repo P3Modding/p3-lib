@@ -16,13 +16,13 @@ pub(crate) fn lock(lock: &AtomicU16) {
 pub(crate) fn try_lock(lock: &AtomicU16) -> u32 {
     match lock.compare_exchange(0, 1, Ordering::SeqCst, Ordering::SeqCst) {
         Ok(_) => 0,
-        Err(_) => 1
+        Err(_) => 1,
     }
 }
 
 pub(crate) fn unlock(lock: &AtomicU16) {
     let old = lock.swap(0, Ordering::SeqCst);
     if old != 1 {
-        panic!("Lock is dirty ({old})");
+        panic!("Cannot unlock, lock is dirty ({old})");
     }
 }
