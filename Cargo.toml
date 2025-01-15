@@ -30,7 +30,7 @@ exclude = [
 ]
 
 [workspace.package]
-version = "0.1.10"
+version = "0.1.11"
 
 [workspace.dependencies]
 hooklet = "^0.1.7"
