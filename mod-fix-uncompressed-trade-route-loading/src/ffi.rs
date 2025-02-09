@@ -32,7 +32,7 @@ std::arch::global_asm!("
 pushfd
 push ecx
 push edx
-mov eax, ecx
+mov ecx, eax
 call {function_symbol}
 pop edx
 pop ecx
