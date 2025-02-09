@@ -21,6 +21,7 @@ jobs:
         mv target/i686-pc-windows-msvc/release/fix_multiplayer_locks.dll ./mods/
         mv target/i686-pc-windows-msvc/release/fix_new_settlement_ware_production.dll ./mods/
         mv target/i686-pc-windows-msvc/release/fix_siege_beggar_satisfaction_bonus.dll ./mods/
+        mv target/i686-pc-windows-msvc/release/fix_uncompressed_trade_route_loading.dll ./mods/
         mv target/i686-pc-windows-msvc/release/high_res.dll ./mods/
         mv target/i686-pc-windows-msvc/release/increase_alderman_found_settlement_mission_limit.dll ./mods/
         mv target/i686-pc-windows-msvc/release/scrollmap_render_all_ships.dll ./mods/

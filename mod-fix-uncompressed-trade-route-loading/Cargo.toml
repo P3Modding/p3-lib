@@ -1,0 +1,13 @@
+[package]
+name = "mod-fix-uncompressed-trade-route-loading"
+edition = "2021"
+version.workspace = true
+
+[lib]
+crate-type = ["cdylib"]
+name="fix_uncompressed_trade_route_loading"
+
+[dependencies]
+log = { workspace = true }
+win_dbg_logger = { workspace = true }
+hooklet = { workspace = true }

@@ -10,7 +10,8 @@ members = [
     "mod-fix-market-hall-production-town",
     "mod-fix-multiplayer-locks",
     "mod-fix-new-settlement-ware-production",
-    "mod-fix-siege-beggar-satisfaction-bonus", 
+    "mod-fix-siege-beggar-satisfaction-bonus",
+    "mod-fix-uncompressed-trade-route-loading",
     "mod-high-res",
     "mod-increase-alderman-found-settlement-mission-limit",
     "mod-scrollmap-render-all-ships",
@@ -33,7 +34,7 @@ exclude = [
 version = "0.1.11"
 
 [workspace.dependencies]
-hooklet = "^0.1.7"
+hooklet = "^0.1.8"
 clap = { version = "4.3.0", features = ["derive"] }
 simple_logger = "4.1"
 log = "0.4"
