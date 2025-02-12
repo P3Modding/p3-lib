@@ -34,19 +34,22 @@ fn simple_route() {
 fn test_serialize1() {
     let _ = simple_logger::SimpleLogger::new().with_level(LevelFilter::Debug).env().init();
     let rou = TradeRouteFile {
-        stops: vec![TradeRouteStop {
-            town_index: 0,
-            action: 0,
-            order: DEFAULT_ORDER,
-            price: [400; 24],
-            amount: [2000; 24],
-        },TradeRouteStop {
-            town_index: 1,
-            action: 0,
-            order: DEFAULT_ORDER,
-            price: [300; 24],
-            amount: [2000; 24],
-        }],
+        stops: vec![
+            TradeRouteStop {
+                town_index: 0,
+                action: 0,
+                order: DEFAULT_ORDER,
+                price: [400; 24],
+                amount: [2000; 24],
+            },
+            TradeRouteStop {
+                town_index: 1,
+                action: 0,
+                order: DEFAULT_ORDER,
+                price: [300; 24],
+                amount: [2000; 24],
+            },
+        ],
     };
 
     let data = rou.serialize();
