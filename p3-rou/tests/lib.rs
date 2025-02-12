@@ -1,6 +1,6 @@
 use log::LevelFilter;
 use p3_rou::{decompress::decompress_file, TradeRouteFile, TradeRouteStop};
-const DEFAULT_ORDER: [i32; 24] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23];
+const DEFAULT_ORDER: [u8; 24] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23];
 const A_ROU: &[u8; 2 * 220] = &[
     0x00, 0x00, 0x06, 0x04, 0x03, 0x13, 0x08, 0x02, 0x00, 0x11, 0x05, 0x0c, 0x0d, 0x01, 0x10, 0x0f, 0x12, 0x04, 0x09, 0x06, 0x0b, 0x0a, 0x07, 0x0e, 0x15, 0x17,
     0x16, 0x14, 0x6e, 0x00, 0x00, 0x00, 0xbd, 0x03, 0x00, 0x00, 0xb8, 0x01, 0x00, 0x00, 0x22, 0x00, 0x00, 0x00, 0x1c, 0x00, 0x00, 0x00, 0x6e, 0x00, 0x00, 0x00,
@@ -36,10 +36,16 @@ fn test_serialize1() {
     let rou = TradeRouteFile {
         stops: vec![TradeRouteStop {
             town_index: 0,
-            action: 1,
+            action: 0,
             order: DEFAULT_ORDER,
-            price: [0; 24],
-            amount: [0; 24],
+            price: [400; 24],
+            amount: [2000; 24],
+        },TradeRouteStop {
+            town_index: 1,
+            action: 0,
+            order: DEFAULT_ORDER,
+            price: [300; 24],
+            amount: [2000; 24],
         }],
     };
 
