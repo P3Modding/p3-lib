@@ -8,3 +8,5 @@ p2arch0_eng
 generated.*.toml
 /deploy*.bat
 /deploy*.ps1
+*.log
+*.dat
