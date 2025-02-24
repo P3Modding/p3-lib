@@ -1,0 +1,11 @@
+[package]
+name = "navpointmatrixcli"
+edition = "2021"
+version.workspace = true
+
+[dependencies]
+p3-api = { path = "../p3-api" }
+clap = { workspace = true }
+log = { workspace = true }
+pathfinding = { workspace = true }
+geo = "0.29.3"

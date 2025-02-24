@@ -19,6 +19,7 @@ members = [
     "mod-tavern-show-all-sailors",
     "mod-town-hall-details",
     "mod-trading-office-prices-synchronization",
+    "navpointmatrixcli",
     #"p3-agent",
     "p3-agent-loader",
     "p3-aim",
@@ -42,3 +43,5 @@ sysinfo = "0.29"
 win_dbg_logger = "0.1"
 num-traits = "0.2"
 num-derive = "0.4"
+byteorder = "1.5.0"
+pathfinding = "4.11.0"
