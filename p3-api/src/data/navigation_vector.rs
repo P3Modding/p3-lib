@@ -17,10 +17,12 @@ impl NavigationVector {
         NavigationVector { length, points }
     }
 
-    pub fn get_distance(&self, source_index: usize, destination_index: usize) -> i128 {
-        let s = self.points[source_index];
-        let d = self.points[destination_index];
-        let i_square = (s.0 as i64 - d.0 as i64).pow(2) + (s.1 as i64 - d.1 as i64).pow(2);
-        ((i_square as f64).sqrt()) as i128
+    pub fn get_distance(&self, source_index: usize, destination_index: usize) -> f32 {
+        let x1 = self.points[source_index].0 as f32;
+        let y1 = self.points[source_index].1 as f32;
+        let x2 = self.points[destination_index].0 as f32;
+        let y2 = self.points[destination_index].1 as f32;
+        let i_square = (x2 - x1).powf(2.0) + (y2 - y1).powf(2.0);
+        i_square.sqrt()
     }
 }

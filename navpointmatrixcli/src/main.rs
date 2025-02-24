@@ -1,7 +1,9 @@
-use std::fs::{self};
-
+use ordered_f64::OrderedF32;
 use p3_api::data::{navigation_matrix::NavigationMatrix, navigation_vector::NavigationVector, navpoint_matrix::NavpointMatrix};
 use pathfinding::prelude::{build_path, dijkstra_all};
+use std::fs::{self};
+
+pub mod ordered_f64;
 
 pub struct DirectlyConnectedNodes {
     pub connected_nodes: Vec<(u16, u16)>,
@@ -116,11 +118,11 @@ impl DirectlyConnectedNodes {
         buf
     }
 
-    pub fn get_neighbours(&self, node_index: u16, nav_vec: &NavigationVector) -> Vec<(u16, i128)> {
+    pub fn get_neighbours(&self, node_index: u16, nav_vec: &NavigationVector) -> Vec<(u16, OrderedF32)> {
         let mut neighbours = vec![];
         for n in &self.connected_nodes {
             if n.0 == node_index {
-                neighbours.push((n.1, nav_vec.get_distance(n.0 as _, n.1 as _)));
+                neighbours.push((n.1, nav_vec.get_distance(n.0 as _, n.1 as _).into()));
             }
         }
 
