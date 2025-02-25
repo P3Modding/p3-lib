@@ -1,7 +1,10 @@
 use std::fs::{self};
 
+use ordered_f32::OrderedF32;
 use p3_api::data::{navigation_matrix::NavigationMatrix, navigation_vector::NavigationVector, navpoint_matrix::NavpointMatrix};
 use pathfinding::prelude::{build_path, dijkstra_all};
+
+pub mod ordered_f32;
 
 pub struct DirectlyConnectedNodes {
     pub connected_nodes: Vec<(u16, u16)>,
@@ -38,8 +41,7 @@ fn main() {
         for target_index in 0..navigation_vector.points.len() as u16 {
             if source_index != target_index {
                 let path = build_path(&(target_index), &parents);
-                let distance = 0;
-                //println!("{source_index} -> {target_index} {path:?}");
+                let distance = navigation_vector.get_path_length(&path);
                 new_navpoint_matrix.set_next(source_index, target_index, path[1], distance, navigation_vector.length)
             } else {
                 new_navpoint_matrix.set_next(source_index, source_index, source_index, 0, navigation_vector.length)
@@ -47,26 +49,30 @@ fn main() {
         }
     }
 
-    {
-        println!(
-            "{} {} {}",
-            navigation_vector.get_distance(0, 14),
-            navigation_vector.get_distance(0, 9),
-            navigation_vector.get_distance(9, 14)
-        );
-    }
-
-    //assert_eq!(original_navpoint_matrix, new_navpoint_matrix)
     assert_eq!(original_navpoint_matrix.matrix.len(), new_navpoint_matrix.matrix.len());
+
     println!("Asserting {} cells", original_navpoint_matrix.matrix.len());
-    //println!("{:?}", &original_navpoint_matrix.matrix[0..10]);
-    //println!("{:?}", &new_navpoint_matrix.matrix[0..10]);
+    let mut bad_next_cells = 0;
     for i in 0..original_navpoint_matrix.matrix.len() {
         let orig_next = original_navpoint_matrix.matrix[i].next;
         let calculated_next = new_navpoint_matrix.matrix[i].next;
-        println!("cell {i}: {orig_next} == {calculated_next}");
-        assert_eq!(orig_next, calculated_next);
+        if orig_next != calculated_next {
+            println!("cell {i}: next {orig_next} != {calculated_next}");
+            bad_next_cells += 1;
+        }
     }
+    println!("{bad_next_cells} bad next entries");
+
+    let mut bad_distance_cells = 0;
+    for i in 0..original_navpoint_matrix.matrix.len() {
+        let orig_distance = original_navpoint_matrix.matrix[i].distance;
+        let calculated_distance = new_navpoint_matrix.matrix[i].distance;
+        if orig_distance != calculated_distance {
+            println!("cell {i}: distance {orig_distance} != {calculated_distance}");
+            bad_distance_cells += 1;
+        }
+    }
+    println!("{bad_distance_cells} bad distances");
 }
 
 fn is_connected(p0: (i16, i16), p1: (i16, i16), navigation_matrix: &NavigationMatrix) -> bool {
@@ -116,11 +122,11 @@ impl DirectlyConnectedNodes {
         buf
     }
 
-    pub fn get_neighbours(&self, node_index: u16, nav_vec: &NavigationVector) -> Vec<(u16, i128)> {
+    pub fn get_neighbours(&self, node_index: u16, nav_vec: &NavigationVector) -> Vec<(u16, OrderedF32)> {
         let mut neighbours = vec![];
         for n in &self.connected_nodes {
             if n.0 == node_index {
-                neighbours.push((n.1, nav_vec.get_distance(n.0 as _, n.1 as _)));
+                neighbours.push((n.1, nav_vec.get_distance(n.0 as _, n.1 as _).into()));
             }
         }
 
@@ -166,4 +172,30 @@ impl DirectlyConnectedNodes {
         }
         DirectlyConnectedNodes { connected_nodes: nodes }
     }
+}
+
+#[test]
+fn test1() {
+    let _navigation_matrix = NavigationMatrix::deserialize(&fs::read(r"C:\Users\Benni\Patrician 3_workbench\navdata\nav_matrix.dat").unwrap());
+    let navigation_vector = NavigationVector::deserialize(&fs::read(r"C:\Users\Benni\Patrician 3_workbench\navdata\nav_vec.dat").unwrap());
+    let original_navpoint_matrix = NavpointMatrix::deserialize(&fs::read(r"C:\Users\Benni\Patrician 3_workbench\navdata\matrix_int.dat").unwrap());
+    let cell4 = &original_navpoint_matrix.matrix[6];
+    let cell4_distance = cell4.distance;
+
+    let (x1, y1) = navigation_vector.points[0];
+    let (x2, y2) = navigation_vector.points[6];
+    let dx = (x2 - x1) as f32;
+    let dy = (y2 - y1) as f32;
+
+    let calculated_distance = ((dx * dx + dy * dy).sqrt() * 65536.0) as i32;
+
+    println!("{cell4_distance} {calculated_distance}");
+    assert_eq!(cell4.distance, calculated_distance)
+}
+
+#[test]
+fn test2() {
+    let navigation_vector = NavigationVector::deserialize(&fs::read(r"C:\Users\Benni\Patrician 3_workbench\navdata\nav_vec.dat").unwrap());
+    let path_0_2 = [0, 9, 20, 34, 33, 25, 24, 29, 31, 59, 65, 64, 44, 2];
+    assert_eq!(19936074, navigation_vector.get_path_length(&path_0_2))
 }
