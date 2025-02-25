@@ -17,10 +17,94 @@ impl NavigationVector {
         NavigationVector { length, points }
     }
 
-    pub fn get_distance(&self, source_index: usize, destination_index: usize) -> i128 {
-        let s = self.points[source_index];
-        let d = self.points[destination_index];
-        let i_square = (s.0 as i64 - d.0 as i64).pow(2) + (s.1 as i64 - d.1 as i64).pow(2);
-        ((i_square as f64).sqrt()) as i128
+    pub fn get_distance(&self, source_index: usize, destination_index: usize) -> f32 {
+        let x1 = self.points[source_index].0 as f32;
+        let y1 = self.points[source_index].1 as f32;
+        let x2 = self.points[destination_index].0 as f32;
+        let y2 = self.points[destination_index].1 as f32;
+        let i_square = (x2 - x1).powf(2.0) + (y2 - y1).powf(2.0);
+        i_square.sqrt()
+    }
+
+    pub fn get_path_length2(&self, path: &[u16]) -> i32 {
+        let mut distance = 0;
+        let mut i = 0;
+        while i < path.len() - 1 {
+            let x1 = self.points[path[i] as usize].0 as i64;
+            let y1 = self.points[path[i] as usize].1 as i64;
+            let x2 = self.points[path[i + 1] as usize].0 as i64;
+            let y2 = self.points[path[i + 1] as usize].1 as i64;
+            let i_square = ((x2 << 16) - (x1 << 16)).pow(2) + ((y2 << 16) - (y1 << 16)).pow(2);
+            distance += i_square.isqrt() as i32;
+            i += 1;
+        }
+
+        distance
+    }
+
+    pub fn get_path_length3(&self, path: &[u16]) -> i32 {
+        let mut distance = 0;
+        let mut i = 0;
+        while i < path.len() - 1 {
+            let x1 = self.points[path[i] as usize].0 as i32;
+            let y1 = self.points[path[i] as usize].1 as i32;
+            let x2 = self.points[path[i + 1] as usize].0 as i32;
+            let y2 = self.points[path[i + 1] as usize].1 as i32;
+            let i_square = (x2 - x1).pow(2) + (y2 - y1).pow(2);
+            distance += i_square.isqrt() << 16;
+            i += 1;
+        }
+
+        distance
+    }
+
+    /// F64, multiplication and rounding at the end
+    pub fn get_path_length_48k(&self, path: &[u16]) -> i32 {
+        let mut distance = 0.0;
+        let mut i = 0;
+        while i < path.len() - 1 {
+            let x1 = self.points[path[i] as usize].0 as i32;
+            let y1 = self.points[path[i] as usize].1 as i32;
+            let x2 = self.points[path[i + 1] as usize].0 as i32;
+            let y2 = self.points[path[i + 1] as usize].1 as i32;
+            let dx = (x2 - x1) as f64;
+            let dy = (y2 - y1) as f64;
+            distance += (dx * dx + dy * dy).sqrt();
+            i += 1;
+        }
+
+        (distance * 65536.0).round() as i32
+    }
+
+    pub fn get_path_length_66k(&self, path: &[u16]) -> i32 {
+        let mut distance = 0.0;
+        let mut i = 0;
+        while i < path.len() - 1 {
+            let x1 = self.points[path[i] as usize].0 as i32;
+            let y1 = self.points[path[i] as usize].1 as i32;
+            let x2 = self.points[path[i + 1] as usize].0 as i32;
+            let y2 = self.points[path[i + 1] as usize].1 as i32;
+            let dx = (x2 - x1) as f32;
+            let dy = (y2 - y1) as f32;
+            distance += (dx * dx + dy * dy).sqrt();
+            i += 1;
+        }
+
+        (distance * 65536.0).round() as i32
+    }
+
+    pub fn get_path_length(&self, path: &[u16]) -> i32 {
+        let mut distance = 0.0;
+        for i in 0..path.len() - 1 {
+            let x1 = self.points[path[i] as usize].0 as i32;
+            let y1 = self.points[path[i] as usize].1 as i32;
+            let x2 = self.points[path[i + 1] as usize].0 as i32;
+            let y2 = self.points[path[i + 1] as usize].1 as i32;
+            let dx = (x2 - x1) as f64;
+            let dy = (y2 - y1) as f64;
+            distance += (dx * dx + dy * dy).sqrt();
+        }
+
+        (distance * 65536.0).round() as i32
     }
 }
