@@ -34,6 +34,15 @@ impl NavpointMatrix {
         NavpointMatrix { matrix }
     }
 
+    pub fn serialize(&self) -> Vec<u8> {
+        let mut buf = Vec::with_capacity(self.matrix.len() * 6);
+        for cell in &self.matrix {
+            buf.extend_from_slice(&cell.distance.to_le_bytes());
+            buf.extend_from_slice(&cell.next.to_le_bytes());
+        }
+        buf
+    }
+
     pub fn set_next(&mut self, source: u16, destination: u16, next: u16, distance: i32, width: u16) {
         self.matrix[source as usize * width as usize + destination as usize] = NavpointMatrixCell { distance, next }
     }
