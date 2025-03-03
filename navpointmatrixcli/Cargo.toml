@@ -9,3 +9,6 @@ clap = { workspace = true }
 log = { workspace = true }
 pathfinding = { workspace = true }
 geo = "0.29.3"
+
+[dev-dependencies]
+regex = "1.11.1"
