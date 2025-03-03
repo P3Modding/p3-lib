@@ -10,7 +10,6 @@ use std::{
 
 pub(crate) mod cli;
 pub(crate) mod connected_nodes;
-pub(crate) mod ordered_f32;
 
 fn main() {
     let cli = Cli::parse();
@@ -53,7 +52,7 @@ fn build_connected_nodes_from_navpoint_matrix(args: ConnectedNodesFromNavpointMa
 fn build_connected_nodes_from_navigation_data(args: ConnectedNodesFromNavigationDataArgs) {
     let navigation_matrix = NavigationMatrix::deserialize(&fs::read(args.navigation_matrix_file).unwrap());
     let navigation_vector = NavigationVector::deserialize(&fs::read(args.navigation_vector_file).unwrap());
-    let connected_nodes = ConnectedNodes::from_navigation_matrix(&navigation_vector, &navigation_matrix);
+    let connected_nodes = ConnectedNodes::from_navigation_matrix_p3(&navigation_vector, &navigation_matrix, args.mode);
     fs::write(args.output_file, connected_nodes.serialize()).unwrap();
 }
 

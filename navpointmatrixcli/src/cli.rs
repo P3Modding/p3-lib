@@ -1,6 +1,5 @@
+use clap::{Args, Parser, Subcommand, ValueEnum};
 use std::path::PathBuf;
-
-use clap::{Args, Parser, Subcommand};
 
 /// Patrician 3 navpoint matrix calculation
 #[derive(Parser, Debug)]
@@ -54,7 +53,17 @@ pub struct ConnectedNodesFromNavigationDataArgs {
     #[arg(long = "navigation-vector", value_name = "navigation-vector-file")]
     pub navigation_vector_file: PathBuf,
 
+    /// F
+    #[arg(long = "calculation-mode", value_name = "calculation-mode")]
+    pub mode: ConnectedNodesMode,
+
     /// Path to the output connected nodes file
     #[arg(long = "output", value_name = "output-file")]
     pub output_file: PathBuf,
+}
+
+#[derive(Debug, Clone, Copy, ValueEnum)]
+pub enum ConnectedNodesMode {
+    BresenhamLine,
+    //P3,
 }
