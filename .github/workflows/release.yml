@@ -31,9 +31,10 @@ jobs:
         mkdir files
         mv target/i686-pc-windows-msvc/release/aimcli.exe ./files
         mv target/i686-pc-windows-msvc/release/cprcli.exe ./files
+        mv target/i686-pc-windows-msvc/release/navpointmatrixcli.exe ./files
         mv target/i686-pc-windows-msvc/release/roucli.exe ./files
         mv target/i686-pc-windows-msvc/release/p3_modloader.dll ./files
         Compress-Archive -Path ./mods/* -DestinationPath ./mods.zip
-        gh release upload ${{ github.ref_name }} ./mods.zip ./files/aimcli.exe ./files/cprcli.exe ./files/roucli.exe ./files/p3_modloader.dll
+        gh release upload ${{ github.ref_name }} ./mods.zip ./files/aimcli.exe ./files/cprcli.exe ./files/navpointmatrixcli.exe ./files/roucli.exe ./files/p3_modloader.dll
       env:
         GITHUB_TOKEN: ${{ github.TOKEN }}
