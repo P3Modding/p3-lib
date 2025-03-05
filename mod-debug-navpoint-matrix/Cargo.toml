@@ -1,0 +1,13 @@
+[package]
+name = "mod-debug-navpoint-matrix"
+edition = "2021"
+version.workspace = true
+
+[lib]
+crate-type = ["cdylib"]
+name="debug_navpoint_matrix"
+
+[dependencies]
+log = { workspace = true }
+p3-api = { path = "../p3-api" }
+hooklet = { workspace = true }

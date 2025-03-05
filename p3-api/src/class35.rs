@@ -97,6 +97,15 @@ impl Class35Ptr {
         Self { address: *CLASS35_PTR_ADDRESS }
     }
 
+    pub unsafe fn get_nav_vec_entry(&self, offset: usize) -> (i16, i16) {
+        let ptr: *const i16 = self.get(0x0c);
+        (*ptr.add(2 * offset), *ptr.add(2 * offset + 1))
+    }
+
+    pub unsafe fn get_nav_vec_count(&self) -> i16 {
+        self.get(0x1c)
+    }
+
     pub unsafe fn calculate_town_route(&self, source: TownId, destination: TownId) -> Option<ShipRoutePtr> {
         let source_data = StaticTownDataPtr::new(source);
         let destination_data = StaticTownDataPtr::new(destination);

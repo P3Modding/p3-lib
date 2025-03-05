@@ -77,7 +77,7 @@ impl FoundTownPtr {
         let mut wares = vec![];
         let raw = self.get_production_effective_raw();
         for i in 0..17 {
-            if raw & 1 << i != 0 {
+            if raw & (1 << i) != 0 {
                 wares.push(FacilityId::from_usize(i + 4).unwrap());
             }
         }

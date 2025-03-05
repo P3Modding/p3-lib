@@ -20,11 +20,19 @@ impl Class37Ptr {
         }
     }
 
-    pub fn get_x(&self) -> i16 {
+    pub fn get_x(&self) -> i32 {
+        unsafe { self.get(0x14) }
+    }
+
+    pub fn get_y(&self) -> i32 {
+        unsafe { self.get(0x18) }
+    }
+
+    pub fn get_offset_x(&self) -> i16 {
         unsafe { self.get(0x29e4) }
     }
 
-    pub fn get_y(&self) -> i16 {
+    pub fn get_offset_y(&self) -> i16 {
         unsafe { self.get(0x29e6) }
     }
 }

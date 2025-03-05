@@ -14,6 +14,7 @@ jobs:
     - run: cargo build --release
     - run: |
         mkdir mods
+        mv target/i686-pc-windows-msvc/release/debug_navpoint_matrix.dll ./mods/
         mv target/i686-pc-windows-msvc/release/fix_bath_house_bribe_blunders.dll ./mods/
         mv target/i686-pc-windows-msvc/release/fix_damage_to_offside_ship_artillery.dll ./mods/
         mv target/i686-pc-windows-msvc/release/fix_invulnerable_ship_artillery_slots.dll ./mods/
