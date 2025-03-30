@@ -1,3 +1,5 @@
+use std::ops::Shl;
+
 #[derive(Debug)]
 pub struct NavigationVector {
     pub length: u16,
@@ -18,17 +20,18 @@ impl NavigationVector {
     }
 
     pub fn get_path_length(&self, path: &[u16]) -> i32 {
-        let mut distance = 0.0;
+        let mut distance = 0;
         for i in 0..path.len() - 1 {
             let x1 = self.points[path[i] as usize].0 as i32;
             let y1 = self.points[path[i] as usize].1 as i32;
             let x2 = self.points[path[i + 1] as usize].0 as i32;
             let y2 = self.points[path[i + 1] as usize].1 as i32;
-            let dx = (x2 - x1) as f64;
-            let dy = (y2 - y1) as f64;
-            distance += (dx * dx + dy * dy).sqrt();
+            let dx = (x2 - x1) as i64;
+            let dy = (y2 - y1) as i64;
+            let squared = dx * dx + dy * dy;
+            distance += ((squared.shl(32) as f64).sqrt() + 0.5) as i64;
         }
 
-        (distance * 65536.0).round() as i32
+        (distance) as i32
     }
 }

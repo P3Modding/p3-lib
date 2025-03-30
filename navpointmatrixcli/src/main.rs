@@ -1,5 +1,5 @@
 use clap::Parser;
-use cli::{BuildNavpointMatrixArgs, Cli, Command, ConnectedNodesFromNavigationDataArgs, ConnectedNodesFromNavpointMatrixArgs};
+use cli::{BuildNavpointMatrixArgs, Cli, Command, ConnectedNodesFromNavigationDataArgs, ConnectedNodesFromNavpointMatrixArgs, ShowPathArgs};
 use connected_nodes::ConnectedNodes;
 use p3_api::data::{navigation_matrix::NavigationMatrix, navigation_vector::NavigationVector, navpoint_matrix::NavpointMatrix};
 use pathfinding::prelude::{build_path, dijkstra_all};
@@ -18,6 +18,7 @@ fn main() {
         Command::ConnectedNodesFromNavpointMatrix(args) => build_connected_nodes_from_navpoint_matrix(args),
         Command::ConnectedNodesFromNavigationData(args) => build_connected_nodes_from_navigation_data(args),
         Command::Test => test(),
+        Command::ShowPath(show_path_args) => show_path(show_path_args),
     }
 }
 
@@ -56,10 +57,26 @@ fn build_connected_nodes_from_navigation_data(args: ConnectedNodesFromNavigation
     fs::write(args.output_file, connected_nodes.serialize()).unwrap();
 }
 
+fn show_path(args: ShowPathArgs) {
+    let navpoint_matrix = NavpointMatrix::deserialize(&fs::read(r"C:\Users\Benni\Patrician 3_workbench\navdata\matrix_int.dat.orig").unwrap());
+    let navigation_vector = NavigationVector::deserialize(&fs::read(r"C:\Users\Benni\Patrician 3_workbench\navdata\nav_vec.dat.orig").unwrap());
+    let mut current = args.source_index;
+    let current_point = navigation_vector.points[current as usize];
+    let mut buf = format!("{current} {current_point:x?}");
+    let distance = navpoint_matrix.get(current, args.destination_index, 350).distance;
+    while current != args.destination_index {
+        let cell = navpoint_matrix.get(current, args.destination_index, 350);
+        current = cell.next;
+        let current_point = navigation_vector.points[current as usize];
+        buf.push_str(&format!(" -> {current} {current_point:x?}"));
+    }
+    println!("{buf} (declared distance: {distance})");
+}
+
 fn test() {
     let start = Instant::now();
-    let navigation_vector = NavigationVector::deserialize(&fs::read(r"C:\Users\Benni\Patrician 3_workbench\navdata\nav_vec.dat").unwrap());
-    let original_navpoint_matrix = NavpointMatrix::deserialize(&fs::read(r"C:\Users\Benni\Patrician 3_workbench\navdata\matrix_int.dat").unwrap());
+    let navigation_vector = NavigationVector::deserialize(&fs::read(r"C:\Users\Benni\Patrician 3_workbench\navdata\nav_vec.dat.orig").unwrap());
+    let original_navpoint_matrix = NavpointMatrix::deserialize(&fs::read(r"C:\Users\Benni\Patrician 3_workbench\navdata\matrix_int.dat.orig").unwrap());
     let connected_nodes = ConnectedNodes::from_navpoint_matrix(&original_navpoint_matrix);
     let mut new_navpoint_matrix = NavpointMatrix::new(navigation_vector.length);
 
@@ -99,7 +116,8 @@ fn test() {
         let orig_distance = original_navpoint_matrix.matrix[i].distance;
         let calculated_distance = new_navpoint_matrix.matrix[i].distance;
         if orig_distance != calculated_distance {
-            println!("cell {i}: distance {orig_distance} != {calculated_distance}");
+            let (source, destination) = new_navpoint_matrix.get_source_and_destination(i, navigation_vector.length);
+            println!("cell {i}: distance {orig_distance} != {calculated_distance} ({source} -> {destination})");
             bad_distance_cells += 1;
         }
     }

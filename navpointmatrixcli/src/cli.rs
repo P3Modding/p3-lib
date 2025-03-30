@@ -15,6 +15,7 @@ pub enum Command {
     ConnectedNodesFromNavpointMatrix(ConnectedNodesFromNavpointMatrixArgs),
     ConnectedNodesFromNavigationData(ConnectedNodesFromNavigationDataArgs),
     NavpointMatrix(BuildNavpointMatrixArgs),
+    ShowPath(ShowPathArgs),
 }
 
 #[derive(Args, Debug)]
@@ -66,4 +67,15 @@ pub struct ConnectedNodesFromNavigationDataArgs {
 pub enum ConnectedNodesMode {
     BresenhamLine,
     //P3,
+}
+
+#[derive(Args, Debug)]
+pub struct ShowPathArgs {
+    /// Source node index
+    #[arg(value_name = "source index", required = true)]
+    pub source_index: u16,
+
+    /// Destination node index
+    #[arg(value_name = "destination index", required = true)]
+    pub destination_index: u16,
 }

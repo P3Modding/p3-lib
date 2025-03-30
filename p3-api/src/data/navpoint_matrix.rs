@@ -46,4 +46,19 @@ impl NavpointMatrix {
     pub fn set_next(&mut self, source: u16, destination: u16, next: u16, distance: i32, width: u16) {
         self.matrix[source as usize * width as usize + destination as usize] = NavpointMatrixCell { distance, next }
     }
+
+    pub fn get_next(&self, source: u16, destination: u16, width: u16) -> u16 {
+        self.matrix[source as usize * width as usize + destination as usize].next
+    }
+
+    pub fn get(&self, source: u16, destination: u16, width: u16) -> &NavpointMatrixCell {
+        &self.matrix[source as usize * width as usize + destination as usize]
+    }
+
+    pub fn get_source_and_destination(&self, cell: usize, width: u16) -> (u16, u16) {
+        let width = width as usize;
+        let destination = cell % width;
+        let source = cell / width;
+        (source as _, destination as _)
+    }
 }
