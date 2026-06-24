@@ -68,12 +68,20 @@ impl ShipPtr {
         unsafe { self.get(0x54) }
     }
 
+    pub fn get_avg_prices(&self) -> [f32; 24] {
+        unsafe { self.get(0xb4) }
+    }
+
+    pub fn get_payload_buy_sum(&self) -> i32 {
+        unsafe { self.get(0x114) }
+    }
+
     pub fn get_status(&self) -> u16 {
         unsafe { self.get(0x134) }
     }
 
     pub fn get_name(&self) -> String {
-        let buf: [u8; 16] = unsafe { self.get(0x160) };
+        let buf: [u8; 32] = unsafe { self.get(0x160) };
         latin1_to_string(&buf)
     }
 
