@@ -1,3 +1,4 @@
+pub mod builder;
 pub mod decompress;
 
 pub struct TradeRouteFile {

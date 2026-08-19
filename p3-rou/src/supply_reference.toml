@@ -1,0 +1,29 @@
+# Reference goods table. Ware keys are the exact WareId identifiers from p3-api.
+# `sell_price` is the minimum sell price used by supply routes, `buy_price` is the
+# maximum buy price used by the suck route type. `supply` is the quantity (in-game
+# units) required to supply `citizens` inhabitants; goods without a `supply` entry are
+# not part of citizens' supply. Supply quantities scale linearly with the citizens
+# parameter, rounded up; prices are used as-is.
+citizens = 1000
+
+[goods]
+Beer = { supply = 28, sell_price = 49, buy_price = 38 }
+Bricks = { sell_price = 120, buy_price = 77 }
+Cloth = { supply = 9, sell_price = 295, buy_price = 227 }
+Fish = { supply = 4, sell_price = 600, buy_price = 462 }
+Grain = { supply = 5, sell_price = 150, buy_price = 115 }
+Hemp = { sell_price = 750, buy_price = 577 }
+Honey = { supply = 6, sell_price = 150, buy_price = 115 }
+IronGoods = { supply = 16, sell_price = 380, buy_price = 292 }
+Leather = { supply = 6, sell_price = 310, buy_price = 238 }
+Meat = { supply = 2, sell_price = 1450, buy_price = 1115 }
+PigIron = { sell_price = 1300, buy_price = 1000 }
+Pitch = { sell_price = 100, buy_price = 77 }
+Pottery = { supply = 6, sell_price = 235, buy_price = 181 }
+Salt = { supply = 1, sell_price = 39, buy_price = 30 }
+Skins = { supply = 5, sell_price = 950, buy_price = 731 }
+Spices = { supply = 1, sell_price = 450, buy_price = 346 }
+Timber = { supply = 2, sell_price = 95, buy_price = 73 }
+WhaleOil = { supply = 7, sell_price = 115, buy_price = 88 }
+Wine = { supply = 10, sell_price = 305, buy_price = 235 }
+Wool = { supply = 1, sell_price = 1400, buy_price = 1077 }

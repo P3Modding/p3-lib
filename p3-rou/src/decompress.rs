@@ -108,7 +108,12 @@ pub fn decompress_file<P: AsRef<Path>>(path: P) -> Vec<u8> {
 fn decompress(input: &[u8]) -> Vec<u8> {
     let mut reader = BitReader::new(input);
     let len = reader.read_i32();
-    assert!(len > 0); //TODO implement negative length special case if required
+    if len < 0 {
+        // A negative length marks an uncompressed file; the payload follows the header verbatim.
+        let len = len.unsigned_abs() as usize;
+        debug!("Reading {len} uncompressed bytes");
+        return input[4..4 + len].to_vec();
+    }
     let mut output = Vec::with_capacity(len as usize);
     debug!("Parsing {len} bytes");
     while output.len() < len as usize {
